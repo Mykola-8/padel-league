@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <title>Padel Overlay</title>
-<!-- Імпортовано додаткові шрифти для назв команд -->
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700&family=Montserrat:wght@500;700&family=Oswald:wght@400;600&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -11,15 +10,17 @@
   --card-bg: rgba(5,12,28,0.88); --border: rgba(0,229,255,0.25);
   --text: #ffffff; --muted: #6a8fa8; --gold: #ffd700;
   --font-size: 15px; --scale: 1;
-  --team-font: 'Barlow Condensed', sans-serif; /* Динамічний шрифт */
+  --team-font: 'Barlow Condensed', sans-serif;
 }
 * { box-sizing:border-box; margin:0; padding:0; }
 html, body { width:100%; height:100%; background:transparent; overflow:hidden; font-family:'Barlow Condensed',sans-serif; color:var(--text); }
 #overlay-root { position:fixed; inset:0; transform-origin:top left; transform:scale(var(--scale)); pointer-events:none; }
-.view { display:none; width:100%; height:100%; }
-.view.active { display:flex; }
 
-/* Динамічний шрифт для команд */
+/* ВИПРАВЛЕННЯ: Жорстко ховаємо неактивні екрани */
+.view { display:none !important; width:100%; height:100%; }
+.view.active { display:flex !important; }
+#v-groups.active { display:grid !important; } /* Для груп використовуємо grid */
+
 .team-name-text { font-family: var(--team-font); font-weight: 600; letter-spacing: 0.5px; }
 
 /* RANKINGS */
@@ -36,8 +37,8 @@ html, body { width:100%; height:100%; background:transparent; overflow:hidden; f
 .pts-col { font-family:'Bebas Neue',sans-serif; font-size:18px; color:var(--accent2); text-align:right; }
 .grp-badge { display:inline-block; padding:2px 9px; border-radius:20px; font-size:11px; font-weight:700; letter-spacing:1px; background:rgba(0,229,255,0.12); color:var(--accent); border:1px solid rgba(0,229,255,0.3); }
 
-/* GROUPS (COMPACT GRID) */
-#v-groups { display:grid; padding:24px; width:100%; height:100%; align-content:center; justify-content:center; }
+/* GROUPS */
+#v-groups { padding:24px; width:100%; height:100%; align-content:center; justify-content:center; }
 .group-card { background:var(--card-bg); border:1px solid var(--border); border-radius:8px; overflow:hidden; min-width:0; animation:slideIn .4s cubic-bezier(.22,.68,0,1.2); box-shadow:0 8px 40px rgba(0,0,0,0.7); font-size:var(--font-size); }
 .group-card-head { background:linear-gradient(90deg,#081830,#0d3060); padding:8px 14px; display:flex; align-items:center; gap:10px; border-bottom:2px solid var(--accent); }
 .group-letter { font-family:'Bebas Neue',sans-serif; font-size:34px; line-height:1; color:var(--accent); }
@@ -45,12 +46,17 @@ html, body { width:100%; height:100%; background:transparent; overflow:hidden; f
 .group-sub { font-size:10px; color:var(--muted); }
 .g-table { width:100%; border-collapse:collapse; }
 .g-table th { background:rgba(0,0,0,0.4); padding:6px 10px; font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; text-align:center; }
-.g-table th:first-child { text-align:left; }
 .g-table td { padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:center; }
-.g-table td:first-child { text-align:left; }
 .g-table tr:last-child td { border-bottom:none; }
 .advance-star { color:var(--gold); }
 .pos-n { color:var(--muted); font-size:11px; margin-right:5px; }
+
+/* ВИПРАВЛЕННЯ: Динамічні розміри та перенос тексту для 6 команд */
+.name-col { text-align:left; white-space:normal !important; word-break:break-word; line-height:1.15; max-width:180px; }
+.group-card.compact-teams .g-table td { padding:4px 8px; font-size:0.88em; }
+.group-card.compact-teams .g-table th { padding:4px 8px; font-size:9px; }
+.group-card.compact-teams .group-letter { font-size:26px; }
+.group-card.compact-teams .group-card-head { padding:6px 12px; }
 
 /* COMPACT MODE MODIFIERS (6+ groups) */
 #v-groups.compact .group-card-head { padding:4px 10px; }
@@ -67,7 +73,7 @@ html, body { width:100%; height:100%; background:transparent; overflow:hidden; f
 .time-c { color:var(--accent); font-family:'Bebas Neue',sans-serif; font-size:22px; width:90px; }
 .break-r td { background:rgba(0,229,255,0.07); color:var(--accent); font-style:italic; text-align:center; font-size:13px; }
 
-/* PLAYOFF (OFFICIAL/STRICT) */
+/* PLAYOFF */
 #v-playoff { align-items:flex-start; padding:24px; overflow-x:auto; }
 .bracket-outer { display:flex; gap:12px; align-items:stretch; animation:slideIn .4s cubic-bezier(.22,.68,0,1.2); }
 .b-round { display:flex; flex-direction:column; justify-content:space-around; min-width:210px; flex:1; }
@@ -157,7 +163,6 @@ function showError(msg) {
 }
 
 const timeout = setTimeout(() => {
-  console.warn('Firebase timeout — showing default state');
   hideLoading();
   applyState(defaultState());
 }, 5000);
@@ -170,7 +175,6 @@ onValue(ref(db, 'padel/state'), (snap) => {
   else applyState(defaultState());
 }, (error) => {
   clearTimeout(timeout);
-  console.error('Firebase error:', error);
   showError('ПОМИЛКА З\'ЄДНАННЯ');
   setTimeout(() => { hideLoading(); applyState(defaultState()); }, 2000);
 });
@@ -182,15 +186,10 @@ function defaultState() {
     rankings: [
       {seed:1, players:'Artem Yatsenko / Slava Sedoplatov',  group:'A', pts:13420},
       {seed:2, players:'Fedor Modnikov / Volodymyr Yelizarov', group:'B', pts:12440},
-      {seed:3, players:'Ivan Petrenko / Mykhailo Kovalenko',  group:'C', pts:11800},
-      {seed:4, players:'Oleh Bondarchuk / Serhii Kravets',   group:'D', pts:11200},
     ],
     groupCount:4, teamCount:4, groups: autoGroups(4,4),
     schedHeaders: ['Час','Корт 1','Корт 2','Корт 3','Корт 4'],
-    schedRows: [
-      {time:'09:00', cells:['A1—A2','B1—B2','C1—C2','D1—D2'], isBreak:false},
-      {time:'10:20', cells:['☕ ТЕХНІЧНА ПЕРЕРВА'], isBreak:true},
-    ],
+    schedRows: [{time:'09:00', cells:['A1—A2','B1—B2','C1—C2','D1—D2'], isBreak:false}],
     bracketFormat: 4, bracketData: autoBracketData(4), champion: '— — —',
   };
 }
@@ -218,7 +217,7 @@ function applyState(s) {
   document.documentElement.style.setProperty('--font-size', (s.fontSize || 15)+'px');
   document.documentElement.style.setProperty('--accent',    s.accent    || '#00e5ff');
   document.documentElement.style.setProperty('--card-bg',   `rgba(5,12,28,${s.bgOpacity||0.88})`);
-  document.documentElement.style.setProperty('--team-font', s.teamFont  || "'Barlow Condensed', sans-serif"); // Застосовуємо шрифт
+  document.documentElement.style.setProperty('--team-font', s.teamFont  || "'Barlow Condensed', sans-serif");
 
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   const vEl = document.getElementById('v-'+(s.view||'rankings'));
@@ -242,10 +241,12 @@ function renderGroups(s) {
   view.innerHTML = '';
   
   const gc = s.groupCount || 4;
+  const tc = s.teamCount || 4;
+  
   let cols = 2;
   if(gc === 3) cols = 3;
   else if(gc === 4) cols = 2;
-  else if(gc === 6) cols = 2; // Згідно з вашим завданням: 3 ряди по 2 колонки
+  else if(gc === 6) cols = 2; 
   else if(gc >= 8) cols = 4;
   
   view.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
@@ -255,14 +256,17 @@ function renderGroups(s) {
   else view.classList.remove('compact');
 
   const L = 'ABCDEFGH';
-  (s.groups || autoGroups(gc, s.teamCount||4)).forEach((grp, gi) => {
+  (s.groups || autoGroups(gc, tc)).forEach((grp, gi) => {
     const letter = L[gi] || String.fromCharCode(65+gi);
     const card = document.createElement('div');
-    card.className = 'group-card';
+    
+    // Додаємо клас compact-teams, якщо в групі 5 або 6 команд
+    card.className = 'group-card' + (tc >= 5 ? ' compact-teams' : '');
+    
     let rows = '';
     (grp.teams || []).forEach((team, ti) => {
       rows += `<tr>
-        <td class="team-name-text"><span class="pos-n">${ti+1}</span>${team.name}</td>
+        <td class="team-name-text name-col"><span class="pos-n">${ti+1}</span>${team.name}</td>
         <td>${team.p||0}</td><td>${team.w||0}</td><td>${team.l||0}</td>
         <td>${team.gd||'0:0'}</td><td>${team.pts||0}</td>
         <td>${ti<2?'<span class="advance-star">★</span>':''}</td>
@@ -321,17 +325,3 @@ function renderPlayoff(s) {
         </div>
         <div class="b-team ${m.winner===1?'winner':m.winner===0?'loser':''}">
           <span class="team-name-text">${m.t2}</span><span class="b-score">${m.s2}</span>
-        </div>`;
-      rd.appendChild(mc);
-    }
-    if (ri === labels.length-1) {
-      const cc = document.createElement('div'); cc.className = 'champ-card';
-      cc.innerHTML = `<div class="champ-trophy">🏆</div><div class="champ-lbl">ЧЕМПІОН</div><div class="champ-name team-name-text">${s.champion||'— — —'}</div>`;
-      rd.appendChild(cc);
-    }
-    outer.appendChild(rd);
-  });
-}
-</script>
-</body>
-</html>
