@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎾 Padel League — Broadcast System</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Barlow Condensed',sans-serif;background:#04080f;color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;}
+.wrap{max-width:600px;width:100%;text-align:center;}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:60px;color:#00e5ff;letter-spacing:6px;margin-bottom:8px;}
+.sub{font-size:16px;color:#5a7a94;letter-spacing:2px;text-transform:uppercase;margin-bottom:48px;}
+.cards{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:32px;}
+.card{background:rgba(10,22,40,0.9);border:1px solid rgba(0,229,255,0.2);border-radius:14px;padding:28px 20px;text-decoration:none;color:#fff;transition:all .2s;display:flex;flex-direction:column;align-items:center;gap:10px;}
+.card:hover{border-color:#00e5ff;background:rgba(0,229,255,0.08);transform:translateY(-3px);}
+.card-icon{font-size:44px;}
+.card-title{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:#00e5ff;}
+.card-desc{font-size:13px;color:#5a7a94;line-height:1.5;}
+.info{background:rgba(0,229,255,0.05);border:1px solid rgba(0,229,255,0.15);border-radius:10px;padding:16px;font-size:13px;color:#5a7a94;line-height:2;text-align:left;}
+.info b{color:#00e5ff;}
+.info code{background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:4px;color:#ff6b35;font-size:12px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="logo">🎾 PADEL</div>
+  <div class="sub">Broadcast System · Ukraine</div>
+  <div class="cards">
+    <a class="card" href="overlay.html">
+      <div class="card-icon">📺</div>
+      <div class="card-title">OVERLAY</div>
+      <div class="card-desc">Для OBS Browser Source.<br>Прозорий оверлей для трансляції.</div>
+    </a>
+    <a class="card" href="controller.html">
+      <div class="card-icon">🎮</div>
+      <div class="card-title">CONTROLLER</div>
+      <div class="card-desc">Панель керування.<br>Відкрийте на телефоні або планшеті.</div>
+    </a>
+  </div>
+  <div class="info">
+    <b>🔧 OBS Setup:</b><br>
+    Add Source → <code>Browser</code> → вставте URL overlay.html<br>
+    Width: <code>1920</code> · Height: <code>1080</code> · ✅ Transparent background<br><br>
+    <b>🌐 Посилання:</b><br>
+    Overlay: <code>https://mykola-8.github.io/padel-league/overlay.html</code><br>
+    Controller: <code>https://mykola-8.github.io/padel-league/controller.html</code><br><br>
+    <b>🔥 Firebase Realtime Database</b> — зміни в контролері миттєво з'являються на оверлеї з будь-якого пристрою у світі.
+  </div>
+</div>
+</body>
+</html>
