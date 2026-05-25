@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎮 Padel Controller</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --accent:#00e5ff; --accent2:#ff6b35; --bg:#04080f;
+  --card:#0a1628; --card2:#0d1e38; --border:rgba(0,229,255,0.18);
+  --text:#fff; --muted:#5a7a94; --gold:#ffd700;
+  --green:#00c46a; --red:#ff4455;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{font-size:14px;}
+body{font-family:'Barlow Condensed',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* NAV */
+.top-nav{position:sticky;top:0;z-index:100;background:rgba(4,8,15,.97);border-bottom:1px solid var(--border);backdrop-filter:blur(16px);display:flex;align-items:center;padding:0 12px;gap:4px;overflow-x:auto;}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--accent);letter-spacing:3px;padding:12px 12px 12px 4px;border-right:1px solid var(--border);margin-right:6px;white-space:nowrap;}
+.tab{padding:13px 14px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;transition:all .18s;flex-shrink:0;}
+.tab:hover{color:var(--text);}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+
+/* PAGES */
+.page{display:none;padding:16px;max-width:900px;margin:0 auto;}
+.page.active{display:block;}
+.sec-title{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;color:var(--accent);margin-bottom:16px;}
+
+/* CARD */
+.card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px;}
+.card-title{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border:none;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.5px;cursor:pointer;transition:all .15s;}
+.btn-primary{background:var(--accent);color:#000;}
+.btn-primary:hover{background:#33eeff;transform:translateY(-1px);}
+.btn-danger{background:rgba(255,68,85,.14);color:var(--red);border:1px solid rgba(255,68,85,.3);}
+.btn-danger:hover{background:rgba(255,68,85,.26);}
+.btn-outline{background:transparent;color:var(--accent);border:1px solid var(--border);}
+.btn-outline:hover{background:rgba(0,229,255,.08);}
+.btn-sm{padding:6px 12px;font-size:12px;}
+
+/* VIEW SWITCHER */
+.view-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.view-btn{padding:14px 10px;border-radius:10px;background:var(--card2);border:2px solid var(--border);text-align:center;cursor:pointer;transition:all .18s;font-weight:700;font-size:13px;}
+.view-btn:hover{border-color:var(--accent);color:var(--accent);}
+.view-btn.active{border-color:var(--accent);background:rgba(0,229,255,.1);color:var(--accent);}
+.view-btn .icon{font-size:22px;display:block;margin-bottom:4px;}
+
+/* FIELDS */
+.field{margin-bottom:12px;}
+.field label{display:block;font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;}
+.field input,.field select,.field textarea{width:100%;padding:9px 12px;background:rgba(255,255,255,.06);color:var(--text);border:1px solid var(--border);border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-size:14px;transition:border-color .15s;}
+.field input:focus,.field select:focus{outline:none;border-color:var(--accent);}
+.field input[type=range]{padding:4px 0;background:transparent;border:none;}
+.field input[type=color]{padding:2px;height:36px;cursor:pointer;}
+.range-row{display:flex;align-items:center;gap:10px;}
+.range-val{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--accent);min-width:40px;text-align:right;}
+
+/* RANKING ROWS */
+.r-row{display:grid;grid-template-columns:40px 1fr 50px 70px 32px;gap:6px;align-items:center;margin-bottom:6px;}
+.r-row input{font-size:13px;}
+.del-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;transition:color .15s;}
+.del-btn:hover{color:var(--red);}
+
+/* SCHED */
+.sched-row{display:grid;gap:5px;align-items:center;margin-bottom:6px;grid-template-columns:70px 1fr 1fr 1fr 1fr 32px;}
+.sched-row.is-break{grid-template-columns:70px 1fr 32px;}
+.sched-row input{font-size:12px;}
+
+/* BRACKET */
+.match-editor{background:var(--card2);border-radius:10px;border:1px solid var(--border);padding:12px;margin-bottom:10px;}
+.match-editor-title{font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:8px;text-transform:uppercase;}
+.match-teams{display:grid;grid-template-columns:1fr 60px 36px;gap:6px;margin-bottom:4px;align-items:center;}
+.match-teams input{font-size:13px;}
+.win-btn{padding:5px 8px;border-radius:6px;font-size:11px;font-weight:700;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .15s;}
+.win-btn.active{background:rgba(0,229,255,.15);color:var(--accent);border-color:var(--accent);}
+
+/* GROUPS */
+.grp-section{margin-bottom:14px;}
+.grp-section-title{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--accent);letter-spacing:1px;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
+.team-stat-row{display:grid;grid-template-columns:1fr 40px 40px 40px 60px 50px;gap:5px;align-items:center;margin-bottom:5px;}
+.team-stat-row input{font-size:12px;}
+.groups-conf{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+
+/* STATUS BAR */
+.status-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(4,8,15,.97);border-top:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(10px);z-index:200;}
+.status-dot{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;margin-right:6px;animation:pulse 2s infinite;}
+.status-dot.offline{background:var(--red);animation:none;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.status-text{font-size:12px;color:var(--muted);}
+.push-btn{padding:10px 24px;background:var(--accent);color:#000;border:none;border-radius:8px;font-weight:700;font-size:14px;cursor:pointer;letter-spacing:.5px;font-family:'Bebas Neue',sans-serif;letter-spacing:1px;}
+.push-btn:active{transform:scale(.97);}
+.push-btn:disabled{background:#1a3a4a;color:var(--muted);cursor:not-allowed;}
+
+/* LINKS CARD */
+.link-box{background:rgba(0,229,255,.06);border:1px solid var(--border);border-radius:10px;padding:14px;font-size:13px;line-height:2;}
+.link-box a{color:var(--accent);word-break:break-all;}
+code{background:rgba(255,255,255,.08);padding:2px 6px;border-radius:4px;font-size:12px;color:var(--accent2);}
+
+@media(max-width:600px){
+  .r-row{grid-template-columns:36px 1fr 44px 60px 28px;}
+  .team-stat-row{grid-template-columns:1fr 36px 36px 36px 52px 44px;}
+}
+</style>
+</head>
+<body>
+
+<div class="top-nav">
+  <div class="logo">🎾 CTRL</div>
+  <div class="tab active" onclick="showPage('display')" id="tab-display">📺 Екран</div>
+  <div class="tab" onclick="showPage('settings')" id="tab-settings">⚙️ Вигляд</div>
+  <div class="tab" onclick="showPage('rankings')" id="tab-rankings">🏅 Рейтинг</div>
+  <div class="tab" onclick="showPage('groups')" id="tab-groups">📊 Групи</div>
+  <div class="tab" onclick="showPage('schedule')" id="tab-schedule">🕐 Розклад</div>
+  <div class="tab" onclick="showPage('playoff')" id="tab-playoff">🏆 Плей-оф</div>
+</div>
+
+<!-- DISPLAY -->
+<div class="page active" id="page-display">
+  <div class="sec-title">Що показати на трансляції</div>
+  <div class="card">
+    <div class="card-title">Активний вигляд оверлею</div>
+    <div class="view-btns">
+      <div class="view-btn active" id="vbtn-rankings" onclick="setView('rankings')"><span class="icon">🏅</span>Рейтинг</div>
+      <div class="view-btn" id="vbtn-groups" onclick="setView('groups')"><span class="icon">📊</span>Групи</div>
+      <div class="view-btn" id="vbtn-schedule" onclick="setView('schedule')"><span class="icon">🕐</span>Розклад</div>
+      <div class="view-btn" id="vbtn-playoff" onclick="setView('playoff')"><span class="icon">🏆</span>Плей-оф</div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">🔗 Посилання</div>
+    <div class="link-box">
+      <div>📺 <b>OBS Overlay:</b><br>
+        <a href="https://mykola-8.github.io/padel-league/overlay.html" target="_blank">
+          https://mykola-8.github.io/padel-league/overlay.html
+        </a>
+      </div>
+      <div style="margin-top:10px">🎮 <b>Контролер:</b><br>
+        <a href="https://mykola-8.github.io/padel-league/controller.html" target="_blank">
+          https://mykola-8.github.io/padel-league/controller.html
+        </a>
+      </div>
+      <div style="margin-top:10px;font-size:12px;color:var(--muted)">
+        В OBS: Add Source → Browser → вставте URL оверлею. Ширина 1920, висота 1080.
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div class="page" id="page-settings">
+  <div class="sec-title">Вигляд оверлею</div>
+  <div class="card">
+    <div class="card-title">Масштаб та розмір</div>
+    <div class="field">
+      <label>Загальний масштаб оверлею</label>
+      <div class="range-row">
+        <input type="range" id="s-scale" min="0.4" max="2" step="0.05" value="1" oninput="syncRange('s-scale','rv-scale')">
+        <span class="range-val" id="rv-scale">1×</span>
+      </div>
+    </div>
+    <div class="field">
+      <label>Розмір тексту (px)</label>
+      <div class="range-row">
+        <input type="range" id="s-font" min="10" max="28" step="1" value="15" oninput="syncRange('s-font','rv-font')">
+        <span class="range-val" id="rv-font">15px</span>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Кольори</div>
+    <div class="field">
+      <label>Акцентний колір</label>
+      <input type="color" id="s-accent" value="#00e5ff">
+    </div>
+    <div class="field">
+      <label>Прозорість карток</label>
+      <div class="range-row">
+        <input type="range" id="s-opacity" min="0.3" max="1" step="0.05" value="0.88" oninput="syncRange('s-opacity','rv-opacity')">
+        <span class="range-val" id="rv-opacity">88%</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RANKINGS -->
+<div class="page" id="page-rankings">
+  <div class="sec-title">Таблиця рейтингу</div>
+  <div class="card">
+    <div class="card-title">Заголовок таблиці</div>
+    <div class="field"><input type="text" id="rank-title-inp" value="ГРАВЦІ (ЧОЛОВІКИ) 🇺🇦"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Команди — SEED · Гравці · Група · Рейтинг</div>
+    <div id="rank-rows"></div>
+    <button class="btn btn-primary btn-sm" onclick="addRankRow()">+ Додати команду</button>
+  </div>
+</div>
+
+<!-- GROUPS -->
+<div class="page" id="page-groups">
+  <div class="sec-title">Групи</div>
+  <div class="card">
+    <div class="card-title">Конфігурація</div>
+    <div class="groups-conf">
+      <div class="field" style="margin:0;flex:1"><label>Груп</label>
+        <select id="g-count" onchange="rebuildGroups()">
+          <option value="2">2</option><option value="3">3</option>
+          <option value="4" selected>4</option><option value="6">6</option><option value="8">8</option>
+        </select>
+      </div>
+      <div class="field" style="margin:0;flex:1"><label>Команд у групі</label>
+        <select id="g-teams" onchange="rebuildGroups()">
+          <option value="3">3</option><option value="4" selected>4</option>
+          <option value="5">5</option><option value="6">6</option>
+        </select>
+      </div>
+    </div>
+  </div>
+  <div id="group-editor"></div>
+</div>
+
+<!-- SCHEDULE -->
+<div class="page" id="page-schedule">
+  <div class="sec-title">Розклад ігор</div>
+  <div class="card">
+    <div class="card-title">Заголовки колонок</div>
+    <div id="sched-headers" style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:6px;"></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Рядки (Час · Корт 1–4)</div>
+    <div id="sched-rows"></div>
+    <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
+      <button class="btn btn-primary btn-sm" onclick="addSchedRow(false)">+ Гра</button>
+      <button class="btn btn-outline btn-sm" onclick="addSchedRow(true)">+ Перерва</button>
+    </div>
+  </div>
+</div>
+
+<!-- PLAYOFF -->
+<div class="page" id="page-playoff">
+  <div class="sec-title">Плей-оф сітка</div>
+  <div class="card">
+    <div class="card-title">Формат</div>
+    <div class="field">
+      <select id="p-format" onchange="rebuildBracket()">
+        <option value="8">1/8 → Фінал (16 команд)</option>
+        <option value="4" selected>1/4 → Фінал (8 команд)</option>
+        <option value="2">1/2 → Фінал (4 команди)</option>
+      </select>
+    </div>
+  </div>
+  <div id="bracket-editor"></div>
+  <div class="card">
+    <div class="card-title">🏆 Чемпіон</div>
+    <div class="field"><input type="text" id="champion-inp" value="— — —"></div>
+  </div>
+</div>
+
+<!-- STATUS -->
+<div class="status-bar">
+  <div><span class="status-dot" id="status-dot"></span><span class="status-text" id="status-text">Підключення...</span></div>
+  <button class="push-btn" id="push-btn" onclick="pushState()" disabled>📡 НАДІСЛАТИ</button>
+</div>
+<div style="height:60px"></div>
+
+<!-- FIREBASE -->
+<script type="module">
+import { initializeApp }            from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCVB0z7m3nOdrjId9FQPmxqxDb8Y1fH7lw",
+  authDomain: "overley-f58f8.firebaseapp.com",
+  databaseURL: "https://overley-f58f8-default-rtdb.firebaseio.com",
+  projectId: "overley-f58f8",
+  storageBucket: "overley-f58f8.firebasestorage.app",
+  messagingSenderId: "414314418439",
+  appId: "1:414314418439:web:9653a4c38c1206dfbb75a2",
+  measurementId: "G-R06MDEYGQ1"
+};
+
+const app = initializeApp(firebaseConfig);
+const db  = getDatabase(app);
+const stateRef = ref(db, 'padel/state');
+
+let state = defaultState();
+let connected = false;
+
+// ── Connection status ──
+onValue(ref(db, '.info/connected'), snap => {
+  connected = snap.val() === true;
+  document.getElementById('status-dot').className = 'status-dot' + (connected ? '' : ' offline');
+  document.getElementById('status-text').textContent = connected ? '🟢 Firebase підключено' : '🔴 Немає з\'єднання';
+  document.getElementById('push-btn').disabled = !connected;
+});
+
+// ── Load existing state once ──
+onValue(stateRef, snap => {
+  const val = snap.val();
+  if (val) { state = val; initUI(); }
+}, { onlyOnce: true });
+
+// ── Push state to Firebase ──
+window.pushState = async function() {
+  const btn = document.getElementById('push-btn');
+  btn.disabled = true; btn.textContent = '⏳ НАДСИЛАЮ...';
+  const s = collectState();
+  try {
+    await set(stateRef, s);
+    document.getElementById('status-text').textContent = '✅ Оновлено о ' + new Date().toLocaleTimeString();
+    btn.textContent = '✅ НАДІСЛАНО';
+    setTimeout(() => { btn.textContent = '📡 НАДІСЛАТИ'; btn.disabled = !connected; }, 1500);
+  } catch(e) {
+    document.getElementById('status-text').textContent = '❌ Помилка: ' + e.message;
+    btn.textContent = '📡 НАДІСЛАТИ'; btn.disabled = false;
+  }
+};
+
+// ══════════════════════════════════
+//  STATE
+// ══════════════════════════════════
+function defaultState() {
+  return {
+    view: 'rankings', scale: 1, fontSize: 15, accent: '#00e5ff', bgOpacity: 0.88,
+    rankTitle: 'ГРАВЦІ (ЧОЛОВІКИ) 🇺🇦',
+    rankings: [
+      {seed:1,players:'Artem Yatsenko / Slava Sedoplatov',group:'A',pts:13420},
+      {seed:2,players:'Fedor Modnikov / Volodymyr Yelizarov',group:'B',pts:12440},
+      {seed:3,players:'Ivan Petrenko / Mykhailo Kovalenko',group:'C',pts:11800},
+      {seed:4,players:'Oleh Bondarchuk / Serhii Kravets',group:'D',pts:11200},
+    ],
+    groupCount:4, teamCount:4, groups: autoGroups(4,4),
+    schedHeaders:['Час','Корт 1','Корт 2','Корт 3','Корт 4'],
+    schedRows:[
+      {time:'09:00',cells:['A1—A2','B1—B2','C1—C2','D1—D2'],isBreak:false},
+      {time:'09:40',cells:['A3—A4','B3—B4','C3—C4','D3—D4'],isBreak:false},
+      {time:'10:20',cells:['☕ ТЕХНІЧНА ПЕРЕРВА'],isBreak:true},
+      {time:'10:40',cells:['A1—A3','B1—B3','C1—C3','D1—D3'],isBreak:false},
+      {time:'11:20',cells:['A2—A4','B2—B4','C2—C4','D2—D4'],isBreak:false},
+      {time:'12:00',cells:['A2—A3','B2—B3','C2—C3','D2—D3'],isBreak:false},
+      {time:'12:40',cells:['A1—A4','B1—B4','C1—C4','D1—D4'],isBreak:false},
+      {time:'13:20',cells:['🏆 ПІДГОТОВКА ДО ПЛЕЙ-ОФ'],isBreak:true},
+    ],
+    bracketFormat:4, bracketData:autoBracketData(4), champion:'— — —',
+  };
+}
+
+function collectState() {
+  state.view       = document.querySelector('.view-btn.active')?.id?.replace('vbtn-','') || 'rankings';
+  state.scale      = parseFloat(document.getElementById('s-scale').value);
+  state.fontSize   = parseInt(document.getElementById('s-font').value);
+  state.accent     = document.getElementById('s-accent').value;
+  state.bgOpacity  = parseFloat(document.getElementById('s-opacity').value);
+  state.rankTitle  = document.getElementById('rank-title-inp').value;
+  state.rankings   = collectRankings();
+  state.schedHeaders = collectSchedHeaders();
+  state.schedRows  = collectSchedRows();
+  state.bracketFormat = parseInt(document.getElementById('p-format').value);
+  state.bracketData   = collectBracket();
+  state.champion   = document.getElementById('champion-inp').value;
+  state.groupCount = parseInt(document.getElementById('g-count').value);
+  state.teamCount  = parseInt(document.getElementById('g-teams').value);
+  state.groups     = collectGroups();
+  return state;
+}
+
+// ══════════════════════════════════
+//  UI HELPERS (exposed to window)
+// ══════════════════════════════════
+window.showPage = function(id) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  document.getElementById('tab-'+id).classList.add('active');
+};
+
+window.setView = function(v) {
+  document.querySelectorAll('.view-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('vbtn-'+v)?.classList.add('active');
+};
+
+window.syncRange = function(inputId, valId) {
+  const v = parseFloat(document.getElementById(inputId).value);
+  const el = document.getElementById(valId);
+  if (inputId==='s-scale') el.textContent = v.toFixed(2)+'×';
+  else if (inputId==='s-font') el.textContent = v+'px';
+  else if (inputId==='s-opacity') el.textContent = Math.round(v*100)+'%';
+};
+
+// ── Rankings ──
+function renderRankEditor() {
+  const wrap = document.getElementById('rank-rows');
+  wrap.innerHTML = '';
+  state.rankings.forEach((r,i) => {
+    const row = document.createElement('div');
+    row.className = 'r-row';
+    row.innerHTML = `
+      <input type="number" value="${r.seed}" data-ri="${i}" data-f="seed" style="text-align:center">
+      <input type="text"   value="${r.players}" data-ri="${i}" data-f="players" placeholder="Гравець / Гравець">
+      <input type="text"   value="${r.group}" data-ri="${i}" data-f="group" style="text-align:center" placeholder="A">
+      <input type="number" value="${r.pts}" data-ri="${i}" data-f="pts" style="text-align:right">
+      <button class="del-btn" onclick="delRankRow(${i})">✕</button>`;
+    wrap.appendChild(row);
+  });
+}
+function collectRankings() {
+  return Array.from(document.querySelectorAll('.r-row')).map(row => ({
+    seed:    parseInt(row.querySelector('[data-f="seed"]').value)||0,
+    players: row.querySelector('[data-f="players"]').value,
+    group:   row.querySelector('[data-f="group"]').value,
+    pts:     parseInt(row.querySelector('[data-f="pts"]').value)||0,
+  }));
+}
+window.addRankRow = function() {
+  state.rankings = collectRankings();
+  const n = state.rankings.length+1;
+  state.rankings.push({seed:n,players:'Гравець / Гравець',group:'ABCDEFGH'[(n-1)%8],pts:0});
+  renderRankEditor();
+};
+window.delRankRow = function(i) {
+  state.rankings = collectRankings(); state.rankings.splice(i,1); renderRankEditor();
+};
+
+// ── Schedule ──
+function renderSchedEditor() {
+  const hw = document.getElementById('sched-headers');
+  hw.innerHTML = '';
+  (state.schedHeaders||[]).forEach((h,i) => {
+    const inp = document.createElement('input');
+    inp.type='text'; inp.value=h; inp.dataset.i=i; hw.appendChild(inp);
+  });
+  const rw = document.getElementById('sched-rows');
+  rw.innerHTML = '';
+  (state.schedRows||[]).forEach((r,i) => {
+    const row = document.createElement('div');
+    row.className = 'sched-row'+(r.isBreak?' is-break':'');
+    if (r.isBreak) {
+      row.innerHTML = `<input type="text" value="${r.time}" data-si="${i}" data-f="time" placeholder="00:00"><input type="text" value="${r.cells[0]||''}" data-si="${i}" data-f="c0" placeholder="Текст перерви"><button class="del-btn" onclick="delSchedRow(${i})">✕</button>`;
+    } else {
+      row.innerHTML = `<input type="text" value="${r.time}" data-si="${i}" data-f="time" placeholder="00:00"><input type="text" value="${r.cells[0]||''}" data-si="${i}" data-f="c0" placeholder="Корт 1"><input type="text" value="${r.cells[1]||''}" data-si="${i}" data-f="c1" placeholder="Корт 2"><input type="text" value="${r.cells[2]||''}" data-si="${i}" data-f="c2" placeholder="Корт 3"><input type="text" value="${r.cells[3]||''}" data-si="${i}" data-f="c3" placeholder="Корт 4"><button class="del-btn" onclick="delSchedRow(${i})">✕</button>`;
+    }
+    rw.appendChild(row);
+  });
+}
+function collectSchedHeaders() { return Array.from(document.querySelectorAll('#sched-headers input')).map(i=>i.value); }
+function collectSchedRows() {
+  return Array.from(document.querySelectorAll('.sched-row')).map(row => {
+    const isBreak=row.classList.contains('is-break');
+    return {time:row.querySelector('[data-f="time"]').value, isBreak,
+      cells:isBreak?[row.querySelector('[data-f="c0"]').value]:['c0','c1','c2','c3'].map(f=>row.querySelector(`[data-f="${f}"]`)?.value||'')};
+  });
+}
+window.addSchedRow = function(isBreak) {
+  state.schedRows=collectSchedRows();
+  state.schedRows.push(isBreak?{time:'--:--',cells:['☕ ПЕРЕРВА'],isBreak:true}:{time:'--:--',cells:['','','',''],isBreak:false});
+  renderSchedEditor();
+};
+window.delSchedRow = function(i) { state.schedRows=collectSchedRows(); state.schedRows.splice(i,1); renderSchedEditor(); };
+
+// ── Groups ──
+function autoGroups(gc,tc) {
+  const L='ABCDEFGH';
+  return Array.from({length:gc},(_,gi)=>({letter:L[gi],teams:Array.from({length:tc},(_,ti)=>({name:`${L[gi]}${ti+1} — Команда`,p:0,w:0,l:0,gd:'0:0',pts:0}))}));
+}
+function renderGroupEditor() {
+  const gc=parseInt(document.getElementById('g-count').value);
+  const grps=state.groups||autoGroups(gc,parseInt(document.getElementById('g-teams').value));
+  const wrap=document.getElementById('group-editor');
+  wrap.innerHTML='';
+  grps.forEach((grp,gi)=>{
+    const L='ABCDEFGH'; const letter=L[gi];
+    const sec=document.createElement('div'); sec.className='card grp-section';
+    let rows='';
+    (grp.teams||[]).forEach((team,ti)=>{
+      rows+=`<div class="team-stat-row" data-gi="${gi}" data-ti="${ti}"><input type="text" value="${team.name}" data-f="name" placeholder="Команда"><input type="number" value="${team.p||0}" data-f="p"><input type="number" value="${team.w||0}" data-f="w"><input type="number" value="${team.l||0}" data-f="l"><input type="text" value="${team.gd||'0:0'}" data-f="gd"><input type="number" value="${team.pts||0}" data-f="pts"></div>`;
+    });
+    sec.innerHTML=`<div class="grp-section-title"><span style="font-size:28px;color:var(--accent)">${letter}</span>Група ${letter}</div><div style="display:grid;grid-template-columns:1fr 40px 40px 40px 60px 50px;gap:5px;margin-bottom:4px;"><span style="font-size:10px;color:var(--muted)">Команда</span><span style="font-size:10px;color:var(--muted);text-align:center">І</span><span style="font-size:10px;color:var(--muted);text-align:center">В</span><span style="font-size:10px;color:var(--muted);text-align:center">П</span><span style="font-size:10px;color:var(--muted);text-align:center">МГ</span><span style="font-size:10px;color:var(--muted);text-align:center">Очки</span></div>${rows}`;
+    wrap.appendChild(sec);
+  });
+}
+function collectGroups() {
+  const map={};
+  document.querySelectorAll('.team-stat-row').forEach(row=>{
+    const gi=row.dataset.gi,ti=row.dataset.ti;
+    if(!map[gi]) map[gi]={letter:'ABCDEFGH'[gi],teams:[]};
+    map[gi].teams[ti]={name:row.querySelector('[data-f="name"]').value,p:parseInt(row.querySelector('[data-f="p"]').value)||0,w:parseInt(row.querySelector('[data-f="w"]').value)||0,l:parseInt(row.querySelector('[data-f="l"]').value)||0,gd:row.querySelector('[data-f="gd"]').value,pts:parseInt(row.querySelector('[data-f="pts"]').value)||0};
+  });
+  return Object.values(map);
+}
+window.rebuildGroups = function() {
+  state.groupCount=parseInt(document.getElementById('g-count').value);
+  state.teamCount=parseInt(document.getElementById('g-teams').value);
+  state.groups=autoGroups(state.groupCount,state.teamCount);
+  renderGroupEditor();
+};
+
+// ── Bracket ──
+function autoBracketData(fmt) {
+  const data={},L='ABCDEFGH';
+  for(let ri=0;ri<Math.log2(fmt);ri++){
+    const count=fmt/Math.pow(2,ri+1);
+    for(let mi=0;mi<count;mi++){
+      data[`${ri}-${mi}`]={t1:ri===0?`${L[mi*2]||'G'}1`:`Переможець М${ri}.${mi*2+1}`,t2:ri===0?`${L[mi*2+1]||'G'}2`:`Переможець М${ri}.${mi*2+2}`,s1:'-',s2:'-',winner:-1};
+    }
+  }
+  return data;
+}
+function renderBracketEditor() {
+  const fmt=parseInt(document.getElementById('p-format').value);
+  const data=state.bracketData&&Object.keys(state.bracketData).length?state.bracketData:autoBracketData(fmt);
+  state.bracketData=data;
+  const wrap=document.getElementById('bracket-editor'); wrap.innerHTML='';
+  const labels=fmt===8?['1/8','1/4','1/2','Фінал']:fmt===4?['1/4','1/2','Фінал']:['1/2','Фінал'];
+  labels.forEach((lbl,ri)=>{
+    const count=fmt/Math.pow(2,ri+1);
+    const card=document.createElement('div'); card.className='card';
+    card.innerHTML=`<div class="card-title">${lbl} ФІНАЛУ</div>`;
+    for(let mi=0;mi<count;mi++){
+      const key=`${ri}-${mi}`,m=data[key]||{t1:'',t2:'',s1:'-',s2:'-',winner:-1};
+      const me=document.createElement('div'); me.className='match-editor';
+      me.innerHTML=`<div class="match-editor-title">Матч ${ri+1}.${mi+1}</div><div class="match-teams"><input type="text" value="${m.t1}" id="mt1-${ri}-${mi}" placeholder="Команда 1"><input type="text" value="${m.s1}" id="ms1-${ri}-${mi}" placeholder="Рах." style="text-align:center"><button class="win-btn ${m.winner===0?'active':''}" onclick="setWinner(${ri},${mi},0)">W</button></div><div class="match-teams"><input type="text" value="${m.t2}" id="mt2-${ri}-${mi}" placeholder="Команда 2"><input type="text" value="${m.s2}" id="ms2-${ri}-${mi}" placeholder="Рах." style="text-align:center"><button class="win-btn ${m.winner===1?'active':''}" onclick="setWinner(${ri},${mi},1)">W</button></div>`;
+      card.appendChild(me);
+    }
+    wrap.appendChild(card);
+  });
+}
+function collectBracket() {
+  const fmt=parseInt(document.getElementById('p-format').value),data={};
+  for(let ri=0;ri<Math.log2(fmt);ri++){
+    const count=fmt/Math.pow(2,ri+1);
+    for(let mi=0;mi<count;mi++){
+      const key=`${ri}-${mi}`,old=state.bracketData?.[key]||{};
+      data[key]={t1:document.getElementById(`mt1-${ri}-${mi}`)?.value||old.t1||'',t2:document.getElementById(`mt2-${ri}-${mi}`)?.value||old.t2||'',s1:document.getElementById(`ms1-${ri}-${mi}`)?.value||old.s1||'-',s2:document.getElementById(`ms2-${ri}-${mi}`)?.value||old.s2||'-',winner:old.winner??-1};
+    }
+  }
+  return data;
+}
+window.setWinner = function(ri,mi,teamIdx) {
+  const data=state.bracketData||{},key=`${ri}-${mi}`;
+  if(!data[key]) return;
+  data[key].winner=teamIdx;
+  const winnerName=document.getElementById(`mt${teamIdx+1}-${ri}-${mi}`)?.value;
+  const nk=`${ri+1}-${Math.floor(mi/2)}`;
+  if(!data[nk]) data[nk]={t1:'',t2:'',s1:'-',s2:'-',winner:-1};
+  if(mi%2===0) data[nk].t1=winnerName; else data[nk].t2=winnerName;
+  state.bracketData=data; renderBracketEditor();
+};
+window.rebuildBracket = function() {
+  state.bracketData=autoBracketData(parseInt(document.getElementById('p-format').value)); renderBracketEditor();
+};
+
+// ── Init UI from state ──
+function initUI() {
+  document.querySelectorAll('.view-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('vbtn-'+(state.view||'rankings'))?.classList.add('active');
+  document.getElementById('s-scale').value   = state.scale||1;
+  document.getElementById('s-font').value    = state.fontSize||15;
+  document.getElementById('s-accent').value  = state.accent||'#00e5ff';
+  document.getElementById('s-opacity').value = state.bgOpacity||0.88;
+  syncRange('s-scale','rv-scale'); syncRange('s-font','rv-font'); syncRange('s-opacity','rv-opacity');
+  document.getElementById('rank-title-inp').value = state.rankTitle||'';
+  document.getElementById('g-count').value = state.groupCount||4;
+  document.getElementById('g-teams').value = state.teamCount||4;
+  document.getElementById('p-format').value = state.bracketFormat||4;
+  document.getElementById('champion-inp').value = state.champion||'— — —';
+  if(!state.groups) state.groups=autoGroups(state.groupCount||4,state.teamCount||4);
+  if(!state.bracketData||!Object.keys(state.bracketData).length) state.bracketData=autoBracketData(state.bracketFormat||4);
+  renderRankEditor(); renderGroupEditor(); renderSchedEditor(); renderBracketEditor();
+}
+
+initUI();
+</script>
+</body>
+</html>
