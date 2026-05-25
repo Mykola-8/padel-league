@@ -48,8 +48,8 @@ html, body { width:100%; height:100%; background:transparent; overflow:hidden; f
 .pts-col { font-family:'Bebas Neue',sans-serif; font-size:18px; color:var(--accent2); text-align:right; }
 .grp-badge { display:inline-block; padding:2px 9px; border-radius:20px; font-size:11px; font-weight:700; letter-spacing:1px; background:rgba(0,229,255,0.12); color:var(--accent); border:1px solid rgba(0,229,255,0.3); }
 
-/* GROUPS */
-#v-groups { padding:24px; width:100%; height:100%; }
+/* GROUPS - ДОДАНО ВІДСТУПИ ВІД КРАЇВ (padding: 50px 60px) */
+#v-groups { padding: 50px 60px; width:100%; height:100%; box-sizing: border-box; }
 #v-groups .team-name-text { color: var(--group-team, #ffffff); }
 .group-card { background:var(--group-bg, var(--card-bg)); border:1px solid var(--border); border-radius:8px; overflow:hidden; min-width:0; max-width: 100%; animation:slideIn .4s cubic-bezier(.22,.68,0,1.2); box-shadow:0 8px 40px rgba(0,0,0,0.7); font-size:var(--font-size); }
 .group-card-head { background:var(--group-head, rgba(8,24,48,0.9)); padding:8px 14px; display:flex; align-items:center; gap:10px; border-bottom:2px solid var(--accent); }
@@ -217,7 +217,6 @@ function hexToRgba(hex, opacity) {
 }
 
 function applyState(s) {
-  // НОВА ЛОГІКА: Показувати чи приховувати оверлей
   const rootEl = document.getElementById('overlay-root');
   if (s.isVisible === false) {
     rootEl.style.opacity = '0';
@@ -259,7 +258,12 @@ function renderGroups(s) {
   const view = document.getElementById('v-groups'); if(!view) return; view.innerHTML = '';
   const gc = s.groupCount || 4; const tc = s.teamCount || 4; let cols = 2;
   if(gc === 3) cols = 3; else if(gc === 4) cols = 2; else if(gc === 6) cols = 2; else if(gc >= 8) cols = 4;
-  view.style.gridTemplateColumns = `repeat(${cols}, 1fr)`; view.style.gap = gc >= 6 ? '12px' : '20px';
+  
+  view.style.gridTemplateColumns = `repeat(${cols}, 1fr)`; 
+  
+  // ДОДАНО: Збільшені відступи між групами
+  view.style.gap = gc >= 6 ? '25px' : '45px';
+  
   if (gc >= 6) view.classList.add('compact'); else view.classList.remove('compact');
 
   const safeGroups = s.groups || autoGroups(gc, tc);
