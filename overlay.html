@@ -16,12 +16,13 @@
 html, body { width:100%; height:100%; background:transparent; overflow:hidden; font-family:'Barlow Condensed',sans-serif; color:var(--text); }
 #overlay-root { position:fixed; inset:0; transform-origin:top left; transform:scale(var(--scale)); pointer-events:none; }
 
-/* Ховаємо неактивні екрани (важливо з !important) */
+/* Ховаємо неактивні екрани */
 .view { display:none !important; width:100%; height:100%; }
 .view.active { display:flex !important; }
 #v-groups.active { display:grid !important; } 
+#v-playoff.active { display:flex !important; flex-direction: column !important; align-items: center; justify-content: center; }
 
-.team-name-text { font-family: var(--team-font); font-weight: 600; letter-spacing: 0.5px; }
+.team-name-text { font-family: var(--team-font); font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
 
 /* RANKINGS */
 #v-rankings { align-items:flex-start; justify-content:flex-start; padding:30px; }
@@ -50,14 +51,11 @@ html, body { width:100%; height:100%; background:transparent; overflow:hidden; f
 .g-table tr:last-child td { border-bottom:none; }
 .advance-star { color:var(--gold); }
 .pos-n { color:var(--muted); font-size:11px; margin-right:5px; }
-
-/* Динамічні розміри та перенос тексту для 6 команд/груп */
 .name-col { text-align:left; white-space:normal !important; word-break:break-word; line-height:1.15; max-width:180px; }
 .group-card.compact-teams .g-table td { padding:4px 8px; font-size:0.88em; }
 .group-card.compact-teams .g-table th { padding:4px 8px; font-size:9px; }
 .group-card.compact-teams .group-letter { font-size:26px; }
 .group-card.compact-teams .group-card-head { padding:6px 12px; }
-
 #v-groups.compact .group-card-head { padding:4px 10px; }
 #v-groups.compact .group-letter { font-size:24px; }
 #v-groups.compact .g-table td, #v-groups.compact .g-table th { padding:4px 8px; font-size:0.9em; }
@@ -72,28 +70,35 @@ html, body { width:100%; height:100%; background:transparent; overflow:hidden; f
 .time-c { color:var(--accent); font-family:'Bebas Neue',sans-serif; font-size:22px; width:90px; }
 .break-r td { background:rgba(0,229,255,0.07); color:var(--accent); font-style:italic; text-align:center; font-size:13px; }
 
-/* PLAYOFF */
-#v-playoff { align-items:flex-start; padding:24px; overflow-x:auto; }
-.bracket-outer { display:flex; gap:12px; align-items:stretch; animation:slideIn .4s cubic-bezier(.22,.68,0,1.2); }
-.b-round { display:flex; flex-direction:column; justify-content:space-around; min-width:210px; flex:1; }
-.b-round-head { font-family:'Bebas Neue',sans-serif; font-size:17px; letter-spacing:2px; color:var(--accent); text-align:center; padding:8px 0; border-bottom:2px solid var(--accent); margin-bottom:12px; background:rgba(0,0,0,0.4); }
-.b-match { background:var(--card-bg); border:1px solid rgba(255,255,255,0.15); border-radius:0; overflow:hidden; margin:8px 0; font-size:var(--font-size); }
-.b-team { padding:6px 10px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.1); border-left:4px solid transparent; }
-.b-team:last-child { border-bottom:none; }
-.b-team.winner { background:rgba(0,229,255,0.15); color:#fff; border-left-color:var(--accent); }
-.b-team.loser { color:var(--muted); }
-.b-score { font-family:'Bebas Neue',sans-serif; font-size:20px; color:var(--accent2); min-width:24px; text-align:right; }
-.b-match-lbl { font-size:9px; color:var(--muted); letter-spacing:1px; text-align:center; padding:3px 0; background:rgba(0,0,0,0.6); border-bottom:1px solid rgba(255,255,255,0.1); }
-.champ-card { background:linear-gradient(135deg,rgba(255,215,0,0.12),rgba(255,140,0,0.08)); border:2px solid var(--gold); border-radius:0; padding:18px; text-align:center; margin:8px 0; }
-.champ-trophy { font-size:32px; }
-.champ-lbl { font-family:'Bebas Neue',sans-serif; font-size:15px; letter-spacing:3px; color:var(--gold); margin:6px 0; }
-.champ-name { font-size:16px; font-weight:700; color:#fff; }
+/* PLAYOFF (НОВЕ ОФОРМЛЕННЯ ЗА ФОТО) */
+.playoff-title { font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: #ffffff; letter-spacing: 3px; margin-bottom: 25px; text-transform: uppercase; text-align: center; }
+.bracket-outer { display: flex; gap: 35px; align-items: stretch; justify-content: center; width: 100%; height: calc(100% - 80px); padding: 0 20px; }
+.b-round { display: flex; flex-direction: column; justify-content: space-around; min-width: 250px; flex: 1; height: 100%; }
+
+.b-match { background: #161a22; border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 0px; overflow: hidden; margin: 6px 0; width: 250px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); animation: slideIn .4s cubic-bezier(.22,.68,0,1.2); }
+.b-team { padding: 0 0 0 12px; height: 38px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+.b-team:last-child { border-bottom: none; }
+.b-team.winner { color: #fff; font-weight: 700; }
+.b-team.loser { color: var(--muted); }
+
+/* Сині спортивні квадрати для рахунку */
+.b-score { display: flex; align-items: center; justify-content: center; width: 42px; height: 100%; background: #0091ea; color: #ffffff; font-family: 'Bebas Neue', sans-serif; font-size: 20px; font-weight: bold; }
+
+/* Стиль для фінального матчу з золотою рамкою та внутрішнім написом */
+.b-match.final-match { border: 2px solid #ffd700; box-shadow: 0 0 25px rgba(255, 215, 0, 0.3); }
+.final-match-header { background: rgba(0, 0, 0, 0.3); color: #ffd700; font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-align: center; padding: 4px 0; border-bottom: 1px solid rgba(255, 215, 0, 0.2); text-transform: uppercase; }
+
+.champ-card { background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 140, 0, 0.1)); border: 2px solid #ffd700; padding: 12px; text-align: center; margin-top: 10px; }
+.champ-trophy { font-size: 28px; }
+.champ-lbl { font-family: 'Bebas Neue', sans-serif; font-size: 14px; letter-spacing: 2px; color: #ffd700; margin: 2px 0; }
+.champ-name { font-size: 15px; font-weight: 700; color: #fff; }
 
 /* LOADING */
 #loading { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(4,8,15,0.95); z-index:999; flex-direction:column; gap:14px; transition:opacity .5s; }
 .loader { width:40px; height:40px; border:3px solid rgba(0,229,255,0.2); border-top-color:var(--accent); border-radius:50%; animation:spin .8s linear infinite; }
 #loading-msg { font-family:'Bebas Neue',sans-serif; font-size:16px; letter-spacing:3px; color:var(--accent); }
 
+@annotations spin { to { transform:rotate(360deg); } }
 @keyframes spin { to { transform:rotate(360deg); } }
 @keyframes slideIn { from{opacity:0;transform:translateY(-14px)} to{opacity:1;transform:translateY(0)} }
 </style>
@@ -128,6 +133,7 @@ html, body { width:100%; height:100%; background:transparent; overflow:hidden; f
     </div>
   </div>
   <div class="view" id="v-playoff">
+    <div class="playoff-title" id="playoff-title">TOURNAMENT PLAYOFF</div>
     <div class="bracket-outer" id="bracket-outer"></div>
   </div>
 </div>
@@ -166,7 +172,6 @@ function showError(msg) {
 }
 
 const timeout = setTimeout(() => {
-  console.warn("Таймаут Firebase, завантажуємо дефолт");
   hideLoading();
   applyState(defaultState());
 }, 5000);
@@ -175,12 +180,11 @@ onValue(ref(db, 'padel/state'), (snap) => {
   clearTimeout(timeout);
   const state = snap.val();
   hideLoading();
-  
   try {
     if (state) applyState(state);
     else applyState(defaultState());
   } catch(e) {
-    console.error("Помилка під час рендерингу (захист системи):", e);
+    console.error("Помилка під час рендерингу:", e);
   }
 }, (error) => {
   clearTimeout(timeout);
@@ -222,24 +226,18 @@ function autoBracketData(fmt) {
 }
 
 function applyState(s) {
-  // Безпечно встановлюємо стилі
   document.documentElement.style.setProperty('--scale',     s.scale     || 1);
   document.documentElement.style.setProperty('--font-size', (s.fontSize || 15)+'px');
   document.documentElement.style.setProperty('--accent',    s.accent    || '#00e5ff');
   document.documentElement.style.setProperty('--card-bg',   `rgba(5,12,28,${s.bgOpacity||0.88})`);
   document.documentElement.style.setProperty('--team-font', s.teamFont  || "'Barlow Condensed', sans-serif");
 
-  // Безпечно ховаємо всі в'юшки і показуємо активну
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   const safeView = s.view || 'rankings';
   const vEl = document.getElementById('v-' + safeView);
   if (vEl) vEl.classList.add('active');
 
-  // Викликаємо функції-рендери
-  renderRankings(s); 
-  renderGroups(s); 
-  renderSchedule(s); 
-  renderPlayoff(s);
+  renderRankings(s); renderGroups(s); renderSchedule(s); renderPlayoff(s);
 }
 
 function renderRankings(s) {
@@ -248,7 +246,6 @@ function renderRankings(s) {
   const tbody = document.getElementById('rank-body'); 
   if(!tbody) return;
   tbody.innerHTML = '';
-  
   (s.rankings || []).forEach(r => {
     const tr = document.createElement('tr');
     tr.innerHTML = `<td class="seed-col">${r.seed || ''}</td><td class="team-name-text">${r.players || ''}</td><td><span class="grp-badge">${r.group || ''}</span></td><td class="pts-col">${r.pts || 0}</td>`;
@@ -260,10 +257,8 @@ function renderGroups(s) {
   const view = document.getElementById('v-groups');
   if(!view) return;
   view.innerHTML = '';
-  
   const gc = s.groupCount || 4;
   const tc = s.teamCount || 4;
-  
   let cols = 2;
   if(gc === 3) cols = 3;
   else if(gc === 4) cols = 2;
@@ -272,24 +267,19 @@ function renderGroups(s) {
   
   view.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
   view.style.gap = gc >= 6 ? '12px' : '20px';
-  
   if (gc >= 6) view.classList.add('compact');
   else view.classList.remove('compact');
 
   const L = 'ABCDEFGH';
   const safeGroups = s.groups || autoGroups(gc, tc);
-  
   safeGroups.forEach((grp, gi) => {
-    if(!grp) return; // Захист
+    if(!grp) return;
     const letter = L[gi] || String.fromCharCode(65+gi);
     const card = document.createElement('div');
-    
-    // Додаємо клас compact-teams, якщо в групі 5 або 6 команд
     card.className = 'group-card' + (tc >= 5 ? ' compact-teams' : '');
-    
     let rows = '';
     (grp.teams || []).forEach((team, ti) => {
-      if(!team) return; // Захист
+      if(!team) return;
       rows += `<tr>
         <td class="team-name-text name-col"><span class="pos-n">${ti+1}</span>${team.name || ''}</td>
         <td>${team.p||0}</td><td>${team.w||0}</td><td>${team.l||0}</td>
@@ -314,31 +304,23 @@ function renderSchedule(s) {
   const thead = document.getElementById('sched-head'); 
   if(!thead) return;
   thead.innerHTML = '';
-  
   const headers = s.schedHeaders || ['Час','Корт 1','Корт 2','Корт 3','Корт 4'];
   headers.forEach(h => {
     const th = document.createElement('th'); th.textContent = h; thead.appendChild(th);
   });
-  
   const tbody = document.getElementById('sched-body'); 
   if(!tbody) return;
   tbody.innerHTML = '';
-  
   const cols = headers.length;
-  
   (s.schedRows || []).forEach(row => {
-    if(!row) return; // Захист
+    if(!row) return;
     const tr = document.createElement('tr');
-    
-    // ЗАХИСТ: гарантуємо, що cells це завжди масив, навіть якщо Firebase його видалив
     const cells = row.cells || []; 
-    
     if (row.isBreak) {
       tr.className = 'break-r';
       tr.innerHTML = `<td class="time-c">${row.time || '--:--'}</td><td colspan="${cols-1}">${cells[0] || ''}</td>`;
     } else {
       let tds = '';
-      // Проходимось рівно стільки разів, скільки потрібно колонок під корти
       for(let i = 0; i < cols - 1; i++) {
         tds += `<td>${cells[i] || ''}</td>`;
       }
@@ -354,32 +336,49 @@ function renderPlayoff(s) {
   outer.innerHTML = '';
   
   const fmt = s.bracketFormat || 4;
+  const titleEl = document.getElementById('playoff-title');
+  if (titleEl) titleEl.textContent = `TOURNAMENT PLAYOFF 1/${fmt}`;
+
   const data = s.bracketData || autoBracketData(fmt);
-  const labels = fmt===8 ? ['1/8 ФІНАЛУ','1/4 ФІНАЛУ','1/2 ФІНАЛУ','ФІНАЛ']
-               : fmt===4 ? ['1/4 ФІНАЛУ','1/2 ФІНАЛУ','ФІНАЛ']
-               :           ['1/2 ФІНАЛУ','ФІНАЛ'];
+  const labels = fmt===8 ? ['1/8','1/4','1/2','FINAL']
+               : fmt===4 ? ['1/4','1/2','FINAL']
+               :           ['1/2','FINAL'];
                
   labels.forEach((label, ri) => {
     const rd = document.createElement('div'); rd.className = 'b-round';
-    rd.innerHTML = `<div class="b-round-head">${label}</div>`;
     const count = fmt / Math.pow(2, ri+1);
-    for (let mi=0; mi<count; mi++) {
-      // ЗАХИСТ: перевірка на наявність даних матчу
+    const isFinalRound = (ri === labels.length - 1);
+    
+    for (let mi = 0; mi < count; mi++) {
       const m = data[`${ri}-${mi}`] || {t1:'—',t2:'—',s1:'-',s2:'-',winner:-1};
-      const mc = document.createElement('div'); mc.className = 'b-match';
-      mc.innerHTML = `
-        <div class="b-match-lbl">МАТЧ ${ri+1}.${mi+1}</div>
-        <div class="b-team ${m.winner===0?'winner':m.winner===1?'loser':''}">
-          <span class="team-name-text">${m.t1 || ''}</span><span class="b-score">${m.s1 || '-'}</span>
-        </div>
-        <div class="b-team ${m.winner===1?'winner':m.winner===0?'loser':''}">
-          <span class="team-name-text">${m.t2 || ''}</span><span class="b-score">${m.s2 || '-'}</span>
-        </div>`;
+      const mc = document.createElement('div'); 
+      
+      if (isFinalRound) {
+        mc.className = 'b-match final-match';
+        mc.innerHTML = `
+          <div class="final-match-header">FINAL MATCH</div>
+          <div class="b-team ${m.winner===0?'winner':m.winner===1?'loser':''}">
+            <span class="team-name-text">${m.t1 || ''}</span><span class="b-score">${m.s1 || '0'}</span>
+          </div>
+          <div class="b-team ${m.winner===1?'winner':m.winner===0?'loser':''}">
+            <span class="team-name-text">${m.t2 || ''}</span><span class="b-score">${m.s2 || '0'}</span>
+          </div>`;
+      } else {
+        mc.className = 'b-match';
+        mc.innerHTML = `
+          <div class="b-team ${m.winner===0?'winner':m.winner===1?'loser':''}">
+            <span class="team-name-text">${m.t1 || ''}</span><span class="b-score">${m.s1 || '0'}</span>
+          </div>
+          <div class="b-team ${m.winner===1?'winner':m.winner===0?'loser':''}">
+            <span class="team-name-text">${m.t2 || ''}</span><span class="b-score">${m.s2 || '0'}</span>
+          </div>`;
+      }
       rd.appendChild(mc);
     }
-    if (ri === labels.length-1) {
+    
+    if (isFinalRound && s.champion && s.champion !== '— — —') {
       const cc = document.createElement('div'); cc.className = 'champ-card';
-      cc.innerHTML = `<div class="champ-trophy">🏆</div><div class="champ-lbl">ЧЕМПІОН</div><div class="champ-name team-name-text">${s.champion||'— — —'}</div>`;
+      cc.innerHTML = `<div class="champ-trophy">🏆</div><div class="champ-lbl">ЧЕМПІОН</div><div class="champ-name team-name-text">${s.champion}</div>`;
       rd.appendChild(cc);
     }
     outer.appendChild(rd);
