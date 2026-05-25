@@ -16,10 +16,10 @@
 html, body { width:100%; height:100%; background:transparent; overflow:hidden; font-family:'Barlow Condensed',sans-serif; color:var(--text); }
 #overlay-root { position:fixed; inset:0; transform-origin:top left; transform:scale(var(--scale)); pointer-events:none; }
 
-/* ВИПРАВЛЕННЯ: Жорстко ховаємо неактивні екрани */
+/* Ховаємо неактивні екрани (важливо з !important) */
 .view { display:none !important; width:100%; height:100%; }
 .view.active { display:flex !important; }
-#v-groups.active { display:grid !important; } /* Для груп використовуємо grid */
+#v-groups.active { display:grid !important; } 
 
 .team-name-text { font-family: var(--team-font); font-weight: 600; letter-spacing: 0.5px; }
 
@@ -51,14 +51,13 @@ html, body { width:100%; height:100%; background:transparent; overflow:hidden; f
 .advance-star { color:var(--gold); }
 .pos-n { color:var(--muted); font-size:11px; margin-right:5px; }
 
-/* ВИПРАВЛЕННЯ: Динамічні розміри та перенос тексту для 6 команд */
+/* Динамічні розміри та перенос тексту для 6 команд/груп */
 .name-col { text-align:left; white-space:normal !important; word-break:break-word; line-height:1.15; max-width:180px; }
 .group-card.compact-teams .g-table td { padding:4px 8px; font-size:0.88em; }
 .group-card.compact-teams .g-table th { padding:4px 8px; font-size:9px; }
 .group-card.compact-teams .group-letter { font-size:26px; }
 .group-card.compact-teams .group-card-head { padding:6px 12px; }
 
-/* COMPACT MODE MODIFIERS (6+ groups) */
 #v-groups.compact .group-card-head { padding:4px 10px; }
 #v-groups.compact .group-letter { font-size:24px; }
 #v-groups.compact .g-table td, #v-groups.compact .g-table th { padding:4px 8px; font-size:0.9em; }
@@ -135,7 +134,7 @@ html, body { width:100%; height:100%; background:transparent; overflow:hidden; f
 
 <script type="module">
 import { initializeApp }  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, onValue, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCVB0z7m3nOdrjId9FQPmxqxDb8Y1fH7lw",
@@ -153,16 +152,21 @@ const db  = getDatabase(app);
 
 function hideLoading() {
   const el = document.getElementById('loading');
-  el.style.opacity = '0';
-  setTimeout(() => el.style.display = 'none', 500);
+  if(el) {
+    el.style.opacity = '0';
+    setTimeout(() => el.style.display = 'none', 500);
+  }
 }
 
 function showError(msg) {
-  document.getElementById('loading-msg').textContent = msg;
-  document.querySelector('.loader').style.display = 'none';
+  const el = document.getElementById('loading-msg');
+  if(el) el.textContent = msg;
+  const loader = document.querySelector('.loader');
+  if(loader) loader.style.display = 'none';
 }
 
 const timeout = setTimeout(() => {
+  console.warn("Таймаут Firebase, завантажуємо дефолт");
   hideLoading();
   applyState(defaultState());
 }, 5000);
@@ -171,8 +175,13 @@ onValue(ref(db, 'padel/state'), (snap) => {
   clearTimeout(timeout);
   const state = snap.val();
   hideLoading();
-  if (state) applyState(state);
-  else applyState(defaultState());
+  
+  try {
+    if (state) applyState(state);
+    else applyState(defaultState());
+  } catch(e) {
+    console.error("Помилка під час рендерингу (захист системи):", e);
+  }
 }, (error) => {
   clearTimeout(timeout);
   showError('ПОМИЛКА З\'ЄДНАННЯ');
@@ -197,7 +206,7 @@ function defaultState() {
 function autoGroups(gc, tc) {
   const L = 'ABCDEFGH';
   return Array.from({length:gc}, (_,gi) => ({
-    letter: L[gi], teams: Array.from({length:tc}, (_,ti) => ({ name:`${L[gi]}${ti+1} — Команда`, p:0, w:0, l:0, gd:'0:0', pts:0 }))
+    letter: L[gi] || 'G', teams: Array.from({length:tc}, (_,ti) => ({ name:`${L[gi]||'G'}${ti+1} — Команда`, p:0, w:0, l:0, gd:'0:0', pts:0 }))
   }));
 }
 
@@ -213,31 +222,43 @@ function autoBracketData(fmt) {
 }
 
 function applyState(s) {
+  // Безпечно встановлюємо стилі
   document.documentElement.style.setProperty('--scale',     s.scale     || 1);
   document.documentElement.style.setProperty('--font-size', (s.fontSize || 15)+'px');
   document.documentElement.style.setProperty('--accent',    s.accent    || '#00e5ff');
   document.documentElement.style.setProperty('--card-bg',   `rgba(5,12,28,${s.bgOpacity||0.88})`);
   document.documentElement.style.setProperty('--team-font', s.teamFont  || "'Barlow Condensed', sans-serif");
 
+  // Безпечно ховаємо всі в'юшки і показуємо активну
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  const vEl = document.getElementById('v-'+(s.view||'rankings'));
+  const safeView = s.view || 'rankings';
+  const vEl = document.getElementById('v-' + safeView);
   if (vEl) vEl.classList.add('active');
 
-  renderRankings(s); renderGroups(s); renderSchedule(s); renderPlayoff(s);
+  // Викликаємо функції-рендери
+  renderRankings(s); 
+  renderGroups(s); 
+  renderSchedule(s); 
+  renderPlayoff(s);
 }
 
 function renderRankings(s) {
-  document.getElementById('rank-title').textContent = s.rankTitle || 'ГРАВЦІ 🇺🇦';
-  const tbody = document.getElementById('rank-body'); tbody.innerHTML = '';
+  const titleEl = document.getElementById('rank-title');
+  if(titleEl) titleEl.textContent = s.rankTitle || 'ГРАВЦІ 🇺🇦';
+  const tbody = document.getElementById('rank-body'); 
+  if(!tbody) return;
+  tbody.innerHTML = '';
+  
   (s.rankings || []).forEach(r => {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td class="seed-col">${r.seed}</td><td class="team-name-text">${r.players}</td><td><span class="grp-badge">${r.group}</span></td><td class="pts-col">${r.pts}</td>`;
+    tr.innerHTML = `<td class="seed-col">${r.seed || ''}</td><td class="team-name-text">${r.players || ''}</td><td><span class="grp-badge">${r.group || ''}</span></td><td class="pts-col">${r.pts || 0}</td>`;
     tbody.appendChild(tr);
   });
 }
 
 function renderGroups(s) {
   const view = document.getElementById('v-groups');
+  if(!view) return;
   view.innerHTML = '';
   
   const gc = s.groupCount || 4;
@@ -256,7 +277,10 @@ function renderGroups(s) {
   else view.classList.remove('compact');
 
   const L = 'ABCDEFGH';
-  (s.groups || autoGroups(gc, tc)).forEach((grp, gi) => {
+  const safeGroups = s.groups || autoGroups(gc, tc);
+  
+  safeGroups.forEach((grp, gi) => {
+    if(!grp) return; // Захист
     const letter = L[gi] || String.fromCharCode(65+gi);
     const card = document.createElement('div');
     
@@ -265,8 +289,9 @@ function renderGroups(s) {
     
     let rows = '';
     (grp.teams || []).forEach((team, ti) => {
+      if(!team) return; // Захист
       rows += `<tr>
-        <td class="team-name-text name-col"><span class="pos-n">${ti+1}</span>${team.name}</td>
+        <td class="team-name-text name-col"><span class="pos-n">${ti+1}</span>${team.name || ''}</td>
         <td>${team.p||0}</td><td>${team.w||0}</td><td>${team.l||0}</td>
         <td>${team.gd||'0:0'}</td><td>${team.pts||0}</td>
         <td>${ti<2?'<span class="advance-star">★</span>':''}</td>
@@ -286,42 +311,80 @@ function renderGroups(s) {
 }
 
 function renderSchedule(s) {
-  const thead = document.getElementById('sched-head'); thead.innerHTML = '';
-  (s.schedHeaders || ['Час','Корт 1','Корт 2','Корт 3','Корт 4']).forEach(h => {
+  const thead = document.getElementById('sched-head'); 
+  if(!thead) return;
+  thead.innerHTML = '';
+  
+  const headers = s.schedHeaders || ['Час','Корт 1','Корт 2','Корт 3','Корт 4'];
+  headers.forEach(h => {
     const th = document.createElement('th'); th.textContent = h; thead.appendChild(th);
   });
-  const tbody = document.getElementById('sched-body'); tbody.innerHTML = '';
-  const cols = (s.schedHeaders||['','','','','']).length;
+  
+  const tbody = document.getElementById('sched-body'); 
+  if(!tbody) return;
+  tbody.innerHTML = '';
+  
+  const cols = headers.length;
+  
   (s.schedRows || []).forEach(row => {
+    if(!row) return; // Захист
     const tr = document.createElement('tr');
+    
+    // ЗАХИСТ: гарантуємо, що cells це завжди масив, навіть якщо Firebase його видалив
+    const cells = row.cells || []; 
+    
     if (row.isBreak) {
       tr.className = 'break-r';
-      tr.innerHTML = `<td class="time-c">${row.time}</td><td colspan="${cols-1}">${row.cells[0]}</td>`;
+      tr.innerHTML = `<td class="time-c">${row.time || '--:--'}</td><td colspan="${cols-1}">${cells[0] || ''}</td>`;
     } else {
-      tr.innerHTML = `<td class="time-c">${row.time}</td>` + row.cells.map(c=>`<td>${c}</td>`).join('');
+      let tds = '';
+      // Проходимось рівно стільки разів, скільки потрібно колонок під корти
+      for(let i = 0; i < cols - 1; i++) {
+        tds += `<td>${cells[i] || ''}</td>`;
+      }
+      tr.innerHTML = `<td class="time-c">${row.time || '--:--'}</td>` + tds;
     }
     tbody.appendChild(tr);
   });
 }
 
 function renderPlayoff(s) {
-  const outer = document.getElementById('bracket-outer'); outer.innerHTML = '';
+  const outer = document.getElementById('bracket-outer'); 
+  if(!outer) return;
+  outer.innerHTML = '';
+  
   const fmt = s.bracketFormat || 4;
   const data = s.bracketData || autoBracketData(fmt);
   const labels = fmt===8 ? ['1/8 ФІНАЛУ','1/4 ФІНАЛУ','1/2 ФІНАЛУ','ФІНАЛ']
                : fmt===4 ? ['1/4 ФІНАЛУ','1/2 ФІНАЛУ','ФІНАЛ']
                :           ['1/2 ФІНАЛУ','ФІНАЛ'];
+               
   labels.forEach((label, ri) => {
     const rd = document.createElement('div'); rd.className = 'b-round';
     rd.innerHTML = `<div class="b-round-head">${label}</div>`;
     const count = fmt / Math.pow(2, ri+1);
     for (let mi=0; mi<count; mi++) {
+      // ЗАХИСТ: перевірка на наявність даних матчу
       const m = data[`${ri}-${mi}`] || {t1:'—',t2:'—',s1:'-',s2:'-',winner:-1};
       const mc = document.createElement('div'); mc.className = 'b-match';
       mc.innerHTML = `
         <div class="b-match-lbl">МАТЧ ${ri+1}.${mi+1}</div>
         <div class="b-team ${m.winner===0?'winner':m.winner===1?'loser':''}">
-          <span class="team-name-text">${m.t1}</span><span class="b-score">${m.s1}</span>
+          <span class="team-name-text">${m.t1 || ''}</span><span class="b-score">${m.s1 || '-'}</span>
         </div>
         <div class="b-team ${m.winner===1?'winner':m.winner===0?'loser':''}">
-          <span class="team-name-text">${m.t2}</span><span class="b-score">${m.s2}</span>
+          <span class="team-name-text">${m.t2 || ''}</span><span class="b-score">${m.s2 || '-'}</span>
+        </div>`;
+      rd.appendChild(mc);
+    }
+    if (ri === labels.length-1) {
+      const cc = document.createElement('div'); cc.className = 'champ-card';
+      cc.innerHTML = `<div class="champ-trophy">🏆</div><div class="champ-lbl">ЧЕМПІОН</div><div class="champ-name team-name-text">${s.champion||'— — —'}</div>`;
+      rd.appendChild(cc);
+    }
+    outer.appendChild(rd);
+  });
+}
+</script>
+</body>
+</html>
