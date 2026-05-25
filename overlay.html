@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<title>Padel Overlay</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --accent: #00e5ff;
+  --accent2: #ff6b35;
+  --card-bg: rgba(5,12,28,0.88);
+  --border: rgba(0,229,255,0.25);
+  --text: #ffffff;
+  --muted: #6a8fa8;
+  --gold: #ffd700;
+  --font-size: 15px;
+  --scale: 1;
+}
+* { box-sizing: border-box; margin:0; padding:0; }
+html, body { width:100%; height:100%; background:transparent; overflow:hidden; font-family:'Barlow Condensed',sans-serif; color:var(--text); }
+
+#overlay-root { position:fixed; inset:0; transform-origin:top left; transform:scale(var(--scale)); pointer-events:none; }
+.view { display:none; width:100%; height:100%; }
+.view.active { display:flex; }
+
+/* ── RANKINGS ── */
+#v-rankings { align-items:flex-start; justify-content:flex-start; padding:30px; }
+.rank-card { background:var(--card-bg); border:1px solid var(--border); border-radius:10px; overflow:hidden; min-width:520px; box-shadow:0 8px 40px rgba(0,0,0,0.7); animation:slideIn .4s cubic-bezier(.22,.68,0,1.2); }
+.rank-header { background:linear-gradient(90deg,#081830,#0d3060); padding:10px 18px; display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--accent); }
+.rank-header-title { font-family:'Bebas Neue',sans-serif; font-size:20px; letter-spacing:3px; }
+.rank-header-sub { font-size:11px; color:var(--muted); letter-spacing:1px; }
+.rank-table { width:100%; border-collapse:collapse; font-size:var(--font-size); }
+.rank-table th { background:rgba(0,0,0,0.5); padding:7px 14px; font-size:10px; color:var(--muted); letter-spacing:1px; text-transform:uppercase; }
+.rank-table td { padding:9px 14px; border-bottom:1px solid rgba(255,255,255,0.05); }
+.rank-table tr:last-child td { border-bottom:none; }
+.seed-col { font-family:'Bebas Neue',sans-serif; font-size:22px; color:var(--accent); width:50px; }
+.pts-col { font-family:'Bebas Neue',sans-serif; font-size:18px; color:var(--accent2); text-align:right; }
+.grp-badge { display:inline-block; padding:2px 9px; border-radius:20px; font-size:11px; font-weight:700; letter-spacing:1px; background:rgba(0,229,255,0.12); color:var(--accent); border:1px solid rgba(0,229,255,0.3); }
+
+/* ── GROUPS ── */
+#v-groups { align-items:flex-start; padding:24px; flex-wrap:wrap; gap:16px; }
+.group-card { background:var(--card-bg); border:1px solid var(--border); border-radius:10px; overflow:hidden; min-width:280px; flex:1; animation:slideIn .4s cubic-bezier(.22,.68,0,1.2); box-shadow:0 8px 40px rgba(0,0,0,0.7); font-size:var(--font-size); }
+.group-card-head { background:linear-gradient(90deg,#081830,#0d3060); padding:8px 14px; display:flex; align-items:center; gap:10px; border-bottom:2px solid var(--accent); }
+.group-letter { font-family:'Bebas Neue',sans-serif; font-size:34px; line-height:1; color:var(--accent); }
+.group-title { font-size:13px; font-weight:700; }
+.group-sub { font-size:10px; color:var(--muted); }
+.g-table { width:100%; border-collapse:collapse; }
+.g-table th { background:rgba(0,0,0,0.4); padding:6px 10px; font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; text-align:center; }
+.g-table th:first-child { text-align:left; }
+.g-table td { padding:8px 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:center; }
+.g-table td:first-child { text-align:left; }
+.g-table tr:last-child td { border-bottom:none; }
+.advance-star { color:var(--gold); }
+.pos-n { color:var(--muted); font-size:11px; margin-right:5px; }
+
+/* ── SCHEDULE ── */
+#v-schedule { align-items:flex-start; padding:24px; }
+.sched-wrap { background:var(--card-bg); border:1px solid var(--border); border-radius:10px; overflow:hidden; min-width:700px; box-shadow:0 8px 40px rgba(0,0,0,0.7); animation:slideIn .4s cubic-bezier(.22,.68,0,1.2); font-size:var(--font-size); }
+.s-table { width:100%; border-collapse:collapse; }
+.s-table th { background:rgba(0,0,0,0.6); padding:10px 14px; color:var(--accent); font-size:11px; text-transform:uppercase; letter-spacing:1px; }
+.s-table td { padding:9px 14px; border-bottom:1px solid rgba(255,255,255,0.06); }
+.s-table tr:last-child td { border-bottom:none; }
+.time-c { color:var(--accent); font-family:'Bebas Neue',sans-serif; font-size:22px; width:90px; }
+.break-r td { background:rgba(0,229,255,0.07); color:var(--accent); font-style:italic; text-align:center; font-size:13px; }
+
+/* ── PLAYOFF ── */
+#v-playoff { align-items:flex-start; padding:24px; overflow-x:auto; }
+.bracket-outer { display:flex; gap:6px; align-items:stretch; animation:slideIn .4s cubic-bezier(.22,.68,0,1.2); }
+.b-round { display:flex; flex-direction:column; justify-content:space-around; min-width:190px; flex:1; }
+.b-round-head { font-family:'Bebas Neue',sans-serif; font-size:16px; letter-spacing:2px; color:var(--accent); text-align:center; padding:10px 0; border-bottom:1px solid var(--border); margin-bottom:12px; }
+.b-match { background:var(--card-bg); border:1px solid var(--border); border-radius:8px; overflow:hidden; margin:6px 0; box-shadow:0 4px 20px rgba(0,0,0,0.5); font-size:var(--font-size); }
+.b-team { padding:8px 12px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.06); }
+.b-team:last-child { border-bottom:none; }
+.b-team.winner { background:rgba(0,229,255,0.12); color:var(--accent); font-weight:700; }
+.b-team.loser { color:var(--muted); }
+.b-score { font-family:'Bebas Neue',sans-serif; font-size:20px; color:var(--accent2); min-width:24px; text-align:right; }
+.b-match-lbl { font-size:9px; color:var(--muted); letter-spacing:1px; text-align:center; padding:3px 0; background:rgba(0,0,0,0.3); }
+.champ-card { background:linear-gradient(135deg,rgba(255,215,0,0.12),rgba(255,140,0,0.08)); border:2px solid var(--gold); border-radius:12px; padding:18px; text-align:center; margin:6px 0; }
+.champ-trophy { font-size:32px; }
+.champ-lbl { font-family:'Bebas Neue',sans-serif; font-size:15px; letter-spacing:3px; color:var(--gold); margin:6px 0; }
+.champ-name { font-size:16px; font-weight:700; color:#fff; }
+
+/* ── LOADING ── */
+#loading { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(4,8,15,0.95); z-index:999; flex-direction:column; gap:14px; }
+.loader { width:40px; height:40px; border:3px solid rgba(0,229,255,0.2); border-top-color:var(--accent); border-radius:50%; animation:spin .8s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
+@keyframes slideIn { from{opacity:0;transform:translateY(-14px)} to{opacity:1;transform:translateY(0)} }
+</style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="loader"></div>
+  <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:3px;color:var(--accent)">ПІДКЛЮЧЕННЯ...</div>
+</div>
+
+<div id="overlay-root">
+  <div class="view active" id="v-rankings">
+    <div class="rank-card">
+      <div class="rank-header">
+        <div class="rank-header-title" id="rank-title">ГРАВЦІ 🇺🇦</div>
+        <div class="rank-header-sub">Padel Tournament</div>
+      </div>
+      <table class="rank-table">
+        <thead><tr><th>SEED</th><th>КОМАНДА / ГРАВЦІ</th><th>ГРУПА</th><th style="text-align:right">РЕЙТИНГ</th></tr></thead>
+        <tbody id="rank-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="view" id="v-groups"></div>
+
+  <div class="view" id="v-schedule">
+    <div class="sched-wrap">
+      <table class="s-table">
+        <thead><tr id="sched-head"></tr></thead>
+        <tbody id="sched-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="view" id="v-playoff">
+    <div class="bracket-outer" id="bracket-outer"></div>
+  </div>
+</div>
+
+<!-- Firebase -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCVB0z7m3nOdrjId9FQPmxqxDb8Y1fH7lw",
+  authDomain: "overley-f58f8.firebaseapp.com",
+  databaseURL: "https://overley-f58f8-default-rtdb.firebaseio.com",
+  projectId: "overley-f58f8",
+  storageBucket: "overley-f58f8.firebasestorage.app",
+  messagingSenderId: "414314418439",
+  appId: "1:414314418439:web:9653a4c38c1206dfbb75a2",
+  measurementId: "G-R06MDEYGQ1"
+};
+
+const app = initializeApp(firebaseConfig);
+const db  = getDatabase(app);
+
+// ── Listen to state ──
+onValue(ref(db, 'padel/state'), (snap) => {
+  const state = snap.val();
+  if (!state) return;
+  document.getElementById('loading').style.display = 'none';
+  applyState(state);
+});
+
+function applyState(s) {
+  // CSS vars
+  document.documentElement.style.setProperty('--scale',     s.scale     || 1);
+  document.documentElement.style.setProperty('--font-size', (s.fontSize || 15) + 'px');
+  document.documentElement.style.setProperty('--accent',    s.accent    || '#00e5ff');
+  document.documentElement.style.setProperty('--card-bg',   `rgba(5,12,28,${s.bgOpacity||0.88})`);
+
+  // Switch view
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  const vEl = document.getElementById('v-' + (s.view || 'rankings'));
+  if (vEl) vEl.classList.add('active');
+
+  renderRankings(s);
+  renderGroups(s);
+  renderSchedule(s);
+  renderPlayoff(s);
+}
+
+// ── Rankings ──
+function renderRankings(s) {
+  document.getElementById('rank-title').textContent = s.rankTitle || 'ГРАВЦІ 🇺🇦';
+  const tbody = document.getElementById('rank-body');
+  tbody.innerHTML = '';
+  (s.rankings || []).forEach(r => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td class="seed-col">${r.seed}</td><td>${r.players}</td><td><span class="grp-badge">${r.group}</span></td><td class="pts-col">${r.pts}</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+// ── Groups ──
+function renderGroups(s) {
+  const view = document.getElementById('v-groups');
+  view.innerHTML = '';
+  const L = 'ABCDEFGH';
+  (s.groups || []).forEach((grp, gi) => {
+    const letter = L[gi] || String.fromCharCode(65+gi);
+    const card = document.createElement('div');
+    card.className = 'group-card';
+    let rows = '';
+    (grp.teams || []).forEach((team, ti) => {
+      rows += `<tr>
+        <td><span class="pos-n">${ti+1}</span>${team.name}</td>
+        <td>${team.p||0}</td><td>${team.w||0}</td><td>${team.l||0}</td>
+        <td>${team.gd||'0:0'}</td><td>${team.pts||0}</td>
+        <td>${ti<2?'<span class="advance-star">★</span>':''}</td>
+      </tr>`;
+    });
+    card.innerHTML = `
+      <div class="group-card-head">
+        <div class="group-letter">${letter}</div>
+        <div><div class="group-title">Група ${letter}</div><div class="group-sub">★ Top 2 → Плей-оф</div></div>
+      </div>
+      <table class="g-table">
+        <thead><tr><th>Команда</th><th>І</th><th>В</th><th>П</th><th>МГ</th><th>Очки</th><th></th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+    view.appendChild(card);
+  });
+}
+
+// ── Schedule ──
+function renderSchedule(s) {
+  const thead = document.getElementById('sched-head');
+  thead.innerHTML = '';
+  (s.schedHeaders || ['Час','Корт 1','Корт 2','Корт 3','Корт 4']).forEach(h => {
+    const th = document.createElement('th');
+    th.textContent = h;
+    thead.appendChild(th);
+  });
+  const tbody = document.getElementById('sched-body');
+  tbody.innerHTML = '';
+  const cols = (s.schedHeaders || []).length;
+  (s.schedRows || []).forEach(row => {
+    const tr = document.createElement('tr');
+    if (row.isBreak) {
+      tr.className = 'break-r';
+      tr.innerHTML = `<td class="time-c">${row.time}</td><td colspan="${cols-1}">${row.cells[0]}</td>`;
+    } else {
+      tr.innerHTML = `<td class="time-c">${row.time}</td>` + row.cells.map(c => `<td>${c}</td>`).join('');
+    }
+    tbody.appendChild(tr);
+  });
+}
+
+// ── Playoff ──
+function renderPlayoff(s) {
+  const outer = document.getElementById('bracket-outer');
+  outer.innerHTML = '';
+  const fmt = s.bracketFormat || 4;
+  const data = s.bracketData || {};
+  const roundLabels = fmt===8 ? ['1/8 ФІНАЛУ','1/4 ФІНАЛУ','1/2 ФІНАЛУ','ФІНАЛ']
+                   : fmt===4 ? ['1/4 ФІНАЛУ','1/2 ФІНАЛУ','ФІНАЛ']
+                   :           ['1/2 ФІНАЛУ','ФІНАЛ'];
+
+  roundLabels.forEach((label, ri) => {
+    const rd = document.createElement('div');
+    rd.className = 'b-round';
+    rd.innerHTML = `<div class="b-round-head">${label}</div>`;
+    const count = fmt / Math.pow(2, ri+1);
+    for (let mi = 0; mi < count; mi++) {
+      const m = data[`${ri}-${mi}`] || { t1:'—', t2:'—', s1:'-', s2:'-', winner:-1 };
+      const mc = document.createElement('div');
+      mc.className = 'b-match';
+      mc.innerHTML = `
+        <div class="b-match-lbl">М${ri+1}.${mi+1}</div>
+        <div class="b-team ${m.winner===0?'winner':m.winner===1?'loser':''}">
+          <span>${m.t1}</span><span class="b-score">${m.s1}</span>
+        </div>
+        <div class="b-team ${m.winner===1?'winner':m.winner===0?'loser':''}">
+          <span>${m.t2}</span><span class="b-score">${m.s2}</span>
+        </div>`;
+      rd.appendChild(mc);
+    }
+    if (ri === roundLabels.length - 1) {
+      const cc = document.createElement('div');
+      cc.className = 'champ-card';
+      cc.innerHTML = `<div class="champ-trophy">🏆</div><div class="champ-lbl">ЧЕМПІОН</div><div class="champ-name">${s.champion||'— — —'}</div>`;
+      rd.appendChild(cc);
+    }
+    outer.appendChild(rd);
+  });
+}
+</script>
+</body>
+</html>
