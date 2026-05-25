@@ -188,6 +188,15 @@ code{background:rgba(255,255,255,.08);padding:2px 6px;border-radius:4px;font-siz
         <span class="range-val" id="rv-font">15px</span>
       </div>
     </div>
+    <div class="field">
+      <label>Шрифт назв команд</label>
+      <select id="s-team-font">
+        <option value="'Barlow Condensed', sans-serif">Barlow Condensed (Стандарт)</option>
+        <option value="'Bebas Neue', sans-serif">Bebas Neue (Широкий)</option>
+        <option value="'Montserrat', sans-serif">Montserrat (Сучасний)</option>
+        <option value="'Oswald', sans-serif">Oswald (Високий)</option>
+      </select>
+    </div>
   </div>
   <div class="card">
     <div class="card-title">Кольори</div>
@@ -350,7 +359,7 @@ function defaultState() {
       'Ivan Petrenko / Mykhailo Kovalenko',
       'Oleh Bondarchuk / Serhii Kravets'
     ],
-    view: 'rankings', scale: 1, fontSize: 15, accent: '#00e5ff', bgOpacity: 0.88,
+    view: 'rankings', scale: 1, fontSize: 15, accent: '#00e5ff', bgOpacity: 0.88, teamFont: "'Barlow Condensed', sans-serif",
     rankTitle: 'ГРАВЦІ (ЧОЛОВІКИ) 🇺🇦',
     rankings: [
       {seed:1,players:'Artem Yatsenko / Slava Sedoplatov',group:'A',pts:13420},
@@ -377,6 +386,7 @@ function collectState() {
   state.fontSize   = parseInt(document.getElementById('s-font').value);
   state.accent     = document.getElementById('s-accent').value;
   state.bgOpacity  = parseFloat(document.getElementById('s-opacity').value);
+  state.teamFont   = document.getElementById('s-team-font').value; // Збираємо шрифт
   state.rankTitle  = document.getElementById('rank-title-inp').value;
   state.rankings   = collectRankings();
   state.schedHeaders = collectSchedHeaders();
@@ -436,10 +446,7 @@ function renderGlobalTeams() {
     wrap.appendChild(row);
   });
   
-  // Re-render UI components to update select dropdowns
-  renderRankEditor();
-  renderGroupEditor();
-  renderBracketEditor();
+  renderRankEditor(); renderGroupEditor(); renderBracketEditor();
 }
 
 window.addGlobalTeam = function() {
@@ -653,7 +660,6 @@ window.rebuildBracket = function() {
 
 // ── Init UI from state ──
 function initUI() {
-  // Load global teams first
   window.globalTeamsList = state.globalTeams || [];
   
   document.querySelectorAll('.view-btn').forEach(b=>b.classList.remove('active'));
@@ -662,6 +668,8 @@ function initUI() {
   document.getElementById('s-font').value    = state.fontSize||15;
   document.getElementById('s-accent').value  = state.accent||'#00e5ff';
   document.getElementById('s-opacity').value = state.bgOpacity||0.88;
+  document.getElementById('s-team-font').value = state.teamFont||"'Barlow Condensed', sans-serif"; // Завантажуємо шрифт
+  
   syncRange('s-scale','rv-scale'); syncRange('s-font','rv-font'); syncRange('s-opacity','rv-opacity');
   document.getElementById('rank-title-inp').value = state.rankTitle||'';
   document.getElementById('g-count').value = state.groupCount||4;
@@ -672,8 +680,7 @@ function initUI() {
   if(!state.groups) state.groups=autoGroups(state.groupCount||4,state.teamCount||4);
   if(!state.bracketData||!Object.keys(state.bracketData).length) state.bracketData=autoBracketData(state.bracketFormat||4);
   
-  renderGlobalTeams(); // This will trigger rendering of Rankings, Groups, and Playoff
-  renderSchedEditor();
+  renderGlobalTeams(); renderSchedEditor();
 }
 
 initUI();
