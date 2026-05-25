@@ -15,7 +15,6 @@
 * { box-sizing:border-box; margin:0; padding:0; }
 html, body { width:100%; height:100%; background:transparent; overflow:hidden; font-family:'Barlow Condensed',sans-serif; color:var(--text); }
 
-/* ПЛАВНЕ ЗНИКНЕННЯ/ПОЯВА ОВЕРЛЕЮ */
 #overlay-root { 
   position:fixed; inset:0; transform-origin:center center; 
   transform:scale(var(--scale)); pointer-events:none;
@@ -51,7 +50,7 @@ html, body { width:100%; height:100%; background:transparent; overflow:hidden; f
 /* GROUPS */
 #v-groups { padding: 50px 60px; width:100%; height:100%; box-sizing: border-box; }
 #v-groups .team-name-text { color: var(--group-team, #ffffff); }
-.group-card { background:var(--group-bg, var(--card-bg)); border:1px solid var(--border); border-radius:8px; overflow:hidden; min-width:0; max-width: 100%; animation:slideIn .4s cubic-bezier(.22,.68,0,1.2); box-shadow:0 8px 40px rgba(0,0,0,0.7); font-size:var(--font-size); }
+.group-card { background:var(--group-bg, var(--card-bg)); border:1px solid var(--border); border-radius:8px; overflow:hidden; min-width:0; max-width: 100%; animation:slideIn .4s cubic-bezier(.22,.68,0,1.2); box-shadow:0 8px 40px rgba(0,0,0,0.7); font-size:var(--font-size); transition: all 0.3s ease; }
 .group-card-head { background:var(--group-head, rgba(8,24,48,0.9)); padding:8px 14px; display:flex; align-items:center; gap:10px; border-bottom:2px solid var(--accent); }
 .group-letter { font-family:'Bebas Neue',sans-serif; font-size:34px; line-height:1; color:var(--accent); }
 .group-title { font-size:13px; font-weight:700; }
@@ -105,13 +104,8 @@ html, body { width:100%; height:100%; background:transparent; overflow:hidden; f
 .loader { width:40px; height:40px; border:3px solid rgba(0,229,255,0.2); border-top-color:var(--accent); border-radius:50%; animation:spin .8s linear infinite; }
 #loading-msg { font-family:'Bebas Neue',sans-serif; font-size:16px; letter-spacing:3px; color:var(--accent); }
 
-/* АНІМАЦІЇ */
 @keyframes spin { to { transform:rotate(360deg); } }
 @keyframes slideIn { from{opacity:0;transform:translateY(-14px)} to{opacity:1;transform:translateY(0)} }
-@keyframes singleGroupSwitch {
-  0% { opacity: 0; transform: scale(0.9) translateY(20px); }
-  100% { opacity: 1; transform: scale(1) translateY(0); }
-}
 </style>
 </head>
 <body>
@@ -184,7 +178,6 @@ onValue(ref(db, 'padel/state'), (snap) => {
 function defaultState() {
   return {
     isVisible: true,
-    showSingleGroup: 'ALL',
     view: 'rankings', scale: 1, fontSize: 15, accent: '#00e5ff', bgOpacity: 0.88, teamFont: "'Barlow Condensed', sans-serif",
     colors: {
       rankings: { team: '#ffffff', bg: '#050c1c', head: '#081830' },
@@ -194,7 +187,7 @@ function defaultState() {
     },
     rankTitle: 'ГРАВЦІ (ЧОЛОВІКИ) 🇺🇦',
     rankings: [{seed:1, players:'Artem Yatsenko / Slava Sedoplatov', group:'A', pts:13420}],
-    groupCount:4, teamCount:4, groups: autoGroups(4,4),
+    groupCount:4, teamCount:4, groups: autoGroups(4,4), visibleGroup: 'all',
     schedHeaders: ['Час','Корт 1','Корт 2','Корт 3','Корт 4'],
     schedRows: [{time:'09:00', cells:['A1—A2','B1—B2','C1—C2','D1—D2'], isBreak:false}],
     bracketFormat: 4, bracketData: autoBracketData(4), champion: '— — —',
@@ -224,8 +217,7 @@ function hexToRgba(hex, opacity) {
 
 function applyState(s) {
   const rootEl = document.getElementById('overlay-root');
-  if (s.isVisible === false) { rootEl.style.opacity = '0'; } 
-  else { rootEl.style.opacity = '1'; }
+  if (s.isVisible === false) { rootEl.style.opacity = '0'; } else { rootEl.style.opacity = '1'; }
 
   const root = document.documentElement.style;
   root.setProperty('--scale', s.scale || 1);
@@ -260,44 +252,33 @@ function renderRankings(s) {
 function renderGroups(s) {
   const view = document.getElementById('v-groups'); if(!view) return; view.innerHTML = '';
   const gc = s.groupCount || 4; const tc = s.teamCount || 4; 
-  const showSingle = s.showSingleGroup || 'ALL';
-  
+  const vis = s.visibleGroup || 'all';
+
   let cols = 2;
-  if (showSingle !== 'ALL') {
-    cols = 1; // Якщо показуємо одну групу - лише одна колонка
-  } else {
+  if (vis === 'all') {
     if(gc === 3) cols = 3; else if(gc === 4) cols = 2; else if(gc === 6) cols = 2; else if(gc >= 8) cols = 4;
+  } else {
+    cols = 1; // Якщо показуємо лише одну групу, вона займає всю ширину по центру
   }
   
   view.style.gridTemplateColumns = `repeat(${cols}, 1fr)`; 
   view.style.gap = gc >= 6 ? '25px' : '45px';
-  if (gc >= 6 && showSingle === 'ALL') view.classList.add('compact'); else view.classList.remove('compact');
+  if (gc >= 6 && vis === 'all') view.classList.add('compact'); else view.classList.remove('compact');
 
   const safeGroups = s.groups || autoGroups(gc, tc);
-  let groupsToRender = [];
-
-  // Фільтруємо групи, якщо вибрано показ однієї
-  if (showSingle !== 'ALL') {
-    const idx = parseInt(showSingle);
-    if (safeGroups[idx]) groupsToRender.push({ data: safeGroups[idx], originalIndex: idx });
-  } else {
-    safeGroups.forEach((g, i) => groupsToRender.push({ data: g, originalIndex: i }));
-  }
-
-  groupsToRender.forEach((item) => {
-    const grp = item.data;
-    const gi = item.originalIndex;
+  safeGroups.forEach((grp, gi) => {
     if(!grp) return;
     
+    // ПРОПУСКАЄМО ГРУПУ, ЯКЩО ОБРАНО ПОКАЗУВАТИ ІНШУ
+    if (vis !== 'all' && parseInt(vis) !== gi) return;
+
     const letter = 'ABCDEFGH'[gi] || String.fromCharCode(65+gi);
-    const card = document.createElement('div'); 
-    card.className = 'group-card' + (tc >= 5 ? ' compact-teams' : '');
+    const card = document.createElement('div'); card.className = 'group-card' + (tc >= 5 ? ' compact-teams' : '');
     
-    // Спеціальні стилі та анімація для режиму "Одиночна група"
-    if (showSingle !== 'ALL') {
-      card.style.maxWidth = '680px';
-      card.style.margin = '0 auto';
-      card.style.animation = 'singleGroupSwitch 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) both';
+    // Робимо одиночну групу трохи ширшою для естетики
+    if (vis !== 'all') {
+      card.style.minWidth = '600px';
+      card.style.maxWidth = '90vw';
     }
 
     let rows = '';
