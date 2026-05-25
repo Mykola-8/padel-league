@@ -61,6 +61,9 @@ select.dyn-select option { background: var(--bg); color: #fff; }
 .range-row{display:flex;align-items:center;gap:10px;}
 .range-val{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--accent);min-width:40px;text-align:right;}
 
+/* НОВІ КОЛЬОРОВІ ПІКЕРИ */
+.color-picker-sm { width:100%; height:32px; padding:2px; cursor:pointer; background:transparent; border:1px solid var(--border); border-radius:4px; }
+
 /* RANKING ROWS */
 .r-row{display:grid;grid-template-columns:40px 1fr 50px 70px 32px;gap:6px;align-items:center;margin-bottom:6px;}
 .r-row input, .r-row select{font-size:13px;}
@@ -121,7 +124,6 @@ code{background:rgba(255,255,255,.08);padding:2px 6px;border-radius:4px;font-siz
   <div class="tab" onclick="showPage('playoff')" id="tab-playoff">🏆 Плей-оф</div>
 </div>
 
-<!-- DISPLAY -->
 <div class="page active" id="page-display">
   <div class="sec-title">Що показати на трансляції</div>
   <div class="card">
@@ -146,20 +148,16 @@ code{background:rgba(255,255,255,.08);padding:2px 6px;border-radius:4px;font-siz
           https://mykola-8.github.io/padel-league/controller.html
         </a>
       </div>
-      <div style="margin-top:10px;font-size:12px;color:var(--muted)">
-        В OBS: Add Source → Browser → вставте URL оверлею. Ширина 1920, висота 1080.
-      </div>
     </div>
   </div>
 </div>
 
-<!-- TEAMS (GLOBAL LIST) -->
 <div class="page" id="page-teams">
   <div class="sec-title">Список усіх команд</div>
   <div class="card">
     <div class="card-title">Додати нову команду</div>
     <div style="display:flex; gap:8px;">
-      <input type="text" id="new-team-inp" class="field" placeholder="Назва команди (напр. Гравець 1 / Гравець 2)" style="flex:1; padding:9px 12px; background:rgba(255,255,255,.06); color:var(--text); border:1px solid var(--border); border-radius:8px;">
+      <input type="text" id="new-team-inp" class="field" placeholder="Назва команди" style="flex:1; padding:9px 12px; background:rgba(255,255,255,.06); color:var(--text); border:1px solid var(--border); border-radius:8px;">
       <button class="btn btn-primary" onclick="addGlobalTeam()">+ Додати</button>
     </div>
   </div>
@@ -169,7 +167,6 @@ code{background:rgba(255,255,255,.08);padding:2px 6px;border-radius:4px;font-siz
   </div>
 </div>
 
-<!-- SETTINGS -->
 <div class="page" id="page-settings">
   <div class="sec-title">Вигляд оверлею</div>
   <div class="card">
@@ -198,23 +195,49 @@ code{background:rgba(255,255,255,.08);padding:2px 6px;border-radius:4px;font-siz
       </select>
     </div>
   </div>
+
   <div class="card">
-    <div class="card-title">Кольори</div>
+    <div class="card-title">Індивідуальні кольори екранів</div>
+    
     <div class="field">
-      <label>Акцентний колір</label>
-      <input type="color" id="s-accent" value="#00e5ff">
-    </div>
-    <div class="field">
-      <label>Прозорість карток</label>
-      <div class="range-row">
+      <label>Загальний Акцент (лінії, обведення)</label>
+      <input type="color" id="s-accent" value="#00e5ff" style="margin-bottom:15px">
+      <label>Прозорість фону таблиць</label>
+      <div class="range-row" style="margin-bottom:15px">
         <input type="range" id="s-opacity" min="0.3" max="1" step="0.05" value="0.88" oninput="syncRange('s-opacity','rv-opacity')">
         <span class="range-val" id="rv-opacity">88%</span>
       </div>
     </div>
+
+    <div style="display:grid; grid-template-columns:70px 1fr 1fr 1fr; gap:8px; align-items:center; background:var(--card2); padding:10px; border-radius:8px; border:1px solid var(--border);">
+      <div style="font-size:10px; color:var(--muted); text-transform:uppercase;">Екран</div>
+      <div style="font-size:10px; color:var(--muted); text-transform:uppercase; text-align:center;">Команди</div>
+      <div style="font-size:10px; color:var(--muted); text-transform:uppercase; text-align:center;">Таблиця</div>
+      <div style="font-size:10px; color:var(--muted); text-transform:uppercase; text-align:center;">Шапка</div>
+
+      <div style="font-size:12px; font-weight:bold;">Рейтинг</div>
+      <input type="color" id="c-rank-team" class="color-picker-sm">
+      <input type="color" id="c-rank-bg" class="color-picker-sm">
+      <input type="color" id="c-rank-head" class="color-picker-sm">
+
+      <div style="font-size:12px; font-weight:bold;">Групи</div>
+      <input type="color" id="c-group-team" class="color-picker-sm">
+      <input type="color" id="c-group-bg" class="color-picker-sm">
+      <input type="color" id="c-group-head" class="color-picker-sm">
+
+      <div style="font-size:12px; font-weight:bold;">Розклад</div>
+      <input type="color" id="c-sched-team" class="color-picker-sm">
+      <input type="color" id="c-sched-bg" class="color-picker-sm">
+      <input type="color" id="c-sched-head" class="color-picker-sm">
+
+      <div style="font-size:12px; font-weight:bold;">Плей-оф</div>
+      <input type="color" id="c-play-team" class="color-picker-sm">
+      <input type="color" id="c-play-bg" class="color-picker-sm">
+      <input type="color" id="c-play-head" class="color-picker-sm">
+    </div>
   </div>
 </div>
 
-<!-- RANKINGS -->
 <div class="page" id="page-rankings">
   <div class="sec-title">Таблиця рейтингу</div>
   <div class="card">
@@ -228,7 +251,6 @@ code{background:rgba(255,255,255,.08);padding:2px 6px;border-radius:4px;font-siz
   </div>
 </div>
 
-<!-- GROUPS -->
 <div class="page" id="page-groups">
   <div class="sec-title">Групи</div>
   <div class="card">
@@ -251,7 +273,6 @@ code{background:rgba(255,255,255,.08);padding:2px 6px;border-radius:4px;font-siz
   <div id="group-editor"></div>
 </div>
 
-<!-- SCHEDULE -->
 <div class="page" id="page-schedule">
   <div class="sec-title">Розклад ігор</div>
   <div class="card">
@@ -268,7 +289,6 @@ code{background:rgba(255,255,255,.08);padding:2px 6px;border-radius:4px;font-siz
   </div>
 </div>
 
-<!-- PLAYOFF -->
 <div class="page" id="page-playoff">
   <div class="sec-title">Плей-оф сітка</div>
   <div class="card">
@@ -288,14 +308,12 @@ code{background:rgba(255,255,255,.08);padding:2px 6px;border-radius:4px;font-siz
   </div>
 </div>
 
-<!-- STATUS -->
 <div class="status-bar">
   <div><span class="status-dot" id="status-dot"></span><span class="status-text" id="status-text">Підключення...</span></div>
   <button class="push-btn" id="push-btn" onclick="pushState()" disabled>📡 НАДІСЛАТИ</button>
 </div>
 <div style="height:60px"></div>
 
-<!-- FIREBASE -->
 <script type="module">
 import { initializeApp }            from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, set, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
@@ -318,7 +336,6 @@ const stateRef = ref(db, 'padel/state');
 let state = defaultState();
 let connected = false;
 
-// ── Connection status ──
 onValue(ref(db, '.info/connected'), snap => {
   connected = snap.val() === true;
   document.getElementById('status-dot').className = 'status-dot' + (connected ? '' : ' offline');
@@ -326,13 +343,11 @@ onValue(ref(db, '.info/connected'), snap => {
   document.getElementById('push-btn').disabled = !connected;
 });
 
-// ── Load existing state once ──
 onValue(stateRef, snap => {
   const val = snap.val();
   if (val) { state = val; initUI(); }
 }, { onlyOnce: true });
 
-// ── Push state to Firebase ──
 window.pushState = async function() {
   const btn = document.getElementById('push-btn');
   btn.disabled = true; btn.textContent = '⏳ НАДСИЛАЮ...';
@@ -348,33 +363,21 @@ window.pushState = async function() {
   }
 };
 
-// ══════════════════════════════════
-//  STATE
-// ══════════════════════════════════
 function defaultState() {
   return {
-    globalTeams: [
-      'Artem Yatsenko / Slava Sedoplatov',
-      'Fedor Modnikov / Volodymyr Yelizarov',
-      'Ivan Petrenko / Mykhailo Kovalenko',
-      'Oleh Bondarchuk / Serhii Kravets'
-    ],
+    globalTeams: ['Artem Yatsenko / Slava Sedoplatov', 'Fedor Modnikov / Volodymyr Yelizarov'],
     view: 'rankings', scale: 1, fontSize: 15, accent: '#00e5ff', bgOpacity: 0.88, teamFont: "'Barlow Condensed', sans-serif",
+    colors: {
+      rankings: { team: '#ffffff', bg: '#050c1c', head: '#081830' },
+      groups:   { team: '#ffffff', bg: '#050c1c', head: '#081830' },
+      schedule: { team: '#ffffff', bg: '#050c1c', head: '#000000' },
+      playoff:  { team: '#ffffff', bg: '#161a22', head: '#000000' }
+    },
     rankTitle: 'ГРАВЦІ (ЧОЛОВІКИ) 🇺🇦',
-    rankings: [
-      {seed:1,players:'Artem Yatsenko / Slava Sedoplatov',group:'A',pts:13420},
-      {seed:2,players:'Fedor Modnikov / Volodymyr Yelizarov',group:'B',pts:12440},
-      {seed:3,players:'Ivan Petrenko / Mykhailo Kovalenko',group:'C',pts:11800},
-      {seed:4,players:'Oleh Bondarchuk / Serhii Kravets',group:'D',pts:11200},
-    ],
+    rankings: [{seed:1,players:'Artem Yatsenko / Slava Sedoplatov',group:'A',pts:13420}],
     groupCount:4, teamCount:4, groups: autoGroups(4,4),
     schedHeaders:['Час','Корт 1','Корт 2','Корт 3','Корт 4'],
-    schedRows:[
-      {time:'09:00',cells:['A1—A2','B1—B2','C1—C2','D1—D2'],isBreak:false},
-      {time:'09:40',cells:['A3—A4','B3—B4','C3—C4','D3—D4'],isBreak:false},
-      {time:'10:20',cells:['☕ ТЕХНІЧНА ПЕРЕРВА'],isBreak:true},
-      {time:'10:40',cells:['A1—A3','B1—B3','C1—C3','D1—D3'],isBreak:false},
-    ],
+    schedRows:[{time:'09:00',cells:['A1—A2','B1—B2','C1—C2','D1—D2'],isBreak:false}],
     bracketFormat:4, bracketData:autoBracketData(4), champion:'— — —',
   };
 }
@@ -386,7 +389,16 @@ function collectState() {
   state.fontSize   = parseInt(document.getElementById('s-font').value);
   state.accent     = document.getElementById('s-accent').value;
   state.bgOpacity  = parseFloat(document.getElementById('s-opacity').value);
-  state.teamFont   = document.getElementById('s-team-font').value; // Збираємо шрифт
+  state.teamFont   = document.getElementById('s-team-font').value;
+  
+  // Збираємо індивідуальні кольори екранів
+  state.colors = {
+    rankings: { team: document.getElementById('c-rank-team').value, bg: document.getElementById('c-rank-bg').value, head: document.getElementById('c-rank-head').value },
+    groups:   { team: document.getElementById('c-group-team').value, bg: document.getElementById('c-group-bg').value, head: document.getElementById('c-group-head').value },
+    schedule: { team: document.getElementById('c-sched-team').value, bg: document.getElementById('c-sched-bg').value, head: document.getElementById('c-sched-head').value },
+    playoff:  { team: document.getElementById('c-play-team').value, bg: document.getElementById('c-play-bg').value, head: document.getElementById('c-play-head').value }
+  };
+
   state.rankTitle  = document.getElementById('rank-title-inp').value;
   state.rankings   = collectRankings();
   state.schedHeaders = collectSchedHeaders();
@@ -400,21 +412,16 @@ function collectState() {
   return state;
 }
 
-// ══════════════════════════════════
-//  UI HELPERS
-// ══════════════════════════════════
 window.showPage = function(id) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.getElementById('page-'+id).classList.add('active');
   document.getElementById('tab-'+id).classList.add('active');
 };
-
 window.setView = function(v) {
   document.querySelectorAll('.view-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('vbtn-'+v)?.classList.add('active');
 };
-
 window.syncRange = function(inputId, valId) {
   const v = parseFloat(document.getElementById(inputId).value);
   const el = document.getElementById(valId);
@@ -423,242 +430,92 @@ window.syncRange = function(inputId, valId) {
   else if (inputId==='s-opacity') el.textContent = Math.round(v*100)+'%';
 };
 
-// ── Global Teams Management ──
 window.globalTeamsList = [];
-
 function renderGlobalTeams() {
-  const wrap = document.getElementById('global-teams-list');
-  wrap.innerHTML = '';
+  const wrap = document.getElementById('global-teams-list'); wrap.innerHTML = '';
   window.globalTeamsList.forEach((team, i) => {
     const row = document.createElement('div');
-    row.style.display = 'flex';
-    row.style.justifyContent = 'space-between';
-    row.style.alignItems = 'center';
-    row.style.padding = '8px 12px';
-    row.style.background = 'rgba(255,255,255,.05)';
-    row.style.borderRadius = '6px';
-    row.style.fontSize = '14px';
-    
-    row.innerHTML = `
-      <span>${team}</span>
-      <button class="del-btn" onclick="delGlobalTeam(${i})">✕</button>
-    `;
+    row.style = 'display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:rgba(255,255,255,.05); border-radius:6px; font-size:14px;';
+    row.innerHTML = `<span>${team}</span><button class="del-btn" onclick="delGlobalTeam(${i})">✕</button>`;
     wrap.appendChild(row);
   });
-  
   renderRankEditor(); renderGroupEditor(); renderBracketEditor();
 }
-
 window.addGlobalTeam = function() {
-  const inp = document.getElementById('new-team-inp');
-  const val = inp.value.trim();
-  if (val) {
-    if (!window.globalTeamsList) window.globalTeamsList = [];
-    window.globalTeamsList.push(val);
-    inp.value = '';
-    renderGlobalTeams();
-  }
+  const inp = document.getElementById('new-team-inp'); const val = inp.value.trim();
+  if (val) { if (!window.globalTeamsList) window.globalTeamsList = []; window.globalTeamsList.push(val); inp.value = ''; renderGlobalTeams(); }
 };
-
-window.delGlobalTeam = function(i) {
-  window.globalTeamsList.splice(i, 1);
-  renderGlobalTeams();
-};
+window.delGlobalTeam = function(i) { window.globalTeamsList.splice(i, 1); renderGlobalTeams(); };
 
 function generateTeamSelect(selectedValue, id, dataAttrs = "") {
   let options = `<option value="">-- Оберіть команду --</option>`;
   const teams = window.globalTeamsList || [];
-  
-  if (selectedValue && !teams.includes(selectedValue)) {
-      options += `<option value="${selectedValue}" selected>${selectedValue}</option>`;
-  }
-
-  teams.forEach(team => {
-    const selected = (team === selectedValue) ? 'selected' : '';
-    options += `<option value="${team}" ${selected}>${team}</option>`;
-  });
-  
+  if (selectedValue && !teams.includes(selectedValue)) options += `<option value="${selectedValue}" selected>${selectedValue}</option>`;
+  teams.forEach(team => { options += `<option value="${team}" ${team === selectedValue ? 'selected' : ''}>${team}</option>`; });
   return `<select class="dyn-select" ${id ? `id="${id}"` : ''} ${dataAttrs}>${options}</select>`;
 }
 
-
-// ── Rankings ──
 function renderRankEditor() {
-  const wrap = document.getElementById('rank-rows');
-  wrap.innerHTML = '';
+  const wrap = document.getElementById('rank-rows'); wrap.innerHTML = '';
   state.rankings.forEach((r,i) => {
-    const row = document.createElement('div');
-    row.className = 'r-row';
-    row.innerHTML = `
-      <input type="number" value="${r.seed}" data-ri="${i}" data-f="seed" style="text-align:center">
-      ${generateTeamSelect(r.players, null, `data-ri="${i}" data-f="players"`)}
-      <input type="text"   value="${r.group}" data-ri="${i}" data-f="group" style="text-align:center" placeholder="A">
-      <input type="number" value="${r.pts}" data-ri="${i}" data-f="pts" style="text-align:right">
-      <button class="del-btn" onclick="delRankRow(${i})">✕</button>`;
+    const row = document.createElement('div'); row.className = 'r-row';
+    row.innerHTML = `<input type="number" value="${r.seed}" data-ri="${i}" data-f="seed" style="text-align:center">${generateTeamSelect(r.players, null, `data-ri="${i}" data-f="players"`)}<input type="text" value="${r.group}" data-ri="${i}" data-f="group" style="text-align:center"><input type="number" value="${r.pts}" data-ri="${i}" data-f="pts" style="text-align:right"><button class="del-btn" onclick="delRankRow(${i})">✕</button>`;
     wrap.appendChild(row);
   });
 }
-function collectRankings() {
-  return Array.from(document.querySelectorAll('.r-row')).map(row => ({
-    seed:    parseInt(row.querySelector('[data-f="seed"]').value)||0,
-    players: row.querySelector('[data-f="players"]').value,
-    group:   row.querySelector('[data-f="group"]').value,
-    pts:     parseInt(row.querySelector('[data-f="pts"]').value)||0,
-  }));
-}
-window.addRankRow = function() {
-  state.rankings = collectRankings();
-  const n = state.rankings.length+1;
-  state.rankings.push({seed:n,players:'',group:'ABCDEFGH'[(n-1)%8],pts:0});
-  renderRankEditor();
-};
-window.delRankRow = function(i) {
-  state.rankings = collectRankings(); state.rankings.splice(i,1); renderRankEditor();
-};
+function collectRankings() { return Array.from(document.querySelectorAll('.r-row')).map(row => ({ seed:parseInt(row.querySelector('[data-f="seed"]').value)||0, players:row.querySelector('[data-f="players"]').value, group:row.querySelector('[data-f="group"]').value, pts:parseInt(row.querySelector('[data-f="pts"]').value)||0 })); }
+window.addRankRow = function() { state.rankings = collectRankings(); const n = state.rankings.length+1; state.rankings.push({seed:n,players:'',group:'ABCDEFGH'[(n-1)%8],pts:0}); renderRankEditor(); };
+window.delRankRow = function(i) { state.rankings = collectRankings(); state.rankings.splice(i,1); renderRankEditor(); };
 
-// ── Schedule ──
 function renderSchedEditor() {
-  const hw = document.getElementById('sched-headers');
-  hw.innerHTML = '';
-  (state.schedHeaders||[]).forEach((h,i) => {
-    const inp = document.createElement('input');
-    inp.type='text'; inp.value=h; inp.dataset.i=i; hw.appendChild(inp);
-  });
-  const rw = document.getElementById('sched-rows');
-  rw.innerHTML = '';
+  const hw = document.getElementById('sched-headers'); hw.innerHTML = '';
+  (state.schedHeaders||[]).forEach((h,i) => { const inp = document.createElement('input'); inp.type='text'; inp.value=h; inp.dataset.i=i; hw.appendChild(inp); });
+  const rw = document.getElementById('sched-rows'); rw.innerHTML = '';
   (state.schedRows||[]).forEach((r,i) => {
-    const row = document.createElement('div');
-    row.className = 'sched-row'+(r.isBreak?' is-break':'');
-    if (r.isBreak) {
-      row.innerHTML = `<input type="text" value="${r.time}" data-si="${i}" data-f="time" placeholder="00:00"><input type="text" value="${r.cells[0]||''}" data-si="${i}" data-f="c0" placeholder="Текст перерви"><button class="del-btn" onclick="delSchedRow(${i})">✕</button>`;
-    } else {
-      row.innerHTML = `<input type="text" value="${r.time}" data-si="${i}" data-f="time" placeholder="00:00"><input type="text" value="${r.cells[0]||''}" data-si="${i}" data-f="c0" placeholder="Корт 1"><input type="text" value="${r.cells[1]||''}" data-si="${i}" data-f="c1" placeholder="Корт 2"><input type="text" value="${r.cells[2]||''}" data-si="${i}" data-f="c2" placeholder="Корт 3"><input type="text" value="${r.cells[3]||''}" data-si="${i}" data-f="c3" placeholder="Корт 4"><button class="del-btn" onclick="delSchedRow(${i})">✕</button>`;
-    }
+    const row = document.createElement('div'); row.className = 'sched-row'+(r.isBreak?' is-break':'');
+    if (r.isBreak) { row.innerHTML = `<input type="text" value="${r.time}" data-si="${i}" data-f="time" placeholder="00:00"><input type="text" value="${r.cells[0]||''}" data-si="${i}" data-f="c0" placeholder="Текст перерви"><button class="del-btn" onclick="delSchedRow(${i})">✕</button>`; }
+    else { row.innerHTML = `<input type="text" value="${r.time}" data-si="${i}" data-f="time" placeholder="00:00"><input type="text" value="${r.cells[0]||''}" data-si="${i}" data-f="c0" placeholder="Корт 1"><input type="text" value="${r.cells[1]||''}" data-si="${i}" data-f="c1" placeholder="Корт 2"><input type="text" value="${r.cells[2]||''}" data-si="${i}" data-f="c2" placeholder="Корт 3"><input type="text" value="${r.cells[3]||''}" data-si="${i}" data-f="c3" placeholder="Корт 4"><button class="del-btn" onclick="delSchedRow(${i})">✕</button>`; }
     rw.appendChild(row);
   });
 }
 function collectSchedHeaders() { return Array.from(document.querySelectorAll('#sched-headers input')).map(i=>i.value); }
-function collectSchedRows() {
-  return Array.from(document.querySelectorAll('.sched-row')).map(row => {
-    const isBreak=row.classList.contains('is-break');
-    return {time:row.querySelector('[data-f="time"]').value, isBreak,
-      cells:isBreak?[row.querySelector('[data-f="c0"]').value]:['c0','c1','c2','c3'].map(f=>row.querySelector(`[data-f="${f}"]`)?.value||'')};
-  });
-}
-window.addSchedRow = function(isBreak) {
-  state.schedRows=collectSchedRows();
-  state.schedRows.push(isBreak?{time:'--:--',cells:['☕ ПЕРЕРВА'],isBreak:true}:{time:'--:--',cells:['','','',''],isBreak:false});
-  renderSchedEditor();
-};
+function collectSchedRows() { return Array.from(document.querySelectorAll('.sched-row')).map(row => { const isBreak=row.classList.contains('is-break'); return {time:row.querySelector('[data-f="time"]').value, isBreak, cells:isBreak?[row.querySelector('[data-f="c0"]').value]:['c0','c1','c2','c3'].map(f=>row.querySelector(`[data-f="${f}"]`)?.value||'')}; }); }
+window.addSchedRow = function(isBreak) { state.schedRows=collectSchedRows(); state.schedRows.push(isBreak?{time:'--:--',cells:['☕ ПЕРЕРВА'],isBreak:true}:{time:'--:--',cells:['','','',''],isBreak:false}); renderSchedEditor(); };
 window.delSchedRow = function(i) { state.schedRows=collectSchedRows(); state.schedRows.splice(i,1); renderSchedEditor(); };
 
-// ── Groups ──
-function autoGroups(gc,tc) {
-  const L='ABCDEFGH';
-  return Array.from({length:gc},(_,gi)=>({letter:L[gi],teams:Array.from({length:tc},(_,ti)=>({name:`${L[gi]}${ti+1} — Команда`,p:0,w:0,l:0,gd:'0:0',pts:0}))}));
-}
+function autoGroups(gc,tc) { const L='ABCDEFGH'; return Array.from({length:gc},(_,gi)=>({letter:L[gi],teams:Array.from({length:tc},(_,ti)=>({name:`${L[gi]}${ti+1} — Команда`,p:0,w:0,l:0,gd:'0:0',pts:0}))})); }
 function renderGroupEditor() {
-  const gc=parseInt(document.getElementById('g-count').value);
-  const grps=state.groups||autoGroups(gc,parseInt(document.getElementById('g-teams').value));
-  const wrap=document.getElementById('group-editor');
-  wrap.innerHTML='';
+  const gc=parseInt(document.getElementById('g-count').value); const grps=state.groups||autoGroups(gc,parseInt(document.getElementById('g-teams').value));
+  const wrap=document.getElementById('group-editor'); wrap.innerHTML='';
   grps.forEach((grp,gi)=>{
-    const L='ABCDEFGH'; const letter=L[gi];
-    const sec=document.createElement('div'); sec.className='card grp-section';
+    const L='ABCDEFGH'; const letter=L[gi]; const sec=document.createElement('div'); sec.className='card grp-section';
     let rows='';
-    (grp.teams||[]).forEach((team,ti)=>{
-      rows+=`<div class="team-stat-row" data-gi="${gi}" data-ti="${ti}">
-        ${generateTeamSelect(team.name, null, `data-f="name"`)}
-        <input type="number" value="${team.p||0}" data-f="p"><input type="number" value="${team.w||0}" data-f="w"><input type="number" value="${team.l||0}" data-f="l"><input type="text" value="${team.gd||'0:0'}" data-f="gd"><input type="number" value="${team.pts||0}" data-f="pts">
-      </div>`;
-    });
+    (grp.teams||[]).forEach((team,ti)=>{ rows+=`<div class="team-stat-row" data-gi="${gi}" data-ti="${ti}">${generateTeamSelect(team.name, null, `data-f="name"`)}<input type="number" value="${team.p||0}" data-f="p"><input type="number" value="${team.w||0}" data-f="w"><input type="number" value="${team.l||0}" data-f="l"><input type="text" value="${team.gd||'0:0'}" data-f="gd"><input type="number" value="${team.pts||0}" data-f="pts"></div>`; });
     sec.innerHTML=`<div class="grp-section-title"><span style="font-size:28px;color:var(--accent)">${letter}</span>Група ${letter}</div><div style="display:grid;grid-template-columns:1fr 40px 40px 40px 60px 50px;gap:5px;margin-bottom:4px;"><span style="font-size:10px;color:var(--muted)">Команда</span><span style="font-size:10px;color:var(--muted);text-align:center">І</span><span style="font-size:10px;color:var(--muted);text-align:center">В</span><span style="font-size:10px;color:var(--muted);text-align:center">П</span><span style="font-size:10px;color:var(--muted);text-align:center">МГ</span><span style="font-size:10px;color:var(--muted);text-align:center">Очки</span></div>${rows}`;
     wrap.appendChild(sec);
   });
 }
-function collectGroups() {
-  const map={};
-  document.querySelectorAll('.team-stat-row').forEach(row=>{
-    const gi=row.dataset.gi,ti=row.dataset.ti;
-    if(!map[gi]) map[gi]={letter:'ABCDEFGH'[gi],teams:[]};
-    map[gi].teams[ti]={name:row.querySelector('[data-f="name"]').value,p:parseInt(row.querySelector('[data-f="p"]').value)||0,w:parseInt(row.querySelector('[data-f="w"]').value)||0,l:parseInt(row.querySelector('[data-f="l"]').value)||0,gd:row.querySelector('[data-f="gd"]').value,pts:parseInt(row.querySelector('[data-f="pts"]').value)||0};
-  });
-  return Object.values(map);
-}
-window.rebuildGroups = function() {
-  state.groupCount=parseInt(document.getElementById('g-count').value);
-  state.teamCount=parseInt(document.getElementById('g-teams').value);
-  state.groups=autoGroups(state.groupCount,state.teamCount);
-  renderGroupEditor();
-};
+function collectGroups() { const map={}; document.querySelectorAll('.team-stat-row').forEach(row=>{ const gi=row.dataset.gi,ti=row.dataset.ti; if(!map[gi]) map[gi]={letter:'ABCDEFGH'[gi],teams:[]}; map[gi].teams[ti]={name:row.querySelector('[data-f="name"]').value,p:parseInt(row.querySelector('[data-f="p"]').value)||0,w:parseInt(row.querySelector('[data-f="w"]').value)||0,l:parseInt(row.querySelector('[data-f="l"]').value)||0,gd:row.querySelector('[data-f="gd"]').value,pts:parseInt(row.querySelector('[data-f="pts"]').value)||0}; }); return Object.values(map); }
+window.rebuildGroups = function() { state.groupCount=parseInt(document.getElementById('g-count').value); state.teamCount=parseInt(document.getElementById('g-teams').value); state.groups=autoGroups(state.groupCount,state.teamCount); renderGroupEditor(); };
 
-// ── Bracket ──
-function autoBracketData(fmt) {
-  const data={},L='ABCDEFGH';
-  for(let ri=0;ri<Math.log2(fmt);ri++){
-    const count=fmt/Math.pow(2,ri+1);
-    for(let mi=0;mi<count;mi++){
-      data[`${ri}-${mi}`]={t1:ri===0?`${L[mi*2]||'G'}1`:`Переможець М${ri}.${mi*2+1}`,t2:ri===0?`${L[mi*2+1]||'G'}2`:`Переможець М${ri}.${mi*2+2}`,s1:'-',s2:'-',winner:-1};
-    }
-  }
-  return data;
-}
+function autoBracketData(fmt) { const data={},L='ABCDEFGH'; for(let ri=0;ri<Math.log2(fmt);ri++){ const count=fmt/Math.pow(2,ri+1); for(let mi=0;mi<count;mi++){ data[`${ri}-${mi}`]={t1:ri===0?`${L[mi*2]||'G'}1`:`Переможець М${ri}.${mi*2+1}`,t2:ri===0?`${L[mi*2+1]||'G'}2`:`Переможець М${ri}.${mi*2+2}`,s1:'-',s2:'-',winner:-1}; } } return data; }
 function renderBracketEditor() {
-  const fmt=parseInt(document.getElementById('p-format').value);
-  const data=state.bracketData&&Object.keys(state.bracketData).length?state.bracketData:autoBracketData(fmt);
-  state.bracketData=data;
+  const fmt=parseInt(document.getElementById('p-format').value); const data=state.bracketData&&Object.keys(state.bracketData).length?state.bracketData:autoBracketData(fmt); state.bracketData=data;
   const wrap=document.getElementById('bracket-editor'); wrap.innerHTML='';
   const labels=fmt===8?['1/8','1/4','1/2','Фінал']:fmt===4?['1/4','1/2','Фінал']:['1/2','Фінал'];
   labels.forEach((lbl,ri)=>{
-    const count=fmt/Math.pow(2,ri+1);
-    const card=document.createElement('div'); card.className='card';
-    card.innerHTML=`<div class="card-title">${lbl} ФІНАЛУ</div>`;
+    const count=fmt/Math.pow(2,ri+1); const card=document.createElement('div'); card.className='card'; card.innerHTML=`<div class="card-title">${lbl} ФІНАЛУ</div>`;
     for(let mi=0;mi<count;mi++){
-      const key=`${ri}-${mi}`,m=data[key]||{t1:'',t2:'',s1:'-',s2:'-',winner:-1};
-      const me=document.createElement('div'); me.className='match-editor';
-      me.innerHTML=`
-        <div class="match-editor-title">Матч ${ri+1}.${mi+1}</div>
-        <div class="match-teams">
-          ${generateTeamSelect(m.t1, `mt1-${ri}-${mi}`)}
-          <input type="text" value="${m.s1}" id="ms1-${ri}-${mi}" placeholder="Рах." style="text-align:center">
-          <button class="win-btn ${m.winner===0?'active':''}" onclick="setWinner(${ri},${mi},0)">W</button>
-        </div>
-        <div class="match-teams">
-          ${generateTeamSelect(m.t2, `mt2-${ri}-${mi}`)}
-          <input type="text" value="${m.s2}" id="ms2-${ri}-${mi}" placeholder="Рах." style="text-align:center">
-          <button class="win-btn ${m.winner===1?'active':''}" onclick="setWinner(${ri},${mi},1)">W</button>
-        </div>`;
+      const key=`${ri}-${mi}`,m=data[key]||{t1:'',t2:'',s1:'-',s2:'-',winner:-1}; const me=document.createElement('div'); me.className='match-editor';
+      me.innerHTML=`<div class="match-editor-title">Матч ${ri+1}.${mi+1}</div><div class="match-teams">${generateTeamSelect(m.t1, `mt1-${ri}-${mi}`)}<input type="text" value="${m.s1}" id="ms1-${ri}-${mi}" placeholder="Рах." style="text-align:center"><button class="win-btn ${m.winner===0?'active':''}" onclick="setWinner(${ri},${mi},0)">W</button></div><div class="match-teams">${generateTeamSelect(m.t2, `mt2-${ri}-${mi}`)}<input type="text" value="${m.s2}" id="ms2-${ri}-${mi}" placeholder="Рах." style="text-align:center"><button class="win-btn ${m.winner===1?'active':''}" onclick="setWinner(${ri},${mi},1)">W</button></div>`;
       card.appendChild(me);
-    }
-    wrap.appendChild(card);
+    } wrap.appendChild(card);
   });
 }
-function collectBracket() {
-  const fmt=parseInt(document.getElementById('p-format').value),data={};
-  for(let ri=0;ri<Math.log2(fmt);ri++){
-    const count=fmt/Math.pow(2,ri+1);
-    for(let mi=0;mi<count;mi++){
-      const key=`${ri}-${mi}`,old=state.bracketData?.[key]||{};
-      data[key]={t1:document.getElementById(`mt1-${ri}-${mi}`)?.value||old.t1||'',t2:document.getElementById(`mt2-${ri}-${mi}`)?.value||old.t2||'',s1:document.getElementById(`ms1-${ri}-${mi}`)?.value||old.s1||'-',s2:document.getElementById(`ms2-${ri}-${mi}`)?.value||old.s2||'-',winner:old.winner??-1};
-    }
-  }
-  return data;
-}
-window.setWinner = function(ri,mi,teamIdx) {
-  const data=state.bracketData||{},key=`${ri}-${mi}`;
-  if(!data[key]) return;
-  data[key].winner=teamIdx;
-  const winnerName=document.getElementById(`mt${teamIdx+1}-${ri}-${mi}`)?.value;
-  const nk=`${ri+1}-${Math.floor(mi/2)}`;
-  if(!data[nk]) data[nk]={t1:'',t2:'',s1:'-',s2:'-',winner:-1};
-  if(mi%2===0) data[nk].t1=winnerName; else data[nk].t2=winnerName;
-  state.bracketData=data; renderBracketEditor();
-};
-window.rebuildBracket = function() {
-  state.bracketData=autoBracketData(parseInt(document.getElementById('p-format').value)); renderBracketEditor();
-};
+function collectBracket() { const fmt=parseInt(document.getElementById('p-format').value),data={}; for(let ri=0;ri<Math.log2(fmt);ri++){ const count=fmt/Math.pow(2,ri+1); for(let mi=0;mi<count;mi++){ const key=`${ri}-${mi}`,old=state.bracketData?.[key]||{}; data[key]={t1:document.getElementById(`mt1-${ri}-${mi}`)?.value||old.t1||'',t2:document.getElementById(`mt2-${ri}-${mi}`)?.value||old.t2||'',s1:document.getElementById(`ms1-${ri}-${mi}`)?.value||old.s1||'-',s2:document.getElementById(`ms2-${ri}-${mi}`)?.value||old.s2||'-',winner:old.winner??-1}; } } return data; }
+window.setWinner = function(ri,mi,teamIdx) { const data=state.bracketData||{},key=`${ri}-${mi}`; if(!data[key]) return; data[key].winner=teamIdx; const winnerName=document.getElementById(`mt${teamIdx+1}-${ri}-${mi}`)?.value; const nk=`${ri+1}-${Math.floor(mi/2)}`; if(!data[nk]) data[nk]={t1:'',t2:'',s1:'-',s2:'-',winner:-1}; if(mi%2===0) data[nk].t1=winnerName; else data[nk].t2=winnerName; state.bracketData=data; renderBracketEditor(); };
+window.rebuildBracket = function() { state.bracketData=autoBracketData(parseInt(document.getElementById('p-format').value)); renderBracketEditor(); };
 
-// ── Init UI from state ──
 function initUI() {
   window.globalTeamsList = state.globalTeams || [];
   
@@ -668,8 +525,15 @@ function initUI() {
   document.getElementById('s-font').value    = state.fontSize||15;
   document.getElementById('s-accent').value  = state.accent||'#00e5ff';
   document.getElementById('s-opacity').value = state.bgOpacity||0.88;
-  document.getElementById('s-team-font').value = state.teamFont||"'Barlow Condensed', sans-serif"; // Завантажуємо шрифт
+  document.getElementById('s-team-font').value = state.teamFont||"'Barlow Condensed', sans-serif";
   
+  // Встановлюємо кольори для екранів
+  const c = state.colors || defaultState().colors;
+  document.getElementById('c-rank-team').value = c.rankings.team; document.getElementById('c-rank-bg').value = c.rankings.bg; document.getElementById('c-rank-head').value = c.rankings.head;
+  document.getElementById('c-group-team').value = c.groups.team;  document.getElementById('c-group-bg').value = c.groups.bg;  document.getElementById('c-group-head').value = c.groups.head;
+  document.getElementById('c-sched-team').value = c.schedule.team; document.getElementById('c-sched-bg').value = c.schedule.bg; document.getElementById('c-sched-head').value = c.schedule.head;
+  document.getElementById('c-play-team').value = c.playoff.team;  document.getElementById('c-play-bg').value = c.playoff.bg;  document.getElementById('c-play-head').value = c.playoff.head;
+
   syncRange('s-scale','rv-scale'); syncRange('s-font','rv-font'); syncRange('s-opacity','rv-opacity');
   document.getElementById('rank-title-inp').value = state.rankTitle||'';
   document.getElementById('g-count').value = state.groupCount||4;
@@ -682,7 +546,6 @@ function initUI() {
   
   renderGlobalTeams(); renderSchedEditor();
 }
-
 initUI();
 </script>
 </body>
