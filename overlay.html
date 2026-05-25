@@ -16,17 +16,21 @@
 html, body { width:100%; height:100%; background:transparent; overflow:hidden; font-family:'Barlow Condensed',sans-serif; color:var(--text); }
 #overlay-root { position:fixed; inset:0; transform-origin:top left; transform:scale(var(--scale)); pointer-events:none; }
 
-/* Ховаємо неактивні екрани */
-.view { display:none !important; width:100%; height:100%; }
+/* 1. ГЛОБАЛЬНЕ ЦЕНТРУВАННЯ ВСІХ ЕКРАНІВ */
+.view { display:none !important; width:100%; height:100%; align-items:center; justify-content:center; flex-direction:column; }
 .view.active { display:flex !important; }
-#v-groups.active { display:grid !important; } 
+#v-groups.active { display:grid !important; align-content:center; justify-content:center; } 
 #v-playoff.active { display:flex !important; flex-direction: column !important; align-items: center; justify-content: center; }
 
-.team-name-text { font-family: var(--team-font); font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase; }
+/* 2. ЗАХИСТ ВІД ВИХОДУ ТЕКСТУ ЗА РАМКИ */
+.team-name-text { 
+  font-family: var(--team-font); font-weight: 600; letter-spacing: 0.5px; 
+  text-transform: uppercase; word-break: break-word; white-space: normal; line-height: 1.15;
+}
 
 /* RANKINGS */
-#v-rankings { align-items:flex-start; justify-content:flex-start; padding:30px; }
-.rank-card { background:var(--card-bg); border:1px solid var(--border); border-radius:10px; overflow:hidden; min-width:520px; box-shadow:0 8px 40px rgba(0,0,0,0.7); animation:slideIn .4s cubic-bezier(.22,.68,0,1.2); }
+#v-rankings { padding:20px; }
+.rank-card { background:var(--card-bg); border:1px solid var(--border); border-radius:10px; overflow:hidden; min-width:520px; max-width: 95vw; box-shadow:0 8px 40px rgba(0,0,0,0.7); animation:slideIn .4s cubic-bezier(.22,.68,0,1.2); }
 .rank-header { background:linear-gradient(90deg,#081830,#0d3060); padding:10px 18px; display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--accent); }
 .rank-header-title { font-family:'Bebas Neue',sans-serif; font-size:20px; letter-spacing:3px; }
 .rank-header-sub { font-size:11px; color:var(--muted); letter-spacing:1px; }
@@ -39,8 +43,8 @@ html, body { width:100%; height:100%; background:transparent; overflow:hidden; f
 .grp-badge { display:inline-block; padding:2px 9px; border-radius:20px; font-size:11px; font-weight:700; letter-spacing:1px; background:rgba(0,229,255,0.12); color:var(--accent); border:1px solid rgba(0,229,255,0.3); }
 
 /* GROUPS */
-#v-groups { padding:24px; width:100%; height:100%; align-content:center; justify-content:center; }
-.group-card { background:var(--card-bg); border:1px solid var(--border); border-radius:8px; overflow:hidden; min-width:0; animation:slideIn .4s cubic-bezier(.22,.68,0,1.2); box-shadow:0 8px 40px rgba(0,0,0,0.7); font-size:var(--font-size); }
+#v-groups { padding:24px; width:100%; height:100%; }
+.group-card { background:var(--card-bg); border:1px solid var(--border); border-radius:8px; overflow:hidden; min-width:0; max-width: 100%; animation:slideIn .4s cubic-bezier(.22,.68,0,1.2); box-shadow:0 8px 40px rgba(0,0,0,0.7); font-size:var(--font-size); }
 .group-card-head { background:linear-gradient(90deg,#081830,#0d3060); padding:8px 14px; display:flex; align-items:center; gap:10px; border-bottom:2px solid var(--accent); }
 .group-letter { font-family:'Bebas Neue',sans-serif; font-size:34px; line-height:1; color:var(--accent); }
 .group-title { font-size:13px; font-weight:700; }
@@ -51,7 +55,7 @@ html, body { width:100%; height:100%; background:transparent; overflow:hidden; f
 .g-table tr:last-child td { border-bottom:none; }
 .advance-star { color:var(--gold); }
 .pos-n { color:var(--muted); font-size:11px; margin-right:5px; }
-.name-col { text-align:left; white-space:normal !important; word-break:break-word; line-height:1.15; max-width:180px; }
+.name-col { text-align:left; max-width:180px; }
 .group-card.compact-teams .g-table td { padding:4px 8px; font-size:0.88em; }
 .group-card.compact-teams .g-table th { padding:4px 8px; font-size:9px; }
 .group-card.compact-teams .group-letter { font-size:26px; }
@@ -61,30 +65,28 @@ html, body { width:100%; height:100%; background:transparent; overflow:hidden; f
 #v-groups.compact .g-table td, #v-groups.compact .g-table th { padding:4px 8px; font-size:0.9em; }
 
 /* SCHEDULE */
-#v-schedule { align-items:flex-start; padding:24px; }
-.sched-wrap { background:var(--card-bg); border:1px solid var(--border); border-radius:10px; overflow:hidden; min-width:700px; box-shadow:0 8px 40px rgba(0,0,0,0.7); animation:slideIn .4s cubic-bezier(.22,.68,0,1.2); font-size:var(--font-size); }
+#v-schedule { padding:24px; }
+.sched-wrap { background:var(--card-bg); border:1px solid var(--border); border-radius:10px; overflow:hidden; min-width:700px; max-width: 95vw; box-shadow:0 8px 40px rgba(0,0,0,0.7); animation:slideIn .4s cubic-bezier(.22,.68,0,1.2); font-size:var(--font-size); }
 .s-table { width:100%; border-collapse:collapse; }
 .s-table th { background:rgba(0,0,0,0.6); padding:10px 14px; color:var(--accent); font-size:11px; text-transform:uppercase; letter-spacing:1px; }
-.s-table td { padding:9px 14px; border-bottom:1px solid rgba(255,255,255,0.06); }
+.s-table td { padding:9px 14px; border-bottom:1px solid rgba(255,255,255,0.06); word-break: break-word; }
 .s-table tr:last-child td { border-bottom:none; }
 .time-c { color:var(--accent); font-family:'Bebas Neue',sans-serif; font-size:22px; width:90px; }
 .break-r td { background:rgba(0,229,255,0.07); color:var(--accent); font-style:italic; text-align:center; font-size:13px; }
 
-/* PLAYOFF (НОВЕ ОФОРМЛЕННЯ ЗА ФОТО) */
+/* PLAYOFF */
 .playoff-title { font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: #ffffff; letter-spacing: 3px; margin-bottom: 25px; text-transform: uppercase; text-align: center; }
-.bracket-outer { display: flex; gap: 35px; align-items: stretch; justify-content: center; width: 100%; height: calc(100% - 80px); padding: 0 20px; }
-.b-round { display: flex; flex-direction: column; justify-content: space-around; min-width: 250px; flex: 1; height: 100%; }
+.bracket-outer { display: flex; gap: 35px; align-items: stretch; justify-content: center; width: 100%; height: calc(100% - 80px); padding: 0 20px; max-width: 100vw; }
+.b-round { display: flex; flex-direction: column; justify-content: space-around; min-width: 230px; flex: 1; height: 100%; }
 
-.b-match { background: #161a22; border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 0px; overflow: hidden; margin: 6px 0; width: 250px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); animation: slideIn .4s cubic-bezier(.22,.68,0,1.2); }
+.b-match { background: #161a22; border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 0px; overflow: hidden; margin: 6px 0; width: 100%; max-width: 280px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); animation: slideIn .4s cubic-bezier(.22,.68,0,1.2); }
 .b-team { padding: 0 0 0 12px; height: 38px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
 .b-team:last-child { border-bottom: none; }
 .b-team.winner { color: #fff; font-weight: 700; }
 .b-team.loser { color: var(--muted); }
 
-/* Сині спортивні квадрати для рахунку */
-.b-score { display: flex; align-items: center; justify-content: center; width: 42px; height: 100%; background: #0091ea; color: #ffffff; font-family: 'Bebas Neue', sans-serif; font-size: 20px; font-weight: bold; }
+.b-score { display: flex; align-items: center; justify-content: center; min-width: 42px; height: 100%; background: #0091ea; color: #ffffff; font-family: 'Bebas Neue', sans-serif; font-size: 20px; font-weight: bold; }
 
-/* Стиль для фінального матчу з золотою рамкою та внутрішнім написом */
 .b-match.final-match { border: 2px solid #ffd700; box-shadow: 0 0 25px rgba(255, 215, 0, 0.3); }
 .final-match-header { background: rgba(0, 0, 0, 0.3); color: #ffd700; font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-align: center; padding: 4px 0; border-bottom: 1px solid rgba(255, 215, 0, 0.2); text-transform: uppercase; }
 
@@ -98,7 +100,6 @@ html, body { width:100%; height:100%; background:transparent; overflow:hidden; f
 .loader { width:40px; height:40px; border:3px solid rgba(0,229,255,0.2); border-top-color:var(--accent); border-radius:50%; animation:spin .8s linear infinite; }
 #loading-msg { font-family:'Bebas Neue',sans-serif; font-size:16px; letter-spacing:3px; color:var(--accent); }
 
-@annotations spin { to { transform:rotate(360deg); } }
 @keyframes spin { to { transform:rotate(360deg); } }
 @keyframes slideIn { from{opacity:0;transform:translateY(-14px)} to{opacity:1;transform:translateY(0)} }
 </style>
