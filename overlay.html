@@ -6,24 +6,18 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --accent: #00e5ff;
-  --accent2: #ff6b35;
-  --card-bg: rgba(5,12,28,0.88);
-  --border: rgba(0,229,255,0.25);
-  --text: #ffffff;
-  --muted: #6a8fa8;
-  --gold: #ffd700;
-  --font-size: 15px;
-  --scale: 1;
+  --accent: #00e5ff; --accent2: #ff6b35;
+  --card-bg: rgba(5,12,28,0.88); --border: rgba(0,229,255,0.25);
+  --text: #ffffff; --muted: #6a8fa8; --gold: #ffd700;
+  --font-size: 15px; --scale: 1;
 }
-* { box-sizing: border-box; margin:0; padding:0; }
+* { box-sizing:border-box; margin:0; padding:0; }
 html, body { width:100%; height:100%; background:transparent; overflow:hidden; font-family:'Barlow Condensed',sans-serif; color:var(--text); }
-
 #overlay-root { position:fixed; inset:0; transform-origin:top left; transform:scale(var(--scale)); pointer-events:none; }
 .view { display:none; width:100%; height:100%; }
 .view.active { display:flex; }
 
-/* ── RANKINGS ── */
+/* RANKINGS */
 #v-rankings { align-items:flex-start; justify-content:flex-start; padding:30px; }
 .rank-card { background:var(--card-bg); border:1px solid var(--border); border-radius:10px; overflow:hidden; min-width:520px; box-shadow:0 8px 40px rgba(0,0,0,0.7); animation:slideIn .4s cubic-bezier(.22,.68,0,1.2); }
 .rank-header { background:linear-gradient(90deg,#081830,#0d3060); padding:10px 18px; display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--accent); }
@@ -37,7 +31,7 @@ html, body { width:100%; height:100%; background:transparent; overflow:hidden; f
 .pts-col { font-family:'Bebas Neue',sans-serif; font-size:18px; color:var(--accent2); text-align:right; }
 .grp-badge { display:inline-block; padding:2px 9px; border-radius:20px; font-size:11px; font-weight:700; letter-spacing:1px; background:rgba(0,229,255,0.12); color:var(--accent); border:1px solid rgba(0,229,255,0.3); }
 
-/* ── GROUPS ── */
+/* GROUPS */
 #v-groups { align-items:flex-start; padding:24px; flex-wrap:wrap; gap:16px; }
 .group-card { background:var(--card-bg); border:1px solid var(--border); border-radius:10px; overflow:hidden; min-width:280px; flex:1; animation:slideIn .4s cubic-bezier(.22,.68,0,1.2); box-shadow:0 8px 40px rgba(0,0,0,0.7); font-size:var(--font-size); }
 .group-card-head { background:linear-gradient(90deg,#081830,#0d3060); padding:8px 14px; display:flex; align-items:center; gap:10px; border-bottom:2px solid var(--accent); }
@@ -53,7 +47,7 @@ html, body { width:100%; height:100%; background:transparent; overflow:hidden; f
 .advance-star { color:var(--gold); }
 .pos-n { color:var(--muted); font-size:11px; margin-right:5px; }
 
-/* ── SCHEDULE ── */
+/* SCHEDULE */
 #v-schedule { align-items:flex-start; padding:24px; }
 .sched-wrap { background:var(--card-bg); border:1px solid var(--border); border-radius:10px; overflow:hidden; min-width:700px; box-shadow:0 8px 40px rgba(0,0,0,0.7); animation:slideIn .4s cubic-bezier(.22,.68,0,1.2); font-size:var(--font-size); }
 .s-table { width:100%; border-collapse:collapse; }
@@ -63,7 +57,7 @@ html, body { width:100%; height:100%; background:transparent; overflow:hidden; f
 .time-c { color:var(--accent); font-family:'Bebas Neue',sans-serif; font-size:22px; width:90px; }
 .break-r td { background:rgba(0,229,255,0.07); color:var(--accent); font-style:italic; text-align:center; font-size:13px; }
 
-/* ── PLAYOFF ── */
+/* PLAYOFF */
 #v-playoff { align-items:flex-start; padding:24px; overflow-x:auto; }
 .bracket-outer { display:flex; gap:6px; align-items:stretch; animation:slideIn .4s cubic-bezier(.22,.68,0,1.2); }
 .b-round { display:flex; flex-direction:column; justify-content:space-around; min-width:190px; flex:1; }
@@ -80,9 +74,11 @@ html, body { width:100%; height:100%; background:transparent; overflow:hidden; f
 .champ-lbl { font-family:'Bebas Neue',sans-serif; font-size:15px; letter-spacing:3px; color:var(--gold); margin:6px 0; }
 .champ-name { font-size:16px; font-weight:700; color:#fff; }
 
-/* ── LOADING ── */
-#loading { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(4,8,15,0.95); z-index:999; flex-direction:column; gap:14px; }
+/* LOADING */
+#loading { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(4,8,15,0.95); z-index:999; flex-direction:column; gap:14px; transition:opacity .5s; }
 .loader { width:40px; height:40px; border:3px solid rgba(0,229,255,0.2); border-top-color:var(--accent); border-radius:50%; animation:spin .8s linear infinite; }
+#loading-msg { font-family:'Bebas Neue',sans-serif; font-size:16px; letter-spacing:3px; color:var(--accent); }
+
 @keyframes spin { to { transform:rotate(360deg); } }
 @keyframes slideIn { from{opacity:0;transform:translateY(-14px)} to{opacity:1;transform:translateY(0)} }
 </style>
@@ -91,7 +87,7 @@ html, body { width:100%; height:100%; background:transparent; overflow:hidden; f
 
 <div id="loading">
   <div class="loader"></div>
-  <div style="font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:3px;color:var(--accent)">ПІДКЛЮЧЕННЯ...</div>
+  <div id="loading-msg">ПІДКЛЮЧЕННЯ...</div>
 </div>
 
 <div id="overlay-root">
@@ -107,9 +103,7 @@ html, body { width:100%; height:100%; background:transparent; overflow:hidden; f
       </table>
     </div>
   </div>
-
   <div class="view" id="v-groups"></div>
-
   <div class="view" id="v-schedule">
     <div class="sched-wrap">
       <table class="s-table">
@@ -118,16 +112,14 @@ html, body { width:100%; height:100%; background:transparent; overflow:hidden; f
       </table>
     </div>
   </div>
-
   <div class="view" id="v-playoff">
     <div class="bracket-outer" id="bracket-outer"></div>
   </div>
 </div>
 
-<!-- Firebase -->
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
-import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
+import { initializeApp }  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getDatabase, ref, onValue, get } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyCVB0z7m3nOdrjId9FQPmxqxDb8Y1fH7lw",
@@ -143,24 +135,103 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db  = getDatabase(app);
 
-// ── Listen to state ──
+function hideLoading() {
+  const el = document.getElementById('loading');
+  el.style.opacity = '0';
+  setTimeout(() => el.style.display = 'none', 500);
+}
+
+function showError(msg) {
+  document.getElementById('loading-msg').textContent = msg;
+  document.querySelector('.loader').style.display = 'none';
+}
+
+// Таймаут — якщо за 5 секунд немає відповіді, показуємо дефолт
+const timeout = setTimeout(() => {
+  console.warn('Firebase timeout — showing default state');
+  hideLoading();
+  applyState(defaultState());
+}, 5000);
+
+// Слухаємо Firebase в реальному часі
 onValue(ref(db, 'padel/state'), (snap) => {
+  clearTimeout(timeout);
   const state = snap.val();
-  if (!state) return;
-  document.getElementById('loading').style.display = 'none';
-  applyState(state);
+  hideLoading();
+  if (state) {
+    applyState(state);
+  } else {
+    // База порожня — показуємо дефолтний стан
+    applyState(defaultState());
+  }
+}, (error) => {
+  clearTimeout(timeout);
+  console.error('Firebase error:', error);
+  showError('ПОМИЛКА З\'ЄДНАННЯ');
+  // Все одно показуємо дефолт через 2 сек
+  setTimeout(() => { hideLoading(); applyState(defaultState()); }, 2000);
 });
 
+// ── Default state (якщо Firebase порожній) ──
+function defaultState() {
+  return {
+    view: 'rankings', scale: 1, fontSize: 15, accent: '#00e5ff', bgOpacity: 0.88,
+    rankTitle: 'ГРАВЦІ (ЧОЛОВІКИ) 🇺🇦',
+    rankings: [
+      {seed:1, players:'Artem Yatsenko / Slava Sedoplatov',  group:'A', pts:13420},
+      {seed:2, players:'Fedor Modnikov / Volodymyr Yelizarov', group:'B', pts:12440},
+      {seed:3, players:'Ivan Petrenko / Mykhailo Kovalenko',  group:'C', pts:11800},
+      {seed:4, players:'Oleh Bondarchuk / Serhii Kravets',   group:'D', pts:11200},
+    ],
+    groupCount:4, teamCount:4,
+    groups: autoGroups(4,4),
+    schedHeaders: ['Час','Корт 1','Корт 2','Корт 3','Корт 4'],
+    schedRows: [
+      {time:'09:00', cells:['A1—A2','B1—B2','C1—C2','D1—D2'], isBreak:false},
+      {time:'09:40', cells:['A3—A4','B3—B4','C3—C4','D3—D4'], isBreak:false},
+      {time:'10:20', cells:['☕ ТЕХНІЧНА ПЕРЕРВА'], isBreak:true},
+      {time:'10:40', cells:['A1—A3','B1—B3','C1—C3','D1—D3'], isBreak:false},
+    ],
+    bracketFormat: 4,
+    bracketData: autoBracketData(4),
+    champion: '— — —',
+  };
+}
+
+function autoGroups(gc, tc) {
+  const L = 'ABCDEFGH';
+  return Array.from({length:gc}, (_,gi) => ({
+    letter: L[gi],
+    teams: Array.from({length:tc}, (_,ti) => ({
+      name:`${L[gi]}${ti+1} — Команда`, p:0, w:0, l:0, gd:'0:0', pts:0
+    }))
+  }));
+}
+
+function autoBracketData(fmt) {
+  const data={}, L='ABCDEFGH';
+  for(let ri=0; ri<Math.log2(fmt); ri++){
+    const count = fmt/Math.pow(2,ri+1);
+    for(let mi=0; mi<count; mi++){
+      data[`${ri}-${mi}`] = {
+        t1: ri===0 ? `${L[mi*2]||'T'}1` : `Переможець М${ri}.${mi*2+1}`,
+        t2: ri===0 ? `${L[mi*2+1]||'T'}2` : `Переможець М${ri}.${mi*2+2}`,
+        s1:'-', s2:'-', winner:-1
+      };
+    }
+  }
+  return data;
+}
+
+// ── Apply state to DOM ──
 function applyState(s) {
-  // CSS vars
   document.documentElement.style.setProperty('--scale',     s.scale     || 1);
-  document.documentElement.style.setProperty('--font-size', (s.fontSize || 15) + 'px');
+  document.documentElement.style.setProperty('--font-size', (s.fontSize || 15)+'px');
   document.documentElement.style.setProperty('--accent',    s.accent    || '#00e5ff');
   document.documentElement.style.setProperty('--card-bg',   `rgba(5,12,28,${s.bgOpacity||0.88})`);
 
-  // Switch view
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  const vEl = document.getElementById('v-' + (s.view || 'rankings'));
+  const vEl = document.getElementById('v-'+(s.view||'rankings'));
   if (vEl) vEl.classList.add('active');
 
   renderRankings(s);
@@ -169,7 +240,6 @@ function applyState(s) {
   renderPlayoff(s);
 }
 
-// ── Rankings ──
 function renderRankings(s) {
   document.getElementById('rank-title').textContent = s.rankTitle || 'ГРАВЦІ 🇺🇦';
   const tbody = document.getElementById('rank-body');
@@ -181,12 +251,11 @@ function renderRankings(s) {
   });
 }
 
-// ── Groups ──
 function renderGroups(s) {
   const view = document.getElementById('v-groups');
   view.innerHTML = '';
   const L = 'ABCDEFGH';
-  (s.groups || []).forEach((grp, gi) => {
+  (s.groups || autoGroups(s.groupCount||4, s.teamCount||4)).forEach((grp, gi) => {
     const letter = L[gi] || String.fromCharCode(65+gi);
     const card = document.createElement('div');
     card.className = 'group-card';
@@ -212,47 +281,42 @@ function renderGroups(s) {
   });
 }
 
-// ── Schedule ──
 function renderSchedule(s) {
   const thead = document.getElementById('sched-head');
   thead.innerHTML = '';
   (s.schedHeaders || ['Час','Корт 1','Корт 2','Корт 3','Корт 4']).forEach(h => {
-    const th = document.createElement('th');
-    th.textContent = h;
-    thead.appendChild(th);
+    const th = document.createElement('th'); th.textContent = h; thead.appendChild(th);
   });
   const tbody = document.getElementById('sched-body');
   tbody.innerHTML = '';
-  const cols = (s.schedHeaders || []).length;
+  const cols = (s.schedHeaders||['','','','','']).length;
   (s.schedRows || []).forEach(row => {
     const tr = document.createElement('tr');
     if (row.isBreak) {
       tr.className = 'break-r';
       tr.innerHTML = `<td class="time-c">${row.time}</td><td colspan="${cols-1}">${row.cells[0]}</td>`;
     } else {
-      tr.innerHTML = `<td class="time-c">${row.time}</td>` + row.cells.map(c => `<td>${c}</td>`).join('');
+      tr.innerHTML = `<td class="time-c">${row.time}</td>` + row.cells.map(c=>`<td>${c}</td>`).join('');
     }
     tbody.appendChild(tr);
   });
 }
 
-// ── Playoff ──
 function renderPlayoff(s) {
   const outer = document.getElementById('bracket-outer');
   outer.innerHTML = '';
   const fmt = s.bracketFormat || 4;
-  const data = s.bracketData || {};
-  const roundLabels = fmt===8 ? ['1/8 ФІНАЛУ','1/4 ФІНАЛУ','1/2 ФІНАЛУ','ФІНАЛ']
-                   : fmt===4 ? ['1/4 ФІНАЛУ','1/2 ФІНАЛУ','ФІНАЛ']
-                   :           ['1/2 ФІНАЛУ','ФІНАЛ'];
-
-  roundLabels.forEach((label, ri) => {
+  const data = s.bracketData || autoBracketData(fmt);
+  const labels = fmt===8 ? ['1/8 ФІНАЛУ','1/4 ФІНАЛУ','1/2 ФІНАЛУ','ФІНАЛ']
+               : fmt===4 ? ['1/4 ФІНАЛУ','1/2 ФІНАЛУ','ФІНАЛ']
+               :           ['1/2 ФІНАЛУ','ФІНАЛ'];
+  labels.forEach((label, ri) => {
     const rd = document.createElement('div');
     rd.className = 'b-round';
     rd.innerHTML = `<div class="b-round-head">${label}</div>`;
     const count = fmt / Math.pow(2, ri+1);
-    for (let mi = 0; mi < count; mi++) {
-      const m = data[`${ri}-${mi}`] || { t1:'—', t2:'—', s1:'-', s2:'-', winner:-1 };
+    for (let mi=0; mi<count; mi++) {
+      const m = data[`${ri}-${mi}`] || {t1:'—',t2:'—',s1:'-',s2:'-',winner:-1};
       const mc = document.createElement('div');
       mc.className = 'b-match';
       mc.innerHTML = `
@@ -265,7 +329,7 @@ function renderPlayoff(s) {
         </div>`;
       rd.appendChild(mc);
     }
-    if (ri === roundLabels.length - 1) {
+    if (ri === labels.length-1) {
       const cc = document.createElement('div');
       cc.className = 'champ-card';
       cc.innerHTML = `<div class="champ-trophy">🏆</div><div class="champ-lbl">ЧЕМПІОН</div><div class="champ-name">${s.champion||'— — —'}</div>`;
