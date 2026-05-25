@@ -16,24 +16,19 @@
 html{font-size:14px;}
 body{font-family:'Barlow Condensed',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;}
 
-/* NAV */
 .top-nav{position:sticky;top:0;z-index:100;background:rgba(4,8,15,.97);border-bottom:1px solid var(--border);backdrop-filter:blur(16px);display:flex;align-items:center;padding:0 12px;gap:4px;overflow-x:auto;}
 .logo{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--accent);letter-spacing:3px;padding:12px 12px 12px 4px;border-right:1px solid var(--border);margin-right:6px;white-space:nowrap;}
 .tab{padding:13px 14px;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--muted);border-bottom:2px solid transparent;cursor:pointer;white-space:nowrap;transition:all .18s;flex-shrink:0;}
 .tab:hover{color:var(--text);}
 .tab.active{color:var(--accent);border-bottom-color:var(--accent);}
 
-/* PAGES */
 .page{display:none;padding:16px;max-width:900px;margin:0 auto;}
 .page.active{display:block;}
 .sec-title{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;color:var(--accent);margin-bottom:16px;}
-
-/* CARD */
 .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:14px;}
 .card-title{font-size:11px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;}
 
-/* BUTTONS */
-.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border:none;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;letter-spacing:.5px;cursor:pointer;transition:all .15s;}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 16px;border:none;border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .15s;}
 .btn-primary{background:var(--accent);color:#000;}
 .btn-primary:hover{background:#33eeff;transform:translateY(-1px);}
 .btn-danger{background:rgba(255,68,85,.14);color:var(--red);border:1px solid rgba(255,68,85,.3);}
@@ -42,17 +37,15 @@ body{font-family:'Barlow Condensed',sans-serif;background:var(--bg);color:var(--
 .btn-outline:hover{background:rgba(0,229,255,.08);}
 .btn-sm{padding:6px 12px;font-size:12px;}
 
-/* VIEW SWITCHER */
 .view-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
 .view-btn{padding:14px 10px;border-radius:10px;background:var(--card2);border:2px solid var(--border);text-align:center;cursor:pointer;transition:all .18s;font-weight:700;font-size:13px;}
 .view-btn:hover{border-color:var(--accent);color:var(--accent);}
 .view-btn.active{border-color:var(--accent);background:rgba(0,229,255,.1);color:var(--accent);}
 .view-btn .icon{font-size:22px;display:block;margin-bottom:4px;}
 
-/* FIELDS & SELECTS */
 .field{margin-bottom:12px;}
 .field label{display:block;font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;}
-.field input,.field select,.field textarea, select.dyn-select{width:100%;padding:9px 12px;background:rgba(255,255,255,.06);color:var(--text);border:1px solid var(--border);border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-size:14px;transition:border-color .15s;}
+.field input,.field select,.field textarea, select.dyn-select{width:100%;padding:9px 12px;background:rgba(255,255,255,.06);color:var(--text);border:1px solid var(--border);border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-size:14px;}
 .field input:focus,.field select:focus, select.dyn-select:focus{outline:none;border-color:var(--accent);}
 .field input[type=range]{padding:4px 0;background:transparent;border:none;}
 .field input[type=color]{padding:2px;height:36px;cursor:pointer;}
@@ -61,54 +54,49 @@ select.dyn-select option { background: var(--bg); color: #fff; }
 .range-row{display:flex;align-items:center;gap:10px;}
 .range-val{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--accent);min-width:40px;text-align:right;}
 
-/* НОВІ КОЛЬОРОВІ ПІКЕРИ */
 .color-picker-sm { width:100%; height:32px; padding:2px; cursor:pointer; background:transparent; border:1px solid var(--border); border-radius:4px; }
 
-/* RANKING ROWS */
 .r-row{display:grid;grid-template-columns:40px 1fr 50px 70px 32px;gap:6px;align-items:center;margin-bottom:6px;}
 .r-row input, .r-row select{font-size:13px;}
 .del-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;transition:color .15s;}
 .del-btn:hover{color:var(--red);}
 
-/* SCHED */
 .sched-row{display:grid;gap:5px;align-items:center;margin-bottom:6px;grid-template-columns:70px 1fr 1fr 1fr 1fr 32px;}
 .sched-row.is-break{grid-template-columns:70px 1fr 32px;}
 .sched-row input{font-size:12px;}
 
-/* BRACKET */
 .match-editor{background:var(--card2);border-radius:10px;border:1px solid var(--border);padding:12px;margin-bottom:10px;}
 .match-editor-title{font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:8px;text-transform:uppercase;}
 .match-teams{display:grid;grid-template-columns:1fr 60px 36px;gap:6px;margin-bottom:4px;align-items:center;}
 .match-teams input, .match-teams select{font-size:13px;}
-.win-btn{padding:5px 8px;border-radius:6px;font-size:11px;font-weight:700;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .15s;}
+.win-btn{padding:5px 8px;border-radius:6px;font-size:11px;font-weight:700;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;}
 .win-btn.active{background:rgba(0,229,255,.15);color:var(--accent);border-color:var(--accent);}
 
-/* GROUPS */
 .grp-section{margin-bottom:14px;}
 .grp-section-title{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--accent);letter-spacing:1px;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
 .team-stat-row{display:grid;grid-template-columns:1fr 40px 40px 40px 60px 50px;gap:5px;align-items:center;margin-bottom:5px;}
 .team-stat-row input, .team-stat-row select{font-size:12px;}
 .groups-conf{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
 
-/* STATUS BAR */
+/* STATUS BAR ТА НОВИЙ ПЕРЕМИКАЧ */
 .status-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(4,8,15,.97);border-top:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(10px);z-index:200;}
 .status-dot{width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block;margin-right:6px;animation:pulse 2s infinite;}
 .status-dot.offline{background:var(--red);animation:none;}
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 .status-text{font-size:12px;color:var(--muted);}
-.push-btn{padding:10px 24px;background:var(--accent);color:#000;border:none;border-radius:8px;font-weight:700;font-size:14px;cursor:pointer;letter-spacing:.5px;font-family:'Bebas Neue',sans-serif;letter-spacing:1px;}
-.push-btn:active{transform:scale(.97);}
-.push-btn:disabled{background:#1a3a4a;color:var(--muted);cursor:not-allowed;}
 
-/* LINKS CARD */
+/* Дизайн перемикача (Toggle) */
+.switch { position: relative; display: inline-block; width: 48px; height: 26px; }
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,68,85,.2); transition: .3s; border-radius: 34px; border: 1px solid var(--red); }
+.slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: #fff; transition: .3s; border-radius: 50%; }
+input:checked + .slider { background-color: rgba(0,196,106,.2); border-color: var(--green); }
+input:checked + .slider:before { transform: translateX(22px); background-color: var(--green); }
+.vis-wrap { display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.5); padding: 6px 14px; border-radius: 20px; border: 1px solid var(--border); }
+.vis-text { font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 1px; transition: color .3s; }
+
 .link-box{background:rgba(0,229,255,.06);border:1px solid var(--border);border-radius:10px;padding:14px;font-size:13px;line-height:2;}
 .link-box a{color:var(--accent);word-break:break-all;}
-code{background:rgba(255,255,255,.08);padding:2px 6px;border-radius:4px;font-size:12px;color:var(--accent2);}
-
-@media(max-width:600px){
-  .r-row{grid-template-columns:36px 1fr 44px 60px 28px;}
-  .team-stat-row{grid-template-columns:1fr 36px 36px 36px 52px 44px;}
-}
 </style>
 </head>
 <body>
@@ -138,16 +126,8 @@ code{background:rgba(255,255,255,.08);padding:2px 6px;border-radius:4px;font-siz
   <div class="card">
     <div class="card-title">🔗 Посилання</div>
     <div class="link-box">
-      <div>📺 <b>OBS Overlay:</b><br>
-        <a href="https://mykola-8.github.io/padel-league/overlay.html" target="_blank">
-          https://mykola-8.github.io/padel-league/overlay.html
-        </a>
-      </div>
-      <div style="margin-top:10px">🎮 <b>Контролер:</b><br>
-        <a href="https://mykola-8.github.io/padel-league/controller.html" target="_blank">
-          https://mykola-8.github.io/padel-league/controller.html
-        </a>
-      </div>
+      <div>📺 <b>OBS Overlay:</b><br><a href="https://mykola-8.github.io/padel-league/overlay.html" target="_blank">https://mykola-8.github.io/padel-league/overlay.html</a></div>
+      <div style="margin-top:10px">🎮 <b>Контролер:</b><br><a href="https://mykola-8.github.io/padel-league/controller.html" target="_blank">https://mykola-8.github.io/padel-league/controller.html</a></div>
     </div>
   </div>
 </div>
@@ -171,146 +151,58 @@ code{background:rgba(255,255,255,.08);padding:2px 6px;border-radius:4px;font-siz
   <div class="sec-title">Вигляд оверлею</div>
   <div class="card">
     <div class="card-title">Масштаб та розмір</div>
-    <div class="field">
-      <label>Загальний масштаб оверлею</label>
-      <div class="range-row">
-        <input type="range" id="s-scale" min="0.4" max="2" step="0.05" value="1" oninput="syncRange('s-scale','rv-scale')">
-        <span class="range-val" id="rv-scale">1×</span>
-      </div>
-    </div>
-    <div class="field">
-      <label>Розмір тексту (px)</label>
-      <div class="range-row">
-        <input type="range" id="s-font" min="10" max="28" step="1" value="15" oninput="syncRange('s-font','rv-font')">
-        <span class="range-val" id="rv-font">15px</span>
-      </div>
-    </div>
-    <div class="field">
-      <label>Шрифт назв команд</label>
-      <select id="s-team-font">
-        <option value="'Barlow Condensed', sans-serif">Barlow Condensed (Стандарт)</option>
-        <option value="'Bebas Neue', sans-serif">Bebas Neue (Широкий)</option>
-        <option value="'Montserrat', sans-serif">Montserrat (Сучасний)</option>
-        <option value="'Oswald', sans-serif">Oswald (Високий)</option>
-      </select>
-    </div>
+    <div class="field"><label>Загальний масштаб оверлею</label><div class="range-row"><input type="range" id="s-scale" min="0.4" max="2" step="0.05" value="1" oninput="syncRange('s-scale','rv-scale')"><span class="range-val" id="rv-scale">1×</span></div></div>
+    <div class="field"><label>Розмір тексту (px)</label><div class="range-row"><input type="range" id="s-font" min="10" max="28" step="1" value="15" oninput="syncRange('s-font','rv-font')"><span class="range-val" id="rv-font">15px</span></div></div>
+    <div class="field"><label>Шрифт назв команд</label><select id="s-team-font"><option value="'Barlow Condensed', sans-serif">Barlow Condensed (Стандарт)</option><option value="'Bebas Neue', sans-serif">Bebas Neue (Широкий)</option><option value="'Montserrat', sans-serif">Montserrat (Сучасний)</option><option value="'Oswald', sans-serif">Oswald (Високий)</option></select></div>
   </div>
 
   <div class="card">
     <div class="card-title">Індивідуальні кольори екранів</div>
-    
-    <div class="field">
-      <label>Загальний Акцент (лінії, обведення)</label>
-      <input type="color" id="s-accent" value="#00e5ff" style="margin-bottom:15px">
-      <label>Прозорість фону таблиць</label>
-      <div class="range-row" style="margin-bottom:15px">
-        <input type="range" id="s-opacity" min="0.3" max="1" step="0.05" value="0.88" oninput="syncRange('s-opacity','rv-opacity')">
-        <span class="range-val" id="rv-opacity">88%</span>
-      </div>
-    </div>
-
+    <div class="field"><label>Загальний Акцент (лінії, обведення)</label><input type="color" id="s-accent" value="#00e5ff" style="margin-bottom:15px"><label>Прозорість фону таблиць</label><div class="range-row" style="margin-bottom:15px"><input type="range" id="s-opacity" min="0.3" max="1" step="0.05" value="0.88" oninput="syncRange('s-opacity','rv-opacity')"><span class="range-val" id="rv-opacity">88%</span></div></div>
     <div style="display:grid; grid-template-columns:70px 1fr 1fr 1fr; gap:8px; align-items:center; background:var(--card2); padding:10px; border-radius:8px; border:1px solid var(--border);">
-      <div style="font-size:10px; color:var(--muted); text-transform:uppercase;">Екран</div>
-      <div style="font-size:10px; color:var(--muted); text-transform:uppercase; text-align:center;">Команди</div>
-      <div style="font-size:10px; color:var(--muted); text-transform:uppercase; text-align:center;">Таблиця</div>
-      <div style="font-size:10px; color:var(--muted); text-transform:uppercase; text-align:center;">Шапка</div>
-
-      <div style="font-size:12px; font-weight:bold;">Рейтинг</div>
-      <input type="color" id="c-rank-team" class="color-picker-sm">
-      <input type="color" id="c-rank-bg" class="color-picker-sm">
-      <input type="color" id="c-rank-head" class="color-picker-sm">
-
-      <div style="font-size:12px; font-weight:bold;">Групи</div>
-      <input type="color" id="c-group-team" class="color-picker-sm">
-      <input type="color" id="c-group-bg" class="color-picker-sm">
-      <input type="color" id="c-group-head" class="color-picker-sm">
-
-      <div style="font-size:12px; font-weight:bold;">Розклад</div>
-      <input type="color" id="c-sched-team" class="color-picker-sm">
-      <input type="color" id="c-sched-bg" class="color-picker-sm">
-      <input type="color" id="c-sched-head" class="color-picker-sm">
-
-      <div style="font-size:12px; font-weight:bold;">Плей-оф</div>
-      <input type="color" id="c-play-team" class="color-picker-sm">
-      <input type="color" id="c-play-bg" class="color-picker-sm">
-      <input type="color" id="c-play-head" class="color-picker-sm">
+      <div style="font-size:10px; color:var(--muted); text-transform:uppercase;">Екран</div><div style="font-size:10px; color:var(--muted); text-transform:uppercase; text-align:center;">Команди</div><div style="font-size:10px; color:var(--muted); text-transform:uppercase; text-align:center;">Таблиця</div><div style="font-size:10px; color:var(--muted); text-transform:uppercase; text-align:center;">Шапка</div>
+      <div style="font-size:12px; font-weight:bold;">Рейтинг</div><input type="color" id="c-rank-team" class="color-picker-sm"><input type="color" id="c-rank-bg" class="color-picker-sm"><input type="color" id="c-rank-head" class="color-picker-sm">
+      <div style="font-size:12px; font-weight:bold;">Групи</div><input type="color" id="c-group-team" class="color-picker-sm"><input type="color" id="c-group-bg" class="color-picker-sm"><input type="color" id="c-group-head" class="color-picker-sm">
+      <div style="font-size:12px; font-weight:bold;">Розклад</div><input type="color" id="c-sched-team" class="color-picker-sm"><input type="color" id="c-sched-bg" class="color-picker-sm"><input type="color" id="c-sched-head" class="color-picker-sm">
+      <div style="font-size:12px; font-weight:bold;">Плей-оф</div><input type="color" id="c-play-team" class="color-picker-sm"><input type="color" id="c-play-bg" class="color-picker-sm"><input type="color" id="c-play-head" class="color-picker-sm">
     </div>
   </div>
 </div>
 
 <div class="page" id="page-rankings">
   <div class="sec-title">Таблиця рейтингу</div>
-  <div class="card">
-    <div class="card-title">Заголовок таблиці</div>
-    <div class="field"><input type="text" id="rank-title-inp" value="ГРАВЦІ (ЧОЛОВІКИ) 🇺🇦"></div>
-  </div>
-  <div class="card">
-    <div class="card-title">Команди — SEED · Гравці · Група · Рейтинг</div>
-    <div id="rank-rows"></div>
-    <button class="btn btn-primary btn-sm" onclick="addRankRow()">+ Додати команду</button>
-  </div>
+  <div class="card"><div class="card-title">Заголовок таблиці</div><div class="field"><input type="text" id="rank-title-inp" value="ГРАВЦІ (ЧОЛОВІКИ) 🇺🇦"></div></div>
+  <div class="card"><div class="card-title">Команди — SEED · Гравці · Група · Рейтинг</div><div id="rank-rows"></div><button class="btn btn-primary btn-sm" onclick="addRankRow()">+ Додати команду</button></div>
 </div>
 
 <div class="page" id="page-groups">
   <div class="sec-title">Групи</div>
-  <div class="card">
-    <div class="card-title">Конфігурація</div>
-    <div class="groups-conf">
-      <div class="field" style="margin:0;flex:1"><label>Груп</label>
-        <select id="g-count" onchange="rebuildGroups()">
-          <option value="2">2</option><option value="3">3</option>
-          <option value="4" selected>4</option><option value="6">6</option><option value="8">8</option>
-        </select>
-      </div>
-      <div class="field" style="margin:0;flex:1"><label>Команд у групі</label>
-        <select id="g-teams" onchange="rebuildGroups()">
-          <option value="3">3</option><option value="4" selected>4</option>
-          <option value="5">5</option><option value="6">6</option>
-        </select>
-      </div>
-    </div>
-  </div>
+  <div class="card"><div class="card-title">Конфігурація</div><div class="groups-conf"><div class="field" style="margin:0;flex:1"><label>Груп</label><select id="g-count" onchange="rebuildGroups()"><option value="2">2</option><option value="3">3</option><option value="4" selected>4</option><option value="6">6</option><option value="8">8</option></select></div><div class="field" style="margin:0;flex:1"><label>Команд у групі</label><select id="g-teams" onchange="rebuildGroups()"><option value="3">3</option><option value="4" selected>4</option><option value="5">5</option><option value="6">6</option></select></div></div></div>
   <div id="group-editor"></div>
 </div>
 
 <div class="page" id="page-schedule">
   <div class="sec-title">Розклад ігор</div>
-  <div class="card">
-    <div class="card-title">Заголовки колонок</div>
-    <div id="sched-headers" style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:6px;"></div>
-  </div>
-  <div class="card">
-    <div class="card-title">Рядки (Час · Корт 1–4)</div>
-    <div id="sched-rows"></div>
-    <div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;">
-      <button class="btn btn-primary btn-sm" onclick="addSchedRow(false)">+ Гра</button>
-      <button class="btn btn-outline btn-sm" onclick="addSchedRow(true)">+ Перерва</button>
-    </div>
-  </div>
+  <div class="card"><div class="card-title">Заголовки колонок</div><div id="sched-headers" style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:6px;"></div></div>
+  <div class="card"><div class="card-title">Рядки (Час · Корт 1–4)</div><div id="sched-rows"></div><div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;"><button class="btn btn-primary btn-sm" onclick="addSchedRow(false)">+ Гра</button><button class="btn btn-outline btn-sm" onclick="addSchedRow(true)">+ Перерва</button></div></div>
 </div>
 
 <div class="page" id="page-playoff">
   <div class="sec-title">Плей-оф сітка</div>
-  <div class="card">
-    <div class="card-title">Формат</div>
-    <div class="field">
-      <select id="p-format" onchange="rebuildBracket()">
-        <option value="8">1/8 → Фінал (16 команд)</option>
-        <option value="4" selected>1/4 → Фінал (8 команд)</option>
-        <option value="2">1/2 → Фінал (4 команди)</option>
-      </select>
-    </div>
-  </div>
+  <div class="card"><div class="card-title">Формат</div><div class="field"><select id="p-format" onchange="rebuildBracket()"><option value="8">1/8 → Фінал (16 команд)</option><option value="4" selected>1/4 → Фінал (8 команд)</option><option value="2">1/2 → Фінал (4 команди)</option></select></div></div>
   <div id="bracket-editor"></div>
-  <div class="card">
-    <div class="card-title">🏆 Чемпіон</div>
-    <div class="field"><input type="text" id="champion-inp" value="— — —"></div>
-  </div>
+  <div class="card"><div class="card-title">🏆 Чемпіон</div><div class="field"><input type="text" id="champion-inp" value="— — —"></div></div>
 </div>
 
 <div class="status-bar">
   <div><span class="status-dot" id="status-dot"></span><span class="status-text" id="status-text">Підключення...</span></div>
-  <button class="push-btn" id="push-btn" onclick="pushState()" disabled>📡 НАДІСЛАТИ</button>
+  <div class="vis-wrap">
+    <span class="vis-text" id="vis-text" style="color:var(--green)">В ЕФІРІ</span>
+    <label class="switch">
+      <input type="checkbox" id="visibility-toggle" checked onchange="toggleVisibility()">
+      <span class="slider"></span>
+    </label>
+  </div>
 </div>
 <div style="height:60px"></div>
 
@@ -340,7 +232,6 @@ onValue(ref(db, '.info/connected'), snap => {
   connected = snap.val() === true;
   document.getElementById('status-dot').className = 'status-dot' + (connected ? '' : ' offline');
   document.getElementById('status-text').textContent = connected ? '🟢 Firebase підключено' : '🔴 Немає з\'єднання';
-  document.getElementById('push-btn').disabled = !connected;
 });
 
 onValue(stateRef, snap => {
@@ -348,23 +239,39 @@ onValue(stateRef, snap => {
   if (val) { state = val; initUI(); }
 }, { onlyOnce: true });
 
+// СИСТЕМА АВТОЗБЕРЕЖЕННЯ
+let saveTimeout;
+window.autoSave = function() {
+  clearTimeout(saveTimeout);
+  document.getElementById('status-text').textContent = '⏳ Збереження...';
+  saveTimeout = setTimeout(() => { pushState(); }, 500); // зберігає через 0.5с після закінчення вводу
+};
+
+// Слухаємо абсолютно всі зміни тексту і списків
+document.addEventListener('input', (e) => { if(e.target.id !== 'visibility-toggle') autoSave(); });
+document.addEventListener('change', (e) => { if(e.target.id !== 'visibility-toggle') autoSave(); });
+
+window.toggleVisibility = function() {
+  const isChecked = document.getElementById('visibility-toggle').checked;
+  const textEl = document.getElementById('vis-text');
+  if (isChecked) { textEl.textContent = 'В ЕФІРІ'; textEl.style.color = 'var(--green)'; } 
+  else { textEl.textContent = 'ПРИХОВАНО'; textEl.style.color = 'var(--red)'; }
+  pushState(); // Відправляємо команду миттєво
+};
+
 window.pushState = async function() {
-  const btn = document.getElementById('push-btn');
-  btn.disabled = true; btn.textContent = '⏳ НАДСИЛАЮ...';
   const s = collectState();
   try {
     await set(stateRef, s);
     document.getElementById('status-text').textContent = '✅ Оновлено о ' + new Date().toLocaleTimeString();
-    btn.textContent = '✅ НАДІСЛАНО';
-    setTimeout(() => { btn.textContent = '📡 НАДІСЛАТИ'; btn.disabled = !connected; }, 1500);
   } catch(e) {
     document.getElementById('status-text').textContent = '❌ Помилка: ' + e.message;
-    btn.textContent = '📡 НАДІСЛАТИ'; btn.disabled = false;
   }
 };
 
 function defaultState() {
   return {
+    isVisible: true,
     globalTeams: ['Artem Yatsenko / Slava Sedoplatov', 'Fedor Modnikov / Volodymyr Yelizarov'],
     view: 'rankings', scale: 1, fontSize: 15, accent: '#00e5ff', bgOpacity: 0.88, teamFont: "'Barlow Condensed', sans-serif",
     colors: {
@@ -383,6 +290,7 @@ function defaultState() {
 }
 
 function collectState() {
+  state.isVisible  = document.getElementById('visibility-toggle').checked;
   state.globalTeams = window.globalTeamsList || [];
   state.view       = document.querySelector('.view-btn.active')?.id?.replace('vbtn-','') || 'rankings';
   state.scale      = parseFloat(document.getElementById('s-scale').value);
@@ -391,7 +299,6 @@ function collectState() {
   state.bgOpacity  = parseFloat(document.getElementById('s-opacity').value);
   state.teamFont   = document.getElementById('s-team-font').value;
   
-  // Збираємо індивідуальні кольори екранів
   state.colors = {
     rankings: { team: document.getElementById('c-rank-team').value, bg: document.getElementById('c-rank-bg').value, head: document.getElementById('c-rank-head').value },
     groups:   { team: document.getElementById('c-group-team').value, bg: document.getElementById('c-group-bg').value, head: document.getElementById('c-group-head').value },
@@ -421,6 +328,7 @@ window.showPage = function(id) {
 window.setView = function(v) {
   document.querySelectorAll('.view-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('vbtn-'+v)?.classList.add('active');
+  autoSave();
 };
 window.syncRange = function(inputId, valId) {
   const v = parseFloat(document.getElementById(inputId).value);
@@ -443,9 +351,9 @@ function renderGlobalTeams() {
 }
 window.addGlobalTeam = function() {
   const inp = document.getElementById('new-team-inp'); const val = inp.value.trim();
-  if (val) { if (!window.globalTeamsList) window.globalTeamsList = []; window.globalTeamsList.push(val); inp.value = ''; renderGlobalTeams(); }
+  if (val) { if (!window.globalTeamsList) window.globalTeamsList = []; window.globalTeamsList.push(val); inp.value = ''; renderGlobalTeams(); autoSave(); }
 };
-window.delGlobalTeam = function(i) { window.globalTeamsList.splice(i, 1); renderGlobalTeams(); };
+window.delGlobalTeam = function(i) { window.globalTeamsList.splice(i, 1); renderGlobalTeams(); autoSave(); };
 
 function generateTeamSelect(selectedValue, id, dataAttrs = "") {
   let options = `<option value="">-- Оберіть команду --</option>`;
@@ -464,8 +372,8 @@ function renderRankEditor() {
   });
 }
 function collectRankings() { return Array.from(document.querySelectorAll('.r-row')).map(row => ({ seed:parseInt(row.querySelector('[data-f="seed"]').value)||0, players:row.querySelector('[data-f="players"]').value, group:row.querySelector('[data-f="group"]').value, pts:parseInt(row.querySelector('[data-f="pts"]').value)||0 })); }
-window.addRankRow = function() { state.rankings = collectRankings(); const n = state.rankings.length+1; state.rankings.push({seed:n,players:'',group:'ABCDEFGH'[(n-1)%8],pts:0}); renderRankEditor(); };
-window.delRankRow = function(i) { state.rankings = collectRankings(); state.rankings.splice(i,1); renderRankEditor(); };
+window.addRankRow = function() { state.rankings = collectRankings(); const n = state.rankings.length+1; state.rankings.push({seed:n,players:'',group:'ABCDEFGH'[(n-1)%8],pts:0}); renderRankEditor(); autoSave(); };
+window.delRankRow = function(i) { state.rankings = collectRankings(); state.rankings.splice(i,1); renderRankEditor(); autoSave(); };
 
 function renderSchedEditor() {
   const hw = document.getElementById('sched-headers'); hw.innerHTML = '';
@@ -480,8 +388,8 @@ function renderSchedEditor() {
 }
 function collectSchedHeaders() { return Array.from(document.querySelectorAll('#sched-headers input')).map(i=>i.value); }
 function collectSchedRows() { return Array.from(document.querySelectorAll('.sched-row')).map(row => { const isBreak=row.classList.contains('is-break'); return {time:row.querySelector('[data-f="time"]').value, isBreak, cells:isBreak?[row.querySelector('[data-f="c0"]').value]:['c0','c1','c2','c3'].map(f=>row.querySelector(`[data-f="${f}"]`)?.value||'')}; }); }
-window.addSchedRow = function(isBreak) { state.schedRows=collectSchedRows(); state.schedRows.push(isBreak?{time:'--:--',cells:['☕ ПЕРЕРВА'],isBreak:true}:{time:'--:--',cells:['','','',''],isBreak:false}); renderSchedEditor(); };
-window.delSchedRow = function(i) { state.schedRows=collectSchedRows(); state.schedRows.splice(i,1); renderSchedEditor(); };
+window.addSchedRow = function(isBreak) { state.schedRows=collectSchedRows(); state.schedRows.push(isBreak?{time:'--:--',cells:['☕ ПЕРЕРВА'],isBreak:true}:{time:'--:--',cells:['','','',''],isBreak:false}); renderSchedEditor(); autoSave(); };
+window.delSchedRow = function(i) { state.schedRows=collectSchedRows(); state.schedRows.splice(i,1); renderSchedEditor(); autoSave(); };
 
 function autoGroups(gc,tc) { const L='ABCDEFGH'; return Array.from({length:gc},(_,gi)=>({letter:L[gi],teams:Array.from({length:tc},(_,ti)=>({name:`${L[gi]}${ti+1} — Команда`,p:0,w:0,l:0,gd:'0:0',pts:0}))})); }
 function renderGroupEditor() {
@@ -496,7 +404,7 @@ function renderGroupEditor() {
   });
 }
 function collectGroups() { const map={}; document.querySelectorAll('.team-stat-row').forEach(row=>{ const gi=row.dataset.gi,ti=row.dataset.ti; if(!map[gi]) map[gi]={letter:'ABCDEFGH'[gi],teams:[]}; map[gi].teams[ti]={name:row.querySelector('[data-f="name"]').value,p:parseInt(row.querySelector('[data-f="p"]').value)||0,w:parseInt(row.querySelector('[data-f="w"]').value)||0,l:parseInt(row.querySelector('[data-f="l"]').value)||0,gd:row.querySelector('[data-f="gd"]').value,pts:parseInt(row.querySelector('[data-f="pts"]').value)||0}; }); return Object.values(map); }
-window.rebuildGroups = function() { state.groupCount=parseInt(document.getElementById('g-count').value); state.teamCount=parseInt(document.getElementById('g-teams').value); state.groups=autoGroups(state.groupCount,state.teamCount); renderGroupEditor(); };
+window.rebuildGroups = function() { state.groupCount=parseInt(document.getElementById('g-count').value); state.teamCount=parseInt(document.getElementById('g-teams').value); state.groups=autoGroups(state.groupCount,state.teamCount); renderGroupEditor(); autoSave(); };
 
 function autoBracketData(fmt) { const data={},L='ABCDEFGH'; for(let ri=0;ri<Math.log2(fmt);ri++){ const count=fmt/Math.pow(2,ri+1); for(let mi=0;mi<count;mi++){ data[`${ri}-${mi}`]={t1:ri===0?`${L[mi*2]||'G'}1`:`Переможець М${ri}.${mi*2+1}`,t2:ri===0?`${L[mi*2+1]||'G'}2`:`Переможець М${ri}.${mi*2+2}`,s1:'-',s2:'-',winner:-1}; } } return data; }
 function renderBracketEditor() {
@@ -513,12 +421,19 @@ function renderBracketEditor() {
   });
 }
 function collectBracket() { const fmt=parseInt(document.getElementById('p-format').value),data={}; for(let ri=0;ri<Math.log2(fmt);ri++){ const count=fmt/Math.pow(2,ri+1); for(let mi=0;mi<count;mi++){ const key=`${ri}-${mi}`,old=state.bracketData?.[key]||{}; data[key]={t1:document.getElementById(`mt1-${ri}-${mi}`)?.value||old.t1||'',t2:document.getElementById(`mt2-${ri}-${mi}`)?.value||old.t2||'',s1:document.getElementById(`ms1-${ri}-${mi}`)?.value||old.s1||'-',s2:document.getElementById(`ms2-${ri}-${mi}`)?.value||old.s2||'-',winner:old.winner??-1}; } } return data; }
-window.setWinner = function(ri,mi,teamIdx) { const data=state.bracketData||{},key=`${ri}-${mi}`; if(!data[key]) return; data[key].winner=teamIdx; const winnerName=document.getElementById(`mt${teamIdx+1}-${ri}-${mi}`)?.value; const nk=`${ri+1}-${Math.floor(mi/2)}`; if(!data[nk]) data[nk]={t1:'',t2:'',s1:'-',s2:'-',winner:-1}; if(mi%2===0) data[nk].t1=winnerName; else data[nk].t2=winnerName; state.bracketData=data; renderBracketEditor(); };
-window.rebuildBracket = function() { state.bracketData=autoBracketData(parseInt(document.getElementById('p-format').value)); renderBracketEditor(); };
+window.setWinner = function(ri,mi,teamIdx) { const data=state.bracketData||{},key=`${ri}-${mi}`; if(!data[key]) return; data[key].winner=teamIdx; const winnerName=document.getElementById(`mt${teamIdx+1}-${ri}-${mi}`)?.value; const nk=`${ri+1}-${Math.floor(mi/2)}`; if(!data[nk]) data[nk]={t1:'',t2:'',s1:'-',s2:'-',winner:-1}; if(mi%2===0) data[nk].t1=winnerName; else data[nk].t2=winnerName; state.bracketData=data; renderBracketEditor(); autoSave(); };
+window.rebuildBracket = function() { state.bracketData=autoBracketData(parseInt(document.getElementById('p-format').value)); renderBracketEditor(); autoSave(); };
 
 function initUI() {
   window.globalTeamsList = state.globalTeams || [];
   
+  // Встановлюємо галочку оверлею
+  const isVis = state.isVisible !== false;
+  document.getElementById('visibility-toggle').checked = isVis;
+  const textEl = document.getElementById('vis-text');
+  textEl.textContent = isVis ? 'В ЕФІРІ' : 'ПРИХОВАНО';
+  textEl.style.color = isVis ? 'var(--green)' : 'var(--red)';
+
   document.querySelectorAll('.view-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('vbtn-'+(state.view||'rankings'))?.classList.add('active');
   document.getElementById('s-scale').value   = state.scale||1;
@@ -527,7 +442,6 @@ function initUI() {
   document.getElementById('s-opacity').value = state.bgOpacity||0.88;
   document.getElementById('s-team-font').value = state.teamFont||"'Barlow Condensed', sans-serif";
   
-  // Встановлюємо кольори для екранів
   const c = state.colors || defaultState().colors;
   document.getElementById('c-rank-team').value = c.rankings.team; document.getElementById('c-rank-bg').value = c.rankings.bg; document.getElementById('c-rank-head').value = c.rankings.head;
   document.getElementById('c-group-team').value = c.groups.team;  document.getElementById('c-group-bg').value = c.groups.bg;  document.getElementById('c-group-head').value = c.groups.head;
