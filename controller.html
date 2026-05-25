@@ -49,19 +49,21 @@ body{font-family:'Barlow Condensed',sans-serif;background:var(--bg);color:var(--
 .view-btn.active{border-color:var(--accent);background:rgba(0,229,255,.1);color:var(--accent);}
 .view-btn .icon{font-size:22px;display:block;margin-bottom:4px;}
 
-/* FIELDS */
+/* FIELDS & SELECTS */
 .field{margin-bottom:12px;}
 .field label{display:block;font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;}
-.field input,.field select,.field textarea{width:100%;padding:9px 12px;background:rgba(255,255,255,.06);color:var(--text);border:1px solid var(--border);border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-size:14px;transition:border-color .15s;}
-.field input:focus,.field select:focus{outline:none;border-color:var(--accent);}
+.field input,.field select,.field textarea, select.dyn-select{width:100%;padding:9px 12px;background:rgba(255,255,255,.06);color:var(--text);border:1px solid var(--border);border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-size:14px;transition:border-color .15s;}
+.field input:focus,.field select:focus, select.dyn-select:focus{outline:none;border-color:var(--accent);}
 .field input[type=range]{padding:4px 0;background:transparent;border:none;}
 .field input[type=color]{padding:2px;height:36px;cursor:pointer;}
+select.dyn-select { padding: 6px; font-size: 13px; }
+select.dyn-select option { background: var(--bg); color: #fff; }
 .range-row{display:flex;align-items:center;gap:10px;}
 .range-val{font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--accent);min-width:40px;text-align:right;}
 
 /* RANKING ROWS */
 .r-row{display:grid;grid-template-columns:40px 1fr 50px 70px 32px;gap:6px;align-items:center;margin-bottom:6px;}
-.r-row input{font-size:13px;}
+.r-row input, .r-row select{font-size:13px;}
 .del-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;transition:color .15s;}
 .del-btn:hover{color:var(--red);}
 
@@ -74,7 +76,7 @@ body{font-family:'Barlow Condensed',sans-serif;background:var(--bg);color:var(--
 .match-editor{background:var(--card2);border-radius:10px;border:1px solid var(--border);padding:12px;margin-bottom:10px;}
 .match-editor-title{font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:8px;text-transform:uppercase;}
 .match-teams{display:grid;grid-template-columns:1fr 60px 36px;gap:6px;margin-bottom:4px;align-items:center;}
-.match-teams input{font-size:13px;}
+.match-teams input, .match-teams select{font-size:13px;}
 .win-btn{padding:5px 8px;border-radius:6px;font-size:11px;font-weight:700;border:1px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;transition:all .15s;}
 .win-btn.active{background:rgba(0,229,255,.15);color:var(--accent);border-color:var(--accent);}
 
@@ -82,7 +84,7 @@ body{font-family:'Barlow Condensed',sans-serif;background:var(--bg);color:var(--
 .grp-section{margin-bottom:14px;}
 .grp-section-title{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--accent);letter-spacing:1px;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
 .team-stat-row{display:grid;grid-template-columns:1fr 40px 40px 40px 60px 50px;gap:5px;align-items:center;margin-bottom:5px;}
-.team-stat-row input{font-size:12px;}
+.team-stat-row input, .team-stat-row select{font-size:12px;}
 .groups-conf{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
 
 /* STATUS BAR */
@@ -111,6 +113,7 @@ code{background:rgba(255,255,255,.08);padding:2px 6px;border-radius:4px;font-siz
 <div class="top-nav">
   <div class="logo">🎾 CTRL</div>
   <div class="tab active" onclick="showPage('display')" id="tab-display">📺 Екран</div>
+  <div class="tab" onclick="showPage('teams')" id="tab-teams">👥 Команди</div>
   <div class="tab" onclick="showPage('settings')" id="tab-settings">⚙️ Вигляд</div>
   <div class="tab" onclick="showPage('rankings')" id="tab-rankings">🏅 Рейтинг</div>
   <div class="tab" onclick="showPage('groups')" id="tab-groups">📊 Групи</div>
@@ -147,6 +150,22 @@ code{background:rgba(255,255,255,.08);padding:2px 6px;border-radius:4px;font-siz
         В OBS: Add Source → Browser → вставте URL оверлею. Ширина 1920, висота 1080.
       </div>
     </div>
+  </div>
+</div>
+
+<!-- TEAMS (GLOBAL LIST) -->
+<div class="page" id="page-teams">
+  <div class="sec-title">Список усіх команд</div>
+  <div class="card">
+    <div class="card-title">Додати нову команду</div>
+    <div style="display:flex; gap:8px;">
+      <input type="text" id="new-team-inp" class="field" placeholder="Назва команди (напр. Гравець 1 / Гравець 2)" style="flex:1; padding:9px 12px; background:rgba(255,255,255,.06); color:var(--text); border:1px solid var(--border); border-radius:8px;">
+      <button class="btn btn-primary" onclick="addGlobalTeam()">+ Додати</button>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-title">Збережені команди</div>
+    <div id="global-teams-list" style="display:flex; flex-direction:column; gap:6px;"></div>
   </div>
 </div>
 
@@ -325,6 +344,12 @@ window.pushState = async function() {
 // ══════════════════════════════════
 function defaultState() {
   return {
+    globalTeams: [
+      'Artem Yatsenko / Slava Sedoplatov',
+      'Fedor Modnikov / Volodymyr Yelizarov',
+      'Ivan Petrenko / Mykhailo Kovalenko',
+      'Oleh Bondarchuk / Serhii Kravets'
+    ],
     view: 'rankings', scale: 1, fontSize: 15, accent: '#00e5ff', bgOpacity: 0.88,
     rankTitle: 'ГРАВЦІ (ЧОЛОВІКИ) 🇺🇦',
     rankings: [
@@ -340,16 +365,13 @@ function defaultState() {
       {time:'09:40',cells:['A3—A4','B3—B4','C3—C4','D3—D4'],isBreak:false},
       {time:'10:20',cells:['☕ ТЕХНІЧНА ПЕРЕРВА'],isBreak:true},
       {time:'10:40',cells:['A1—A3','B1—B3','C1—C3','D1—D3'],isBreak:false},
-      {time:'11:20',cells:['A2—A4','B2—B4','C2—C4','D2—D4'],isBreak:false},
-      {time:'12:00',cells:['A2—A3','B2—B3','C2—C3','D2—D3'],isBreak:false},
-      {time:'12:40',cells:['A1—A4','B1—B4','C1—C4','D1—D4'],isBreak:false},
-      {time:'13:20',cells:['🏆 ПІДГОТОВКА ДО ПЛЕЙ-ОФ'],isBreak:true},
     ],
     bracketFormat:4, bracketData:autoBracketData(4), champion:'— — —',
   };
 }
 
 function collectState() {
+  state.globalTeams = window.globalTeamsList || [];
   state.view       = document.querySelector('.view-btn.active')?.id?.replace('vbtn-','') || 'rankings';
   state.scale      = parseFloat(document.getElementById('s-scale').value);
   state.fontSize   = parseInt(document.getElementById('s-font').value);
@@ -369,7 +391,7 @@ function collectState() {
 }
 
 // ══════════════════════════════════
-//  UI HELPERS (exposed to window)
+//  UI HELPERS
 // ══════════════════════════════════
 window.showPage = function(id) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
@@ -391,6 +413,68 @@ window.syncRange = function(inputId, valId) {
   else if (inputId==='s-opacity') el.textContent = Math.round(v*100)+'%';
 };
 
+// ── Global Teams Management ──
+window.globalTeamsList = [];
+
+function renderGlobalTeams() {
+  const wrap = document.getElementById('global-teams-list');
+  wrap.innerHTML = '';
+  window.globalTeamsList.forEach((team, i) => {
+    const row = document.createElement('div');
+    row.style.display = 'flex';
+    row.style.justifyContent = 'space-between';
+    row.style.alignItems = 'center';
+    row.style.padding = '8px 12px';
+    row.style.background = 'rgba(255,255,255,.05)';
+    row.style.borderRadius = '6px';
+    row.style.fontSize = '14px';
+    
+    row.innerHTML = `
+      <span>${team}</span>
+      <button class="del-btn" onclick="delGlobalTeam(${i})">✕</button>
+    `;
+    wrap.appendChild(row);
+  });
+  
+  // Re-render UI components to update select dropdowns
+  renderRankEditor();
+  renderGroupEditor();
+  renderBracketEditor();
+}
+
+window.addGlobalTeam = function() {
+  const inp = document.getElementById('new-team-inp');
+  const val = inp.value.trim();
+  if (val) {
+    if (!window.globalTeamsList) window.globalTeamsList = [];
+    window.globalTeamsList.push(val);
+    inp.value = '';
+    renderGlobalTeams();
+  }
+};
+
+window.delGlobalTeam = function(i) {
+  window.globalTeamsList.splice(i, 1);
+  renderGlobalTeams();
+};
+
+function generateTeamSelect(selectedValue, id, dataAttrs = "") {
+  let options = `<option value="">-- Оберіть команду --</option>`;
+  const teams = window.globalTeamsList || [];
+  
+  if (selectedValue && !teams.includes(selectedValue)) {
+      options += `<option value="${selectedValue}" selected>${selectedValue}</option>`;
+  }
+
+  teams.forEach(team => {
+    const selected = (team === selectedValue) ? 'selected' : '';
+    options += `<option value="${team}" ${selected}>${team}</option>`;
+  });
+  
+  return `<select class="dyn-select" ${id ? `id="${id}"` : ''} ${dataAttrs}>${options}</select>`;
+}
+
+
 // ── Rankings ──
 function renderRankEditor() {
   const wrap = document.getElementById('rank-rows');
@@ -400,7 +484,7 @@ function renderRankEditor() {
     row.className = 'r-row';
     row.innerHTML = `
       <input type="number" value="${r.seed}" data-ri="${i}" data-f="seed" style="text-align:center">
-      <input type="text"   value="${r.players}" data-ri="${i}" data-f="players" placeholder="Гравець / Гравець">
+      ${generateTeamSelect(r.players, null, `data-ri="${i}" data-f="players"`)}
       <input type="text"   value="${r.group}" data-ri="${i}" data-f="group" style="text-align:center" placeholder="A">
       <input type="number" value="${r.pts}" data-ri="${i}" data-f="pts" style="text-align:right">
       <button class="del-btn" onclick="delRankRow(${i})">✕</button>`;
@@ -418,7 +502,7 @@ function collectRankings() {
 window.addRankRow = function() {
   state.rankings = collectRankings();
   const n = state.rankings.length+1;
-  state.rankings.push({seed:n,players:'Гравець / Гравець',group:'ABCDEFGH'[(n-1)%8],pts:0});
+  state.rankings.push({seed:n,players:'',group:'ABCDEFGH'[(n-1)%8],pts:0});
   renderRankEditor();
 };
 window.delRankRow = function(i) {
@@ -476,7 +560,10 @@ function renderGroupEditor() {
     const sec=document.createElement('div'); sec.className='card grp-section';
     let rows='';
     (grp.teams||[]).forEach((team,ti)=>{
-      rows+=`<div class="team-stat-row" data-gi="${gi}" data-ti="${ti}"><input type="text" value="${team.name}" data-f="name" placeholder="Команда"><input type="number" value="${team.p||0}" data-f="p"><input type="number" value="${team.w||0}" data-f="w"><input type="number" value="${team.l||0}" data-f="l"><input type="text" value="${team.gd||'0:0'}" data-f="gd"><input type="number" value="${team.pts||0}" data-f="pts"></div>`;
+      rows+=`<div class="team-stat-row" data-gi="${gi}" data-ti="${ti}">
+        ${generateTeamSelect(team.name, null, `data-f="name"`)}
+        <input type="number" value="${team.p||0}" data-f="p"><input type="number" value="${team.w||0}" data-f="w"><input type="number" value="${team.l||0}" data-f="l"><input type="text" value="${team.gd||'0:0'}" data-f="gd"><input type="number" value="${team.pts||0}" data-f="pts">
+      </div>`;
     });
     sec.innerHTML=`<div class="grp-section-title"><span style="font-size:28px;color:var(--accent)">${letter}</span>Група ${letter}</div><div style="display:grid;grid-template-columns:1fr 40px 40px 40px 60px 50px;gap:5px;margin-bottom:4px;"><span style="font-size:10px;color:var(--muted)">Команда</span><span style="font-size:10px;color:var(--muted);text-align:center">І</span><span style="font-size:10px;color:var(--muted);text-align:center">В</span><span style="font-size:10px;color:var(--muted);text-align:center">П</span><span style="font-size:10px;color:var(--muted);text-align:center">МГ</span><span style="font-size:10px;color:var(--muted);text-align:center">Очки</span></div>${rows}`;
     wrap.appendChild(sec);
@@ -522,7 +609,18 @@ function renderBracketEditor() {
     for(let mi=0;mi<count;mi++){
       const key=`${ri}-${mi}`,m=data[key]||{t1:'',t2:'',s1:'-',s2:'-',winner:-1};
       const me=document.createElement('div'); me.className='match-editor';
-      me.innerHTML=`<div class="match-editor-title">Матч ${ri+1}.${mi+1}</div><div class="match-teams"><input type="text" value="${m.t1}" id="mt1-${ri}-${mi}" placeholder="Команда 1"><input type="text" value="${m.s1}" id="ms1-${ri}-${mi}" placeholder="Рах." style="text-align:center"><button class="win-btn ${m.winner===0?'active':''}" onclick="setWinner(${ri},${mi},0)">W</button></div><div class="match-teams"><input type="text" value="${m.t2}" id="mt2-${ri}-${mi}" placeholder="Команда 2"><input type="text" value="${m.s2}" id="ms2-${ri}-${mi}" placeholder="Рах." style="text-align:center"><button class="win-btn ${m.winner===1?'active':''}" onclick="setWinner(${ri},${mi},1)">W</button></div>`;
+      me.innerHTML=`
+        <div class="match-editor-title">Матч ${ri+1}.${mi+1}</div>
+        <div class="match-teams">
+          ${generateTeamSelect(m.t1, `mt1-${ri}-${mi}`)}
+          <input type="text" value="${m.s1}" id="ms1-${ri}-${mi}" placeholder="Рах." style="text-align:center">
+          <button class="win-btn ${m.winner===0?'active':''}" onclick="setWinner(${ri},${mi},0)">W</button>
+        </div>
+        <div class="match-teams">
+          ${generateTeamSelect(m.t2, `mt2-${ri}-${mi}`)}
+          <input type="text" value="${m.s2}" id="ms2-${ri}-${mi}" placeholder="Рах." style="text-align:center">
+          <button class="win-btn ${m.winner===1?'active':''}" onclick="setWinner(${ri},${mi},1)">W</button>
+        </div>`;
       card.appendChild(me);
     }
     wrap.appendChild(card);
@@ -555,6 +653,9 @@ window.rebuildBracket = function() {
 
 // ── Init UI from state ──
 function initUI() {
+  // Load global teams first
+  window.globalTeamsList = state.globalTeams || [];
+  
   document.querySelectorAll('.view-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('vbtn-'+(state.view||'rankings'))?.classList.add('active');
   document.getElementById('s-scale').value   = state.scale||1;
@@ -567,9 +668,12 @@ function initUI() {
   document.getElementById('g-teams').value = state.teamCount||4;
   document.getElementById('p-format').value = state.bracketFormat||4;
   document.getElementById('champion-inp').value = state.champion||'— — —';
+  
   if(!state.groups) state.groups=autoGroups(state.groupCount||4,state.teamCount||4);
   if(!state.bracketData||!Object.keys(state.bracketData).length) state.bracketData=autoBracketData(state.bracketFormat||4);
-  renderRankEditor(); renderGroupEditor(); renderSchedEditor(); renderBracketEditor();
+  
+  renderGlobalTeams(); // This will trigger rendering of Rankings, Groups, and Playoff
+  renderSchedEditor();
 }
 
 initUI();
