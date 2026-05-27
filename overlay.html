@@ -209,9 +209,9 @@
         .stats-team-name { text-align: left; font-size: 36px; font-weight: bold; font-family: var(--team-font-family); padding-right: 40px; color: white; white-space: nowrap; text-transform: uppercase; }
         .stats-set-column { width: 95px; text-align: center; }
         .stats-games-num  { font-size: 46px; font-weight: 900; font-family: var(--team-font-family); color: white; }
-        .stats-time-label { font-size: 20px; /* ОНОВЛЕНО: Час геймів збільшено з 15px */ font-weight: 900; color: #7eb8ff; font-family: 'Inter', sans-serif; margin-top: 1px; letter-spacing: 0.5px; }
+        .stats-time-label { font-size: 20px; font-weight: 900; color: #7eb8ff; font-family: 'Inter', sans-serif; margin-top: 1px; letter-spacing: 0.5px; }
         
-        /* ── ТАБЛО РЕЗУЛЬТАТУ / КІНЕЦЬ МАТЧУ (ОНОВЛЕНО: ДОДАНО АНІМАЦІЮ ПЛАВНОГО ВИХОДУ) ── */
+        /* ── ТАБЛО РЕЗУЛЬТАТУ / КІНЕЦЬ МАТЧУ ── */
         #match-finish-overlay {
             position: fixed; inset: 0; width: 100vw; height: 100vh;
             background: transparent;
@@ -257,7 +257,7 @@
         .fault-row-bg.fr-out { animation: fault-row-out 0.25s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
         .fault-row-lbl.fr-txt-show { animation: fault-row-txt 0.18s 0.18s ease forwards; }
 
-        /* ── BOTTOM NOTIF PLANK (ОНОВЛЕНО: ТЕКСТ БІЛЬШИЙ ТА ЧІТКІШИЙ, ПЛАШКА ПІДЛАШТОВАНА) ── */
+        /* ── BOTTOM NOTIF PLANK ── */
         #bottom-notif { 
             position: absolute; 
             top: 100%; 
@@ -265,7 +265,7 @@
             width: fit-content; 
             min-width: 260px;
             padding: 0 38px; 
-            height: 44px; /* Збільшено з 38px для збалансованого відступу нового шрифту */
+            height: 44px; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
@@ -277,7 +277,7 @@
         }
         .bn-bg { position: absolute; inset: 0; background: rgba(30,30,35,0.85); border-left: 5px solid var(--bn-color, var(--accent-blue)); border-radius: 6px; backdrop-filter: blur(10px); box-shadow: 0 5px 22px rgba(0,0,0,0.55); }
         .bn-bg::after { content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 1px; background: var(--bn-color, var(--accent-blue)); opacity: 0.5; }
-        .bn-text { position: relative; z-index: 1; font-family: var(--team-font-family); font-size: 24px; /* Збільшено з 18px для ідеальної читаємості */ font-weight: 900; text-transform: uppercase; letter-spacing: 2px; color: #ffffff; opacity: 0; white-space: nowrap; text-shadow: 0 2px 6px rgba(0,0,0,0.85); /* Ефект підвищеної чіткості */ }
+        .bn-text { position: relative; z-index: 1; font-family: var(--team-font-family); font-size: 24px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; color: #ffffff; opacity: 0; white-space: nowrap; text-shadow: 0 2px 6px rgba(0,0,0,0.85); }
         .bn-dot { position: relative; z-index: 1; width: 7px; height: 7px; border-radius: 50%; background: var(--bn-color, var(--accent-blue)); box-shadow: 0 0 8px var(--bn-color, var(--accent-blue)); margin-right: 10px; flex-shrink: 0; opacity: 0; }
         
         #bottom-notif.bn-show { animation: bn-slide-in 0.36s cubic-bezier(0.4,0,0.2,1) forwards; }
@@ -716,7 +716,14 @@
                         const txtEl = document.getElementById('fullscreen-alert-text');
 
                         const glowMap = { golden:'#d4ac0d', tiebreak:'#c0392b', normal:null };
-                        const glowColor = glowMap[capturedMode] || '#0055ff';
+                        let glowColor = glowMap[capturedMode] || '#0055ff';
+                        
+                        /* ОНОВЛЕНО: Якщо це GAME POINT чи BREAK POINT, перемикаємо на темно-зелений */
+                        const txtUpper = capturedText.toUpperCase();
+                        if (txtUpper.includes("BREAK") || txtUpper.includes("GAME") || txtUpper.includes("БРЕЙК") || txtUpper.includes("ГЕЙМ")) {
+                            glowColor = '#006400'; /* Темно-зелений колір (dark green) */
+                        }
+
                         ring.style.setProperty('--glow-color', glowColor);
                         el.style.setProperty('--glow-color', glowColor);
 
@@ -793,7 +800,6 @@
 
         document.getElementById('scoreboard-anchor').classList.toggle('hidden-board', showBoard === false || showFinish || showIntro);
 
-        /* ОНОВЛЕНО: ЛОГІКА КЕРУВАННЯ ПЛАВНИМ ВИХОДОМ ТАБЛО РЕЗУЛЬТАТІВ */
         const finishOverlay = document.getElementById('match-finish-overlay');
         if (showFinish && !finishOverlay.classList.contains('active')) {
             updateFinishPanel(state);
@@ -804,7 +810,7 @@
                 finishOverlay.classList.add('closing');
                 setTimeout(() => {
                     finishOverlay.classList.remove('active', 'closing');
-                }, 500); /* Час збігається з тривалістю анімації finish-bg-out */
+                }, 500);
             }
         }
 
@@ -870,7 +876,6 @@
             const v = (sh[0] && sh[0][i]!==undefined)?sh[0][i]:'-';
             const won = (sh[0] && sh[1] && sh[0][i]!==undefined && sh[1][i]!==undefined && sh[0][i]>sh[1][i]);
             html += `<td class="finish-cell-set"><span class="finish-box-score${won?' winner-box':''}">${v}</span>`;
-            /* ОНОВЛЕНО: Час геймів на фінальному табло збільшено з 11px до 16px */
             if(st && st[i] && i===0) html += `<div style="font-size:16px;color:#7eb8ff;margin-top:3px;font-weight:900;">${st[i]}'</div>`;
             html += `</td>`;
         }
@@ -879,7 +884,6 @@
             const v = (sh[1] && sh[1][i]!==undefined)?sh[1][i]:'-';
             const won = (sh[0] && sh[1] && sh[0][i]!==undefined && sh[1][i]!==undefined && sh[1][i]>sh[0][i]);
             html += `<td class="finish-cell-set"><span class="finish-box-score${won?' winner-box':''}">${v}</span>`;
-            /* ОНОВЛЕНО: Час геймів на фінальному табло збільшено з 11px до 16px */
             if(st && st[i] && i>0) html += `<div style="font-size:16px;color:#7eb8ff;margin-top:3px;font-weight:900;">${st[i]}'</div>`;
             html += `</td>`;
         }
