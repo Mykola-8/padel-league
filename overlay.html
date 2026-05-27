@@ -718,10 +718,12 @@
                         const glowMap = { golden:'#d4ac0d', tiebreak:'#c0392b', normal:null };
                         let glowColor = glowMap[capturedMode] || '#0055ff';
                         
-                        /* ОНОВЛЕНО: Якщо це GAME POINT чи BREAK POINT, перемикаємо на темно-зелений */
+                        /* ПЕРЕВІРКА НАЗВИ ОЧКА (УКР ТА АНГЛ) ДЛЯ ЗМІНИ СЯЙВА ТА КЛАСУ */
                         const txtUpper = capturedText.toUpperCase();
-                        if (txtUpper.includes("BREAK") || txtUpper.includes("GAME") || txtUpper.includes("БРЕЙК") || txtUpper.includes("ГЕЙМ")) {
-                            glowColor = '#006400'; /* Темно-зелений колір (dark green) */
+                        const isPointAlert = txtUpper.includes("BREAK") || txtUpper.includes("GAME") || txtUpper.includes("БРЕЙК") || txtUpper.includes("ГЕЙМ");
+                        
+                        if (isPointAlert) {
+                            glowColor = '#006400'; /* Темно-зелений колір */
                         }
 
                         ring.style.setProperty('--glow-color', glowColor);
@@ -743,7 +745,10 @@
                         ring.classList.remove('glow-out');
                         ring.classList.add('glow-active');
                         
-                        if (capturedMode === 'golden') {
+                        /* ОНОВЛЕНО: ГАРАНТОВАНА ЗАМІНА ФОНУ ПЛАШКИ НА ТЕМНО-ЗЕЛЕНИЙ */
+                        if (isPointAlert) {
+                            bg.style.background = '#006400';
+                        } else if (capturedMode === 'golden') {
                             bg.style.background = 'linear-gradient(135deg, #9a7d0a 0%, #b7950b 60%, #d4ac0d 100%)';
                         } else {
                             bg.style.background = glowColor;
