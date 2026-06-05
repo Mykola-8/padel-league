@@ -85,7 +85,6 @@ select.dyn-select option { background: var(--bg); color: #fff; }
 @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
 .status-text{font-size:12px;color:var(--muted);}
 
-/* Дизайн перемикача (Toggle) */
 .switch { position: relative; display: inline-block; width: 48px; height: 26px; }
 .switch input { opacity: 0; width: 0; height: 0; }
 .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(255,68,85,.2); transition: .3s; border-radius: 34px; border: 1px solid var(--red); }
@@ -114,6 +113,18 @@ input:checked + .slider:before { transform: translateX(22px); background-color: 
 
 <div class="page active" id="page-display">
   <div class="sec-title">Що показати на трансляції</div>
+  
+  <div class="card">
+    <div class="card-title">Назва турніру (Банер)</div>
+    <div style="display:flex; gap:12px; align-items:center;">
+      <label class="switch">
+        <input type="checkbox" id="tour-visible" onchange="autoSave()">
+        <span class="slider"></span>
+      </label>
+      <input type="text" id="tour-text" placeholder="Введіть назву турніру..." oninput="autoSave()" style="flex:1; padding:9px 12px; background:rgba(255,255,255,.06); color:var(--text); border:1px solid var(--border); border-radius:8px;">
+    </div>
+  </div>
+
   <div class="card">
     <div class="card-title">Активний вигляд оверлею</div>
     <div class="view-btns">
@@ -123,6 +134,7 @@ input:checked + .slider:before { transform: translateX(22px); background-color: 
       <div class="view-btn" id="vbtn-playoff" onclick="setView('playoff')"><span class="icon">🏆</span>Плей-оф</div>
     </div>
   </div>
+  
   <div class="card">
     <div class="card-title">🔗 Посилання</div>
     <div class="link-box">
@@ -149,10 +161,26 @@ input:checked + .slider:before { transform: translateX(22px); background-color: 
 
 <div class="page" id="page-settings">
   <div class="sec-title">Вигляд оверлею</div>
+  
   <div class="card">
-    <div class="card-title">Масштаб та розмір</div>
-    <div class="field"><label>Загальний масштаб оверлею</label><div class="range-row"><input type="range" id="s-scale" min="0.4" max="2" step="0.05" value="1" oninput="syncRange('s-scale','rv-scale')"><span class="range-val" id="rv-scale">1×</span></div></div>
-    <div class="field"><label>Розмір тексту (px)</label><div class="range-row"><input type="range" id="s-font" min="10" max="28" step="1" value="15" oninput="syncRange('s-font','rv-font')"><span class="range-val" id="rv-font">15px</span></div></div>
+     <div class="card-title">💾 Теми налаштувань (Збереження дизайну)</div>
+     <div style="display:flex; gap:8px; margin-bottom: 12px;">
+        <select id="theme-select" style="flex:1; padding:9px; background:rgba(255,255,255,.06); color:#fff; border:1px solid var(--border); border-radius:8px;"></select>
+        <button class="btn btn-outline" onclick="loadTheme()">Завантажити</button>
+     </div>
+     <div style="display:flex; gap:8px;">
+        <input type="text" id="theme-name" placeholder="Введіть назву нової теми..." style="flex:1; padding:9px; background:rgba(255,255,255,.06); color:#fff; border:1px solid var(--border); border-radius:8px;">
+        <button class="btn btn-primary" onclick="saveTheme()">Зберегти нову</button>
+        <button class="btn btn-danger" onclick="deleteTheme()">Видалити</button>
+     </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Розміри та масштаби</div>
+    <div class="field"><label>Загальний масштаб екрану</label><div class="range-row"><input type="range" id="s-scale" min="0.4" max="2" step="0.05" value="1" oninput="syncRange('s-scale','rv-scale')"><span class="range-val" id="rv-scale">1×</span></div></div>
+    <div class="field"><label>Ширина таблиць (%)</label><div class="range-row"><input type="range" id="s-t-width" min="40" max="100" step="1" value="95" oninput="syncRange('s-t-width','rv-t-width')"><span class="range-val" id="rv-t-width">95%</span></div></div>
+    <div class="field"><label>Висота рядків (відступи)</label><div class="range-row"><input type="range" id="s-t-pad" min="2" max="24" step="1" value="9" oninput="syncRange('s-t-pad','rv-t-pad')"><span class="range-val" id="rv-t-pad">9px</span></div></div>
+    <div class="field"><label>Загальний Розмір тексту (px)</label><div class="range-row"><input type="range" id="s-font" min="10" max="28" step="1" value="15" oninput="syncRange('s-font','rv-font')"><span class="range-val" id="rv-font">15px</span></div></div>
     <div class="field"><label>Шрифт назв команд</label><select id="s-team-font"><option value="'Barlow Condensed', sans-serif">Barlow Condensed (Стандарт)</option><option value="'Bebas Neue', sans-serif">Bebas Neue (Широкий)</option><option value="'Montserrat', sans-serif">Montserrat (Сучасний)</option><option value="'Oswald', sans-serif">Oswald (Високий)</option></select></div>
   </div>
 
@@ -177,15 +205,10 @@ input:checked + .slider:before { transform: translateX(22px); background-color: 
 
 <div class="page" id="page-groups">
   <div class="sec-title">Групи</div>
-  
   <div class="card">
     <div class="card-title">Відображення на трансляції</div>
-    <div class="field">
-      <select id="g-visible" onchange="autoSave()">
-        </select>
-    </div>
+    <div class="field"><select id="g-visible" onchange="autoSave()"></select></div>
   </div>
-
   <div class="card"><div class="card-title">Конфігурація</div><div class="groups-conf"><div class="field" style="margin:0;flex:1"><label>Груп</label><select id="g-count" onchange="rebuildGroups()"><option value="2">2</option><option value="3">3</option><option value="4" selected>4</option><option value="6">6</option><option value="8">8</option></select></div><div class="field" style="margin:0;flex:1"><label>Команд у групі</label><select id="g-teams" onchange="rebuildGroups()"><option value="3">3</option><option value="4" selected>4</option><option value="5">5</option><option value="6">6</option></select></div></div></div>
   <div id="group-editor"></div>
 </div>
@@ -255,8 +278,12 @@ window.autoSave = function() {
   saveTimeout = setTimeout(() => { pushState(); }, 500); 
 };
 
-document.addEventListener('input', (e) => { if(e.target.id !== 'visibility-toggle') autoSave(); });
-document.addEventListener('change', (e) => { if(e.target.id !== 'visibility-toggle') autoSave(); });
+document.addEventListener('input', (e) => { 
+  if(e.target.id !== 'visibility-toggle' && e.target.id !== 'theme-select' && e.target.id !== 'theme-name') autoSave(); 
+});
+document.addEventListener('change', (e) => { 
+  if(e.target.id !== 'visibility-toggle' && e.target.id !== 'theme-select' && e.target.id !== 'theme-name') autoSave(); 
+});
 
 window.toggleVisibility = function() {
   const isChecked = document.getElementById('visibility-toggle').checked;
@@ -279,6 +306,9 @@ window.pushState = async function() {
 function defaultState() {
   return {
     isVisible: true,
+    tourVisible: false, tourText: 'PADEL TOURNAMENT 2026',
+    tblWidth: 95, tblPadY: 9,
+    themes: {}, // Об'єкт для збереження тем
     globalTeams: ['Artem Yatsenko / Slava Sedoplatov', 'Fedor Modnikov / Volodymyr Yelizarov'],
     view: 'rankings', scale: 1, fontSize: 15, accent: '#00e5ff', bgOpacity: 0.88, teamFont: "'Barlow Condensed', sans-serif",
     colors: {
@@ -298,10 +328,18 @@ function defaultState() {
 
 function collectState() {
   state.isVisible  = document.getElementById('visibility-toggle').checked;
+  
+  state.tourVisible = document.getElementById('tour-visible').checked;
+  state.tourText    = document.getElementById('tour-text').value;
+
   state.globalTeams = window.globalTeamsList || [];
   state.view       = document.querySelector('.view-btn.active')?.id?.replace('vbtn-','') || 'rankings';
+  
   state.scale      = parseFloat(document.getElementById('s-scale').value);
+  state.tblWidth   = parseInt(document.getElementById('s-t-width').value);
+  state.tblPadY    = parseInt(document.getElementById('s-t-pad').value);
   state.fontSize   = parseInt(document.getElementById('s-font').value);
+  
   state.accent     = document.getElementById('s-accent').value;
   state.bgOpacity  = parseFloat(document.getElementById('s-opacity').value);
   state.teamFont   = document.getElementById('s-team-font').value;
@@ -327,6 +365,82 @@ function collectState() {
   return state;
 }
 
+// === УПРАВЛІННЯ ТЕМАМИ НАЛАШТУВАНЬ ===
+function updateThemeDropdown() {
+  const select = document.getElementById('theme-select');
+  select.innerHTML = '<option value="">-- Оберіть збережену тему --</option>';
+  if(state.themes) {
+    Object.keys(state.themes).forEach(name => {
+      select.innerHTML += `<option value="${name}">${name}</option>`;
+    });
+  }
+}
+
+window.saveTheme = function() {
+  const name = document.getElementById('theme-name').value.trim();
+  if(!name) return alert('Будь ласка, введіть назву для нової теми!');
+  if(!state.themes) state.themes = {};
+  
+  // Зберігаємо поточні візуальні налаштування
+  state.themes[name] = {
+    scale: parseFloat(document.getElementById('s-scale').value),
+    tblWidth: parseInt(document.getElementById('s-t-width').value),
+    tblPadY: parseInt(document.getElementById('s-t-pad').value),
+    fontSize: parseInt(document.getElementById('s-font').value),
+    accent: document.getElementById('s-accent').value,
+    bgOpacity: parseFloat(document.getElementById('s-opacity').value),
+    teamFont: document.getElementById('s-team-font').value,
+    colors: {
+      rankings: { team: document.getElementById('c-rank-team').value, bg: document.getElementById('c-rank-bg').value, head: document.getElementById('c-rank-head').value },
+      groups:   { team: document.getElementById('c-group-team').value, bg: document.getElementById('c-group-bg').value, head: document.getElementById('c-group-head').value },
+      schedule: { team: document.getElementById('c-sched-team').value, bg: document.getElementById('c-sched-bg').value, head: document.getElementById('c-sched-head').value },
+      playoff:  { team: document.getElementById('c-play-team').value, bg: document.getElementById('c-play-bg').value, head: document.getElementById('c-play-head').value }
+    }
+  };
+  
+  document.getElementById('theme-name').value = '';
+  updateThemeDropdown();
+  document.getElementById('theme-select').value = name;
+  pushState();
+  alert('Тему "' + name + '" успішно збережено!');
+};
+
+window.loadTheme = function() {
+  const name = document.getElementById('theme-select').value;
+  if(!name || !state.themes || !state.themes[name]) return alert('Спочатку оберіть тему зі списку');
+  
+  const t = state.themes[name];
+  
+  document.getElementById('s-scale').value = t.scale || 1;
+  document.getElementById('s-t-width').value = t.tblWidth || 95;
+  document.getElementById('s-t-pad').value = t.tblPadY || 9;
+  document.getElementById('s-font').value = t.fontSize || 15;
+  document.getElementById('s-accent').value = t.accent || '#00e5ff';
+  document.getElementById('s-opacity').value = t.bgOpacity || 0.88;
+  document.getElementById('s-team-font').value = t.teamFont || "'Barlow Condensed', sans-serif";
+  
+  const c = t.colors || defaultState().colors;
+  document.getElementById('c-rank-team').value = c.rankings.team; document.getElementById('c-rank-bg').value = c.rankings.bg; document.getElementById('c-rank-head').value = c.rankings.head;
+  document.getElementById('c-group-team').value = c.groups.team;  document.getElementById('c-group-bg').value = c.groups.bg;  document.getElementById('c-group-head').value = c.groups.head;
+  document.getElementById('c-sched-team').value = c.schedule.team; document.getElementById('c-sched-bg').value = c.schedule.bg; document.getElementById('c-sched-head').value = c.schedule.head;
+  document.getElementById('c-play-team').value = c.playoff.team;  document.getElementById('c-play-bg').value = c.playoff.bg;  document.getElementById('c-play-head').value = c.playoff.head;
+
+  syncRange('s-scale','rv-scale'); syncRange('s-t-width','rv-t-width'); syncRange('s-t-pad','rv-t-pad'); syncRange('s-font','rv-font'); syncRange('s-opacity','rv-opacity');
+  
+  autoSave();
+};
+
+window.deleteTheme = function() {
+  const name = document.getElementById('theme-select').value;
+  if(!name || !state.themes || !state.themes[name]) return;
+  if(confirm('Ви впевнені, що хочете видалити тему "' + name + '"?')) {
+    delete state.themes[name];
+    updateThemeDropdown();
+    pushState();
+  }
+};
+// ==========================================
+
 window.showPage = function(id) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
@@ -343,6 +457,8 @@ window.syncRange = function(inputId, valId) {
   const el = document.getElementById(valId);
   if (inputId==='s-scale') el.textContent = v.toFixed(2)+'×';
   else if (inputId==='s-font') el.textContent = v+'px';
+  else if (inputId==='s-t-pad') el.textContent = v+'px';
+  else if (inputId==='s-t-width') el.textContent = v+'%';
   else if (inputId==='s-opacity') el.textContent = Math.round(v*100)+'%';
 };
 
@@ -403,7 +519,6 @@ function autoGroups(gc,tc) { const L='ABCDEFGH'; return Array.from({length:gc},(
 function renderGroupEditor() {
   const gc=parseInt(document.getElementById('g-count').value); const grps=state.groups||autoGroups(gc,parseInt(document.getElementById('g-teams').value));
   
-  // Оновлюємо випадаючий список "Відображення на трансляції"
   const visSelect = document.getElementById('g-visible');
   const currentVis = state.visibleGroup || visSelect.value || 'all';
   let visHTML = '<option value="all">Всі групи разом</option>';
@@ -451,9 +566,15 @@ function initUI() {
   textEl.textContent = isVis ? 'В ЕФІРІ' : 'ПРИХОВАНО';
   textEl.style.color = isVis ? 'var(--green)' : 'var(--red)';
 
+  document.getElementById('tour-visible').checked = state.tourVisible || false;
+  document.getElementById('tour-text').value = state.tourText || 'PADEL TOURNAMENT 2026';
+
   document.querySelectorAll('.view-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('vbtn-'+(state.view||'rankings'))?.classList.add('active');
+  
   document.getElementById('s-scale').value   = state.scale||1;
+  document.getElementById('s-t-width').value = state.tblWidth||95;
+  document.getElementById('s-t-pad').value   = state.tblPadY||9;
   document.getElementById('s-font').value    = state.fontSize||15;
   document.getElementById('s-accent').value  = state.accent||'#00e5ff';
   document.getElementById('s-opacity').value = state.bgOpacity||0.88;
@@ -465,7 +586,8 @@ function initUI() {
   document.getElementById('c-sched-team').value = c.schedule.team; document.getElementById('c-sched-bg').value = c.schedule.bg; document.getElementById('c-sched-head').value = c.schedule.head;
   document.getElementById('c-play-team').value = c.playoff.team;  document.getElementById('c-play-bg').value = c.playoff.bg;  document.getElementById('c-play-head').value = c.playoff.head;
 
-  syncRange('s-scale','rv-scale'); syncRange('s-font','rv-font'); syncRange('s-opacity','rv-opacity');
+  syncRange('s-scale','rv-scale'); syncRange('s-t-width','rv-t-width'); syncRange('s-t-pad','rv-t-pad'); syncRange('s-font','rv-font'); syncRange('s-opacity','rv-opacity');
+  
   document.getElementById('rank-title-inp').value = state.rankTitle||'';
   document.getElementById('g-count').value = state.groupCount||4;
   document.getElementById('g-teams').value = state.teamCount||4;
@@ -475,6 +597,7 @@ function initUI() {
   if(!state.groups) state.groups=autoGroups(state.groupCount||4,state.teamCount||4);
   if(!state.bracketData||!Object.keys(state.bracketData).length) state.bracketData=autoBracketData(state.bracketFormat||4);
   
+  updateThemeDropdown();
   renderGlobalTeams(); renderSchedEditor();
 }
 initUI();
