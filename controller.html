@@ -601,7 +601,8 @@ window.onMatrixInput = function(gi, ti, tj, value) {
  
 function recalcGroupStats(gi) {
   const tc = parseInt(document.getElementById('g-teams').value);
-  // Зберемо всі рахунки для цієї групи з DOM
+ 
+  // Збираємо всі рахунки для цієї групи з DOM
   const scores = [];
   for (let ti = 0; ti < tc; ti++) {
     scores[ti] = [];
@@ -611,7 +612,8 @@ function recalcGroupStats(gi) {
     }
   }
  
-  // Для кожної команди підрахуємо І, В, П, МГ (геми), Очки
+  // Розраховуємо статистику кожної команди
+  const stats = [];
   for (let ti = 0; ti < tc; ti++) {
     let p = 0, w = 0, l = 0, gf = 0, ga = 0, pts = 0;
     for (let tj = 0; tj < tc; tj++) {
@@ -621,25 +623,96 @@ function recalcGroupStats(gi) {
       const parts = sc.split(':');
       const a = parseInt(parts[0]), b = parseInt(parts[1]);
       if (isNaN(a) || isNaN(b)) continue;
-      p++;
-      gf += a; ga += b;
+      p++; gf += a; ga += b;
       if (a > b) { w++; pts += 2; }
       else if (a < b) { l++; }
-      else { pts += 1; } // нічия
+      else { pts += 1; }
     }
-    // Знаходимо рядок цієї команди і оновлюємо поля
-    const row = document.querySelector(`.team-stat-row[data-gi="${gi}"][data-ti="${ti}"]`);
+    const diff = gf - ga;
+    const diffStr = diff > 0 ? '+' + diff : String(diff);
+    // МГ: "X:Y (+N)" або "X:Y (-N)" або "X:Y (0)"
+    const gdVal = p > 0 ? gf + ':' + ga + ' (' + diffStr + ')' : '0:0 (0)';
+    stats[ti] = { ti, p, w, l, gf, ga, pts, gdVal, diff };
+  }
+ 
+  // Оновлюємо поля в DOM для кожної команди
+  for (const s of stats) {
+    const row = document.querySelector(`.team-stat-row[data-gi="${gi}"][data-ti="${s.ti}"]`);
     if (row) {
-      row.querySelector('[data-f="p"]').value = p;
-      row.querySelector('[data-f="w"]').value = w;
-      row.querySelector('[data-f="l"]').value = l;
-      row.querySelector('[data-f="gd"]').value = p > 0 ? gf + ':' + ga : '0:0';
-      row.querySelector('[data-f="pts"]').value = pts;
+      row.querySelector('[data-f="p"]').value = s.p;
+      row.querySelector('[data-f="w"]').value = s.w;
+      row.querySelector('[data-f="l"]').value = s.l;
+      row.querySelector('[data-f="gd"]').value = s.gdVal;
+      row.querySelector('[data-f="pts"]').value = s.pts;
     }
   }
+ 
+  // Сортуємо рядки в DOM за очками (потім за перемогами, потім за різницею геймів)
+  const sorted = [...stats].sort((a, b) => {
+    if (b.pts !== a.pts) return b.pts - a.pts;
+    if (b.w !== a.w) return b.w - a.w;
+    return b.diff - a.diff;
+  });
+ 
+  const container = document.querySelector(`.team-stat-row[data-gi="${gi}"]`)?.parentElement;
+  if (container) {
+    sorted.forEach(s => {
+      const row = document.querySelector(`.team-stat-row[data-gi="${gi}"][data-ti="${s.ti}"]`);
+      if (row) container.appendChild(row);
+    });
+  }
+ 
+  // Авто-синхронізація плей-оф без підтвердження
+  autoSyncPlayoff();
 }
  
-window.seedPlayoffFromGroups = function() { if (!confirm('Ця дія перезапише команди в першому раунді Плей-оф. Продовжити?')) return; const groups = collectGroups(); const fmt = parseInt(document.getElementById('p-format').value); const sortedGroups = groups.map(g => { const teams = [...g.teams].sort((a, b) => { if (b.pts !== a.pts) return b.pts - a.pts; if (b.w !== a.w) return b.w - a.w; const gdA = a.gd.split(':').map(Number); const gdB = b.gd.split(':').map(Number); const diffA = (gdA[0]||0) - (gdA[1]||0); const diffB = (gdB[0]||0) - (gdB[1]||0); return diffB - diffA; }); return { letter: g.letter, top: teams }; }); const getT = (gIdx, pos) => { if (!sortedGroups[gIdx] || !sortedGroups[gIdx].top[pos] || !sortedGroups[gIdx].top[pos].name) return `Група ${'ABCDEFGHIJ'[gIdx] || ''} ${pos+1}`; return sortedGroups[gIdx].top[pos].name; }; const bData = collectBracket(); if (fmt === 8) { bData['0-0'].t1 = getT(0,0); bData['0-0'].t2 = getT(1,1); bData['0-1'].t1 = getT(2,0); bData['0-1'].t2 = getT(3,1); bData['0-2'].t1 = getT(4,0); bData['0-2'].t2 = getT(5,1); bData['0-3'].t1 = getT(6,0); bData['0-3'].t2 = getT(7,1); bData['0-4'].t1 = getT(1,0); bData['0-4'].t2 = getT(0,1); bData['0-5'].t1 = getT(3,0); bData['0-5'].t2 = getT(2,1); bData['0-6'].t1 = getT(5,0); bData['0-6'].t2 = getT(4,1); bData['0-7'].t1 = getT(7,0); bData['0-7'].t2 = getT(6,1); } else if (fmt === 4) { bData['0-0'].t1 = getT(0,0); bData['0-0'].t2 = getT(1,1); bData['0-1'].t1 = getT(2,0); bData['0-1'].t2 = getT(3,1); bData['0-2'].t1 = getT(1,0); bData['0-2'].t2 = getT(0,1); bData['0-3'].t1 = getT(3,0); bData['0-3'].t2 = getT(2,1); } else if (fmt === 2) { bData['0-0'].t1 = getT(0,0); bData['0-0'].t2 = getT(1,1); bData['0-1'].t1 = getT(1,0); bData['0-1'].t2 = getT(0,1); } state.bracketData = bData; renderBracketEditor(); autoSave(); alert('Плей-оф успішно сформовано на основі поточних результатів груп!'); };
+function getSortedGroupsForPlayoff() {
+  const groups = collectGroups();
+  return groups.map(g => {
+    const teams = [...g.teams].sort((a, b) => {
+      if (b.pts !== a.pts) return b.pts - a.pts;
+      if (b.w !== a.w) return b.w - a.w;
+      const gdA = a.gd.replace(/\s*\(.*\)/, '').split(':').map(Number);
+      const gdB = b.gd.replace(/\s*\(.*\)/, '').split(':').map(Number);
+      const diffA = (gdA[0]||0) - (gdA[1]||0);
+      const diffB = (gdB[0]||0) - (gdB[1]||0);
+      return diffB - diffA;
+    });
+    return { letter: g.letter, top: teams };
+  });
+}
+ 
+function autoSyncPlayoff() {
+  const fmt = parseInt(document.getElementById('p-format').value);
+  const sortedGroups = getSortedGroupsForPlayoff();
+  const getT = (gIdx, pos) => {
+    if (!sortedGroups[gIdx] || !sortedGroups[gIdx].top[pos] || !sortedGroups[gIdx].top[pos].name) return `Група ${'ABCDEFGHIJ'[gIdx]||''} ${pos+1}`;
+    return sortedGroups[gIdx].top[pos].name;
+  };
+  const bData = state.bracketData || {};
+  if (fmt === 8) {
+    bData['0-0'].t1=getT(0,0); bData['0-0'].t2=getT(1,1);
+    bData['0-1'].t1=getT(2,0); bData['0-1'].t2=getT(3,1);
+    bData['0-2'].t1=getT(4,0); bData['0-2'].t2=getT(5,1);
+    bData['0-3'].t1=getT(6,0); bData['0-3'].t2=getT(7,1);
+    bData['0-4'].t1=getT(1,0); bData['0-4'].t2=getT(0,1);
+    bData['0-5'].t1=getT(3,0); bData['0-5'].t2=getT(2,1);
+    bData['0-6'].t1=getT(5,0); bData['0-6'].t2=getT(4,1);
+    bData['0-7'].t1=getT(7,0); bData['0-7'].t2=getT(6,1);
+  } else if (fmt === 4) {
+    if(bData['0-0']) { bData['0-0'].t1=getT(0,0); bData['0-0'].t2=getT(1,1); }
+    if(bData['0-1']) { bData['0-1'].t1=getT(2,0); bData['0-1'].t2=getT(3,1); }
+    if(bData['0-2']) { bData['0-2'].t1=getT(1,0); bData['0-2'].t2=getT(0,1); }
+    if(bData['0-3']) { bData['0-3'].t1=getT(3,0); bData['0-3'].t2=getT(2,1); }
+  } else if (fmt === 2) {
+    if(bData['0-0']) { bData['0-0'].t1=getT(0,0); bData['0-0'].t2=getT(1,1); }
+    if(bData['0-1']) { bData['0-1'].t1=getT(1,0); bData['0-1'].t2=getT(0,1); }
+  }
+  state.bracketData = bData;
+  renderBracketEditor();
+}
+ 
+window.seedPlayoffFromGroups = function() { if (!confirm('Ця дія перезапише команди в першому раунді Плей-оф. Продовжити?')) return; autoSyncPlayoff(); renderBracketEditor(); autoSave(); alert('Плей-оф успішно сформовано на основі поточних результатів груп!'); };
  
 function autoBracketData(fmt) { const data={},L='ABCDEFGHIJ'; for(let ri=0;ri<Math.log2(fmt);ri++){ const count=fmt/Math.pow(2,ri+1); for(let mi=0;mi<count;mi++){ data[`${ri}-${mi}`]={t1:ri===0?`${L[mi*2]||'G'}1`:`Переможець М${ri}.${mi*2+1}`,t2:ri===0?`${L[mi*2+1]||'G'}2`:`Переможець М${ri}.${mi*2+2}`,s1:'-',s2:'-',winner:-1}; } } return data; }
 function renderBracketEditor() { const fmt=parseInt(document.getElementById('p-format').value); const data=state.bracketData&&Object.keys(state.bracketData).length?state.bracketData:autoBracketData(fmt); state.bracketData=data; const wrap=document.getElementById('bracket-editor'); wrap.innerHTML=''; const labels=fmt===8?['1/8','1/4','1/2','Фінал']:fmt===4?['1/4','1/2','Фінал']:['1/2','Фінал']; labels.forEach((lbl,ri)=>{ const count=fmt/Math.pow(2,ri+1); const card=document.createElement('div'); card.className='card'; card.innerHTML=`<div class="card-title">${lbl} ФІНАЛУ</div>`; for(let mi=0;mi<count;mi++){ const key=`${ri}-${mi}`,m=data[key]||{t1:'',t2:'',s1:'-',s2:'-',winner:-1}; const me=document.createElement('div'); me.className='match-editor'; me.innerHTML=`<div class="match-editor-title">Матч ${ri+1}.${mi+1}</div><div class="match-teams">${generateTeamSelect(m.t1, `mt1-${ri}-${mi}`)}<input type="text" value="${m.s1}" id="ms1-${ri}-${mi}" placeholder="Рах." style="text-align:center"><button class="win-btn ${m.winner===0?'active':''}" onclick="setWinner(${ri},${mi},0)">W</button></div><div class="match-teams">${generateTeamSelect(m.t2, `mt2-${ri}-${mi}`)}<input type="text" value="${m.s2}" id="ms2-${ri}-${mi}" placeholder="Рах." style="text-align:center"><button class="win-btn ${m.winner===1?'active':''}" onclick="setWinner(${ri},${mi},1)">W</button></div>`; card.appendChild(me); } wrap.appendChild(card); }); }
