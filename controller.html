@@ -189,7 +189,7 @@ input:checked + .slider:before { transform: translateX(22px); background-color: 
   </div>
 
   <div class="card">
-    <div class="card-title">Додати нову команду до списку</div>
+    <div class="card-title">Додати нову команду до списку (з автододаванням у Рейтинг)</div>
     <div style="display:flex; gap:8px; margin-bottom: 12px;">
       <input type="text" id="new-team-inp" class="field" placeholder="Назва команди" style="flex:1; padding:9px 12px; background:rgba(255,255,255,.06); color:var(--text); border:1px solid var(--border); border-radius:8px; margin-bottom: 0;">
       <button class="btn btn-primary" onclick="addGlobalTeam()">+ Додати</button>
@@ -465,25 +465,53 @@ window.syncRange = function(inputId, valId) { const v = parseFloat(document.getE
 
 window.globalTeamsList = [];
 function renderGlobalTeams() { const wrap = document.getElementById('global-teams-list'); wrap.innerHTML = ''; window.globalTeamsList.forEach((team, i) => { const row = document.createElement('div'); row.style = 'display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:rgba(255,255,255,.05); border-radius:6px; font-size:14px;'; row.innerHTML = `<span>${team}</span><button class="del-btn" onclick="delGlobalTeam(${i})">✕</button>`; wrap.appendChild(row); }); renderRankEditor(); renderGroupEditor(); renderBracketEditor(); }
-window.addGlobalTeam = function() { const inp = document.getElementById('new-team-inp'); const val = inp.value.trim(); if (val) { if (!window.globalTeamsList) window.globalTeamsList = []; window.globalTeamsList.push(val); inp.value = ''; renderGlobalTeams(); autoSave(); } };
+
+// ЗМІНЕНО: Додавання однієї команди з автододаванням у Рейтинг
+window.addGlobalTeam = function() { 
+  const inp = document.getElementById('new-team-inp'); 
+  const val = inp.value.trim(); 
+  if (val) { 
+    if (!window.globalTeamsList) window.globalTeamsList = []; 
+    if (!window.globalTeamsList.includes(val)) {
+      window.globalTeamsList.push(val); 
+      // Авто-додавання в таблицю рейтингу
+      state.rankings = collectRankings();
+      const n = state.rankings.length + 1;
+      state.rankings.push({seed: n, players: val, group: 'ABCDEFGHIJ'[(n-1)%10], pts: 0});
+    }
+    inp.value = ''; 
+    renderGlobalTeams(); 
+    autoSave(); 
+  } 
+};
 window.delGlobalTeam = function(i) { window.globalTeamsList.splice(i, 1); renderGlobalTeams(); autoSave(); };
 
-// МАСОВЕ ДОДАВАННЯ КОМАНД
+// ЗМІНЕНО: Масове додавання команд з автододаванням у Рейтинг
 window.addBulkTeams = function() {
   const inp = document.getElementById('bulk-teams-inp');
   const lines = inp.value.split('\n');
   let added = false;
   if (!window.globalTeamsList) window.globalTeamsList = [];
+  
+  state.rankings = collectRankings(); // беремо поточний стан рейтингу
+  let currentSeed = state.rankings.length;
+  
   lines.forEach(line => {
     const val = line.trim();
     if (val && !window.globalTeamsList.includes(val)) {
       window.globalTeamsList.push(val);
+      
+      // Авто-додавання в таблицю рейтингу
+      currentSeed++;
+      state.rankings.push({seed: currentSeed, players: val, group: 'ABCDEFGHIJ'[(currentSeed-1)%10], pts: 0});
+      
       added = true;
     }
   });
+  
   if (added) {
     inp.value = '';
-    renderGlobalTeams();
+    renderGlobalTeams(); // це автоматично оновить таблицю рейтингу на екрані
     autoSave();
   }
 };
