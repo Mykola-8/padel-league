@@ -46,7 +46,7 @@ body{font-family:'Barlow Condensed',sans-serif;background:var(--bg);color:var(--
 .field{margin-bottom:12px;}
 .field label{display:block;font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;}
 .field input,.field select,.field textarea, select.dyn-select{width:100%;padding:9px 12px;background:rgba(255,255,255,.06);color:var(--text);border:1px solid var(--border);border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-size:14px;}
-.field input:focus,.field select:focus, select.dyn-select:focus{outline:none;border-color:var(--accent);}
+.field input:focus,.field select:focus, select.dyn-select:focus, .field textarea:focus{outline:none;border-color:var(--accent);}
 .field input[type=range]{padding:4px 0;background:transparent;border:none;}
 .field input[type=color]{padding:2px;height:36px;cursor:pointer;}
 select.dyn-select { padding: 6px; font-size: 13px; }
@@ -190,9 +190,14 @@ input:checked + .slider:before { transform: translateX(22px); background-color: 
 
   <div class="card">
     <div class="card-title">Додати нову команду до списку</div>
-    <div style="display:flex; gap:8px;">
-      <input type="text" id="new-team-inp" class="field" placeholder="Назва команди" style="flex:1; padding:9px 12px; background:rgba(255,255,255,.06); color:var(--text); border:1px solid var(--border); border-radius:8px;">
+    <div style="display:flex; gap:8px; margin-bottom: 12px;">
+      <input type="text" id="new-team-inp" class="field" placeholder="Назва команди" style="flex:1; padding:9px 12px; background:rgba(255,255,255,.06); color:var(--text); border:1px solid var(--border); border-radius:8px; margin-bottom: 0;">
       <button class="btn btn-primary" onclick="addGlobalTeam()">+ Додати</button>
+    </div>
+    <div style="font-size:11px; color:var(--muted); margin-bottom:6px; letter-spacing:1px; text-transform:uppercase;">Або вставте скопійований список (кожна з нового рядка)</div>
+    <div style="display:flex; gap:8px;">
+      <textarea id="bulk-teams-inp" rows="3" placeholder="Команда 1&#10;Команда 2&#10;Команда 3..." style="flex:1; padding:9px 12px; background:rgba(255,255,255,.06); color:var(--text); border:1px solid var(--border); border-radius:8px; resize:vertical; font-family:'Barlow Condensed',sans-serif; font-size:14px; margin-bottom:0;"></textarea>
+      <button class="btn btn-outline" style="align-self:flex-start;" onclick="addBulkTeams()">+ Додати список</button>
     </div>
   </div>
   <div class="card">
@@ -325,10 +330,10 @@ window.autoSave = function() {
 };
 
 document.addEventListener('input', (e) => { 
-  if(!['visibility-toggle','theme-select','theme-name','tour-save-select','tour-save-name', 'target-screen-select'].includes(e.target.id)) autoSave(); 
+  if(!['visibility-toggle','theme-select','theme-name','tour-save-select','tour-save-name', 'target-screen-select', 'bulk-teams-inp'].includes(e.target.id)) autoSave(); 
 });
 document.addEventListener('change', (e) => { 
-  if(!['visibility-toggle','theme-select','theme-name','tour-save-select','tour-save-name', 'target-screen-select'].includes(e.target.id)) autoSave(); 
+  if(!['visibility-toggle','theme-select','theme-name','tour-save-select','tour-save-name', 'target-screen-select', 'bulk-teams-inp'].includes(e.target.id)) autoSave(); 
 });
 
 // КЕРУВАННЯ РОЗДІЛЕНИМИ ЕКРАНАМИ
@@ -462,6 +467,26 @@ window.globalTeamsList = [];
 function renderGlobalTeams() { const wrap = document.getElementById('global-teams-list'); wrap.innerHTML = ''; window.globalTeamsList.forEach((team, i) => { const row = document.createElement('div'); row.style = 'display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:rgba(255,255,255,.05); border-radius:6px; font-size:14px;'; row.innerHTML = `<span>${team}</span><button class="del-btn" onclick="delGlobalTeam(${i})">✕</button>`; wrap.appendChild(row); }); renderRankEditor(); renderGroupEditor(); renderBracketEditor(); }
 window.addGlobalTeam = function() { const inp = document.getElementById('new-team-inp'); const val = inp.value.trim(); if (val) { if (!window.globalTeamsList) window.globalTeamsList = []; window.globalTeamsList.push(val); inp.value = ''; renderGlobalTeams(); autoSave(); } };
 window.delGlobalTeam = function(i) { window.globalTeamsList.splice(i, 1); renderGlobalTeams(); autoSave(); };
+
+// МАСОВЕ ДОДАВАННЯ КОМАНД
+window.addBulkTeams = function() {
+  const inp = document.getElementById('bulk-teams-inp');
+  const lines = inp.value.split('\n');
+  let added = false;
+  if (!window.globalTeamsList) window.globalTeamsList = [];
+  lines.forEach(line => {
+    const val = line.trim();
+    if (val && !window.globalTeamsList.includes(val)) {
+      window.globalTeamsList.push(val);
+      added = true;
+    }
+  });
+  if (added) {
+    inp.value = '';
+    renderGlobalTeams();
+    autoSave();
+  }
+};
 
 function generateTeamSelect(selectedValue, id, dataAttrs = "") { let options = `<option value="">-- Оберіть команду --</option>`; const teams = window.globalTeamsList || []; if (selectedValue && !teams.includes(selectedValue)) options += `<option value="${selectedValue}" selected>${selectedValue}</option>`; teams.forEach(team => { options += `<option value="${team}" ${team === selectedValue ? 'selected' : ''}>${team}</option>`; }); return `<select class="dyn-select" ${id ? `id="${id}"` : ''} ${dataAttrs}>${options}</select>`; }
 
