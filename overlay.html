@@ -87,6 +87,8 @@ html, body { width:100%; height:100%; background:transparent; overflow:hidden; f
 #v-groups.compact .group-card-head { padding:4px 10px; }
 #v-groups.compact .group-letter { font-size:24px; }
 #v-groups.compact .g-table td, #v-groups.compact .g-table th { padding: calc(var(--tbl-pad-y)/1.5) 8px; font-size:0.9em; }
+.chess-x { background: rgba(0,0,0,0.4) !important; border-radius: 4px; }
+.chess-val { font-family: 'Bebas Neue', sans-serif; font-size: 1.1em; color: var(--accent); letter-spacing: 0.5px; }
 
 /* SCHEDULE */
 #v-schedule { padding:24px; }
@@ -234,21 +236,13 @@ function applyState(s) {
   
   // 3. АВТОМАТИЧНА ФІЛЬТРАЦІЯ ДАНИХ (Якщо це окремий корт)
   if (courtIdx !== null) {
-      // Фільтр Груп: показуємо тільки групу для цього корту (Корт 1 = Група А)
       s.visibleGroup = courtIdx.toString();
-
-      // Фільтр Рейтингу: показуємо тільки гравців з відповідної групи
       const targetGroup = 'ABCDEFGHIJ'[courtIdx] || 'A';
-      if (s.rankings) {
-          s.rankings = s.rankings.filter(r => r.group === targetGroup);
-      }
-
-      // Фільтр Розкладу: залишаємо Час і ТІЛЬКИ колонку цього корту
+      if (s.rankings) { s.rankings = s.rankings.filter(r => r.group === targetGroup); }
       if (s.schedHeaders && s.schedRows) {
           const targetCol = courtIdx; 
           const headerText = s.schedHeaders[courtIdx + 1] || `Корт ${courtParam}`;
           s.schedHeaders = [s.schedHeaders[0], headerText]; 
-          
           s.schedRows = s.schedRows.map(r => {
               if (r.isBreak) return r;
               return { time: r.time, cells: [r.cells[targetCol] || '-'], isBreak: false };
@@ -297,6 +291,7 @@ function renderGroups(s) {
   const view = document.getElementById('v-groups'); if(!view) return; view.innerHTML = '';
   const gc = s.groupCount || 4; const tc = s.teamCount || 4; 
   const vis = s.visibleGroup || 'all';
+  const isChess = (s.groupLayout === 'chess');
 
   let cols = 2;
   if (vis === 'all') { if(gc === 3) cols = 3; else if(gc === 4) cols = 2; else if(gc === 6) cols = 2; else if(gc >= 8) cols = 4; } 
@@ -317,9 +312,39 @@ function renderGroups(s) {
     let rows = '';
     (grp.teams || []).forEach((team, ti) => {
       if(!team) return;
-      rows += `<tr><td class="team-name-text name-col"><span class="pos-n">${ti+1}</span>${team.name || ''}</td><td>${team.p||0}</td><td>${team.w||0}</td><td>${team.l||0}</td><td>${team.gd||'0:0'}</td><td>${team.pts||0}</td><td>${ti<2?'<span class="advance-star">★</span>':''}</td></tr>`;
+      if (isChess) {
+        let scoreCells = '';
+        for(let tj=0; tj<tc; tj++) {
+          if (ti === tj) {
+            scoreCells += `<td class="chess-x"></td>`;
+          } else {
+            const txt = (team.scores && team.scores[tj]) ? team.scores[tj] : '';
+            scoreCells += `<td class="chess-val">${txt}</td>`;
+          }
+        }
+        rows += `<tr>
+          <td class="team-name-text name-col"><span class="pos-n">${ti+1}</span>${team.name || ''}</td>
+          ${scoreCells}
+          <td>${team.w||0}</td>
+          <td>${team.l||0}</td>
+          <td style="color:var(--accent2); font-weight:bold; font-size:1.1em;">${team.pts||0}</td>
+          <td>${ti<2?'<span class="advance-star">★</span>':''}</td>
+        </tr>`;
+      } else {
+        rows += `<tr><td class="team-name-text name-col"><span class="pos-n">${ti+1}</span>${team.name || ''}</td><td>${team.p||0}</td><td>${team.w||0}</td><td>${team.l||0}</td><td>${team.gd||'0:0'}</td><td style="color:var(--accent2); font-weight:bold; font-size:1.1em;">${team.pts||0}</td><td>${ti<2?'<span class="advance-star">★</span>':''}</td></tr>`;
+      }
     });
-    card.innerHTML = `<div class="group-card-head"><div class="group-letter">${letter}</div><div><div class="group-title">Група ${letter}</div><div class="group-sub">★ Top 2 → Плей-оф</div></div></div><table class="g-table"><thead><tr><th>Команда</th><th>І</th><th>В</th><th>П</th><th>МГ</th><th>Очки</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
+
+    let theadHTML = '';
+    if (isChess) {
+      let headCols = '';
+      for(let tj=0; tj<tc; tj++) headCols += `<th>${tj+1}</th>`;
+      theadHTML = `<tr><th>Команда</th>${headCols}<th>В</th><th>П</th><th>Очки</th><th></th></tr>`;
+    } else {
+      theadHTML = `<tr><th>Команда</th><th>І</th><th>В</th><th>П</th><th>МГ</th><th>Очки</th><th></th></tr>`;
+    }
+
+    card.innerHTML = `<div class="group-card-head"><div class="group-letter">${letter}</div><div><div class="group-title">Група ${letter}</div><div class="group-sub">★ Top 2 → Плей-оф</div></div></div><table class="g-table"><thead>${theadHTML}</thead><tbody>${rows}</tbody></table>`;
     view.appendChild(card);
   });
 }
