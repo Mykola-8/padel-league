@@ -152,6 +152,14 @@ input:checked + .slider:before { transform: translateX(22px); background-color: 
       <div class="view-btn" id="vbtn-playoff" onclick="setView('playoff')"><span class="icon">🏆</span>Плей-оф</div>
     </div>
   </div>
+ 
+  <div class="card" id="bracket-view-card">
+    <div class="card-title">Яку сітку Плей-оф показувати (для вигляду "Плей-оф")</div>
+    <div class="view-btns">
+      <div class="view-btn active" id="bvbtn-upper" onclick="setBracketView('upper')"><span class="icon">🏆</span>Верхня сітка</div>
+      <div class="view-btn" id="bvbtn-lower" onclick="setBracketView('lower')"><span class="icon">🥉</span>Нижня сітка</div>
+    </div>
+  </div>
   
   <div class="card">
     <div class="card-title">🔗 Посилання для OBS</div>
@@ -275,14 +283,24 @@ input:checked + .slider:before { transform: translateX(22px); background-color: 
 <div class="page" id="page-playoff">
   <div class="sec-title">Плей-оф сітка</div>
   <div class="card">
-    <div class="card-title">Авто-заповнення першого раунду</div>
-    <button class="btn btn-primary" onclick="seedPlayoffFromGroups()" style="width:100%;">🏆 Сформувати сітку з результатів Груп</button>
-    <div style="font-size:11px; color:var(--muted); margin-top:8px; text-align:center;">Автоматично відсортує команди в групах (за очками та різницею) і розставить 1-ші та 2-гі місця у Плей-оф.</div>
+    <div class="card-title">Авто-заповнення сіток</div>
+    <button class="btn btn-primary" onclick="seedPlayoffFromGroups()" style="width:100%;">🏆 Сформувати верхню та нижню сітки з результатів Груп</button>
+    <div style="font-size:11px; color:var(--muted); margin-top:8px; text-align:center;">Автоматично відсортує команди в групах (за очками та різницею). 1-ші та 2-гі місця → Верхня сітка (за золото). 3-ті та 4-ті місця → Нижня сітка (за втішний приз).</div>
   </div>
   <div class="card"><div class="card-title">Формат турніру</div><div class="field"><select id="p-format" onchange="rebuildBracket()"><option value="8">1/8 → Фінал (16 команд)</option><option value="4" selected>1/4 → Фінал (8 команд)</option><option value="2">1/2 → Фінал (4 команди)</option></select></div></div>
+ 
+  <div class="card" style="padding:6px;">
+    <div class="view-btns" style="grid-template-columns:1fr 1fr;">
+      <div class="view-btn active" id="btab-upper" onclick="switchBracketTab('upper')"><span class="icon">🏆</span>Верхня сітка</div>
+      <div class="view-btn" id="btab-lower" onclick="switchBracketTab('lower')"><span class="icon">🥉</span>Нижня сітка</div>
+    </div>
+  </div>
+ 
   <div id="bracket-editor"></div>
-  <div class="card"><div class="card-title">🏆 Чемпіон</div><div class="field"><input type="text" id="champion-inp" value="— — —"></div></div>
+  <div class="card"><div class="card-title">🏆 Чемпіон (Верхня сітка)</div><div class="field"><input type="text" id="champion-inp" value="— — —"></div></div>
+  <div class="card"><div class="card-title">🥉 Переможець нижньої сітки</div><div class="field"><input type="text" id="champion-lower-inp" value="— — —"></div></div>
 </div>
+ 
  
 <div class="status-bar">
   <div><span class="status-dot" id="status-dot"></span><span class="status-text" id="status-text">Підключення...</span></div>
@@ -345,20 +363,25 @@ document.addEventListener('change', (e) => {
  
 window.changeTargetScreen = function() {
   const target = document.getElementById('target-screen-select').value;
-  let isVis = true, v = 'rankings';
+  let isVis = true, v = 'rankings', bv = 'upper';
   if (target === 'global') {
      isVis = state.isVisible !== false;
      v = state.view || 'rankings';
+     bv = state.bracketView || 'upper';
   } else {
      isVis = (state.courtVisibility && state.courtVisibility[target] !== undefined) ? state.courtVisibility[target] : true;
      v = (state.courtViews && state.courtViews[target]) ? state.courtViews[target] : 'rankings';
+     bv = (state.courtBracketViews && state.courtBracketViews[target]) ? state.courtBracketViews[target] : 'upper';
   }
   document.getElementById('visibility-toggle').checked = isVis;
   const textEl = document.getElementById('vis-text');
   if (isVis) { textEl.textContent = 'В ЕФІРІ'; textEl.style.color = 'var(--green)'; } 
   else { textEl.textContent = 'ПРИХОВАНО'; textEl.style.color = 'var(--red)'; }
-  document.querySelectorAll('.view-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.view-btn').forEach(b=>{ if(!b.id.startsWith('bvbtn-')) b.classList.remove('active'); });
   document.getElementById('vbtn-'+v)?.classList.add('active');
+  document.getElementById('bvbtn-upper')?.classList.toggle('active', bv==='upper');
+  document.getElementById('bvbtn-lower')?.classList.toggle('active', bv==='lower');
+  updateBracketViewCardVisibility(v);
 };
  
 window.toggleVisibility = function() {
@@ -382,10 +405,28 @@ window.setView = function(v) {
       if (!state.courtViews) state.courtViews = {};
       state.courtViews[target] = v;
   }
-  document.querySelectorAll('.view-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.view-btn').forEach(b=>{ if(!b.id.startsWith('bvbtn-')) b.classList.remove('active'); });
   document.getElementById('vbtn-'+v)?.classList.add('active');
+  updateBracketViewCardVisibility(v);
   pushState();
 };
+ 
+window.setBracketView = function(bv) {
+  const target = document.getElementById('target-screen-select').value;
+  if (target === 'global') { state.bracketView = bv; }
+  else {
+      if (!state.courtBracketViews) state.courtBracketViews = {};
+      state.courtBracketViews[target] = bv;
+  }
+  document.getElementById('bvbtn-upper')?.classList.toggle('active', bv==='upper');
+  document.getElementById('bvbtn-lower')?.classList.toggle('active', bv==='lower');
+  pushState();
+};
+ 
+function updateBracketViewCardVisibility(v) {
+  const card = document.getElementById('bracket-view-card');
+  if (card) card.style.display = (v === 'playoff') ? '' : 'none';
+}
  
 window.pushState = async function() {
   const s = collectState();
@@ -397,6 +438,7 @@ function defaultState() {
   return {
     isVisible: true, view: 'rankings',
     courtVisibility: {}, courtViews: {},
+    bracketView: 'upper', courtBracketViews: {},
     tourVisible: false, tourText: 'PADEL TOURNAMENT 2026',
     tblWidth: 95, tblPadY: 9,
     themes: {}, savedTournaments: {},
@@ -407,7 +449,7 @@ function defaultState() {
     rankings: [{seed:1,players:'Artem Yatsenko / Slava Sedoplatov',group:'A',pts:13420}],
     groupLayout: 'classic', groupCount:4, teamCount:4, groups: autoGroups(4,4), visibleGroup: 'all',
     schedHeaders:['Час','Корт 1','Корт 2','Корт 3','Корт 4'], schedRows:[{time:'09:00',cells:['A1—A2','B1—B2','C1—C2','D1—D2'],isBreak:false}],
-    bracketFormat:4, bracketData:autoBracketData(4), champion:'— — —',
+    bracketFormat:4, bracketData:autoBracketData(4), bracketDataLower:autoBracketData(4), champion:'— — —', championLower:'— — —',
   };
 }
  
@@ -437,8 +479,10 @@ function collectState() {
   state.schedHeaders = collectSchedHeaders();
   state.schedRows  = collectSchedRows();
   state.bracketFormat = parseInt(document.getElementById('p-format').value);
-  state.bracketData   = collectBracket();
-  state.champion   = document.getElementById('champion-inp').value;
+  state.bracketData      = collectBracket('upper');
+  state.bracketDataLower = collectBracket('lower');
+  state.champion      = document.getElementById('champion-inp').value;
+  state.championLower = document.getElementById('champion-lower-inp').value;
   state.groupLayout = document.getElementById('g-layout').value || 'classic';
   state.groupCount = parseInt(document.getElementById('g-count').value);
   state.teamCount  = parseInt(document.getElementById('g-teams').value);
@@ -721,6 +765,7 @@ function autoSyncPlayoff() {
     if (!sortedGroups[gIdx] || !sortedGroups[gIdx].top[pos] || !sortedGroups[gIdx].top[pos].name) return `Група ${'ABCDEFGHIJ'[gIdx]||''} ${pos+1}`;
     return sortedGroups[gIdx].top[pos].name;
   };
+  // --- ВЕРХНЯ СІТКА (1-ші та 2-гі місця) ---
   const bData = state.bracketData || {};
   if (fmt === 8) {
     bData['0-0'].t1=getT(0,0); bData['0-0'].t2=getT(1,1);
@@ -741,16 +786,111 @@ function autoSyncPlayoff() {
     if(bData['0-1']) { bData['0-1'].t1=getT(1,0); bData['0-1'].t2=getT(0,1); }
   }
   state.bracketData = bData;
+ 
+  // --- НИЖНЯ СІТКА (3-ті та 4-ті місця) ---
+  const bDataLower = state.bracketDataLower || {};
+  if (fmt === 8) {
+    bDataLower['0-0'] = bDataLower['0-0']||{}; bDataLower['0-0'].t1=getT(0,2); bDataLower['0-0'].t2=getT(1,3);
+    bDataLower['0-1'] = bDataLower['0-1']||{}; bDataLower['0-1'].t1=getT(2,2); bDataLower['0-1'].t2=getT(3,3);
+    bDataLower['0-2'] = bDataLower['0-2']||{}; bDataLower['0-2'].t1=getT(4,2); bDataLower['0-2'].t2=getT(5,3);
+    bDataLower['0-3'] = bDataLower['0-3']||{}; bDataLower['0-3'].t1=getT(6,2); bDataLower['0-3'].t2=getT(7,3);
+    bDataLower['0-4'] = bDataLower['0-4']||{}; bDataLower['0-4'].t1=getT(1,2); bDataLower['0-4'].t2=getT(0,3);
+    bDataLower['0-5'] = bDataLower['0-5']||{}; bDataLower['0-5'].t1=getT(3,2); bDataLower['0-5'].t2=getT(2,3);
+    bDataLower['0-6'] = bDataLower['0-6']||{}; bDataLower['0-6'].t1=getT(5,2); bDataLower['0-6'].t2=getT(4,3);
+    bDataLower['0-7'] = bDataLower['0-7']||{}; bDataLower['0-7'].t1=getT(7,2); bDataLower['0-7'].t2=getT(6,3);
+  } else if (fmt === 4) {
+    if(bDataLower['0-0']) { bDataLower['0-0'].t1=getT(0,2); bDataLower['0-0'].t2=getT(1,3); }
+    if(bDataLower['0-1']) { bDataLower['0-1'].t1=getT(2,2); bDataLower['0-1'].t2=getT(3,3); }
+    if(bDataLower['0-2']) { bDataLower['0-2'].t1=getT(1,2); bDataLower['0-2'].t2=getT(0,3); }
+    if(bDataLower['0-3']) { bDataLower['0-3'].t1=getT(3,2); bDataLower['0-3'].t2=getT(2,3); }
+  } else if (fmt === 2) {
+    if(bDataLower['0-0']) { bDataLower['0-0'].t1=getT(0,2); bDataLower['0-0'].t2=getT(1,3); }
+    if(bDataLower['0-1']) { bDataLower['0-1'].t1=getT(1,2); bDataLower['0-1'].t2=getT(0,3); }
+  }
+  state.bracketDataLower = bDataLower;
+ 
   renderBracketEditor();
 }
  
-window.seedPlayoffFromGroups = function() { if (!confirm('Ця дія перезапише команди в першому раунді Плей-оф. Продовжити?')) return; autoSyncPlayoff(); renderBracketEditor(); autoSave(); alert('Плей-оф успішно сформовано на основі поточних результатів груп!'); };
+window.seedPlayoffFromGroups = function() { if (!confirm('Ця дія перезапише команди в першому раунді Верхньої та Нижньої сіток. Продовжити?')) return; autoSyncPlayoff(); renderBracketEditor(); autoSave(); alert('Верхню та нижню сітки плей-оф успішно сформовано на основі поточних результатів груп!'); };
  
 function autoBracketData(fmt) { const data={},L='ABCDEFGHIJ'; for(let ri=0;ri<Math.log2(fmt);ri++){ const count=fmt/Math.pow(2,ri+1); for(let mi=0;mi<count;mi++){ data[`${ri}-${mi}`]={t1:ri===0?`${L[mi*2]||'G'}1`:`Переможець М${ri}.${mi*2+1}`,t2:ri===0?`${L[mi*2+1]||'G'}2`:`Переможець М${ri}.${mi*2+2}`,s1:'-',s2:'-',winner:-1}; } } return data; }
-function renderBracketEditor() { const fmt=parseInt(document.getElementById('p-format').value); const data=state.bracketData&&Object.keys(state.bracketData).length?state.bracketData:autoBracketData(fmt); state.bracketData=data; const wrap=document.getElementById('bracket-editor'); wrap.innerHTML=''; const labels=fmt===8?['1/8','1/4','1/2','Фінал']:fmt===4?['1/4','1/2','Фінал']:['1/2','Фінал']; labels.forEach((lbl,ri)=>{ const count=fmt/Math.pow(2,ri+1); const card=document.createElement('div'); card.className='card'; card.innerHTML=`<div class="card-title">${lbl} ФІНАЛУ</div>`; for(let mi=0;mi<count;mi++){ const key=`${ri}-${mi}`,m=data[key]||{t1:'',t2:'',s1:'-',s2:'-',winner:-1}; const me=document.createElement('div'); me.className='match-editor'; me.innerHTML=`<div class="match-editor-title">Матч ${ri+1}.${mi+1}</div><div class="match-teams">${generateTeamSelect(m.t1, `mt1-${ri}-${mi}`)}<input type="text" value="${m.s1}" id="ms1-${ri}-${mi}" placeholder="Рах." style="text-align:center"><button class="win-btn ${m.winner===0?'active':''}" onclick="setWinner(${ri},${mi},0)">W</button></div><div class="match-teams">${generateTeamSelect(m.t2, `mt2-${ri}-${mi}`)}<input type="text" value="${m.s2}" id="ms2-${ri}-${mi}" placeholder="Рах." style="text-align:center"><button class="win-btn ${m.winner===1?'active':''}" onclick="setWinner(${ri},${mi},1)">W</button></div>`; card.appendChild(me); } wrap.appendChild(card); }); }
-function collectBracket() { const fmt=parseInt(document.getElementById('p-format').value),data={}; for(let ri=0;ri<Math.log2(fmt);ri++){ const count=fmt/Math.pow(2,ri+1); for(let mi=0;mi<count;mi++){ const key=`${ri}-${mi}`,old=state.bracketData?.[key]||{}; data[key]={t1:document.getElementById(`mt1-${ri}-${mi}`)?.value||old.t1||'',t2:document.getElementById(`mt2-${ri}-${mi}`)?.value||old.t2||'',s1:document.getElementById(`ms1-${ri}-${mi}`)?.value||old.s1||'-',s2:document.getElementById(`ms2-${ri}-${mi}`)?.value||old.s2||'-',winner:old.winner??-1}; } } return data; }
-window.setWinner = function(ri,mi,teamIdx) { const data=state.bracketData||{},key=`${ri}-${mi}`; if(!data[key]) return; data[key].winner=teamIdx; const winnerName=document.getElementById(`mt${teamIdx+1}-${ri}-${mi}`)?.value; const nk=`${ri+1}-${Math.floor(mi/2)}`; if(!data[nk]) data[nk]={t1:'',t2:'',s1:'-',s2:'-',winner:-1}; if(mi%2===0) data[nk].t1=winnerName; else data[nk].t2=winnerName; state.bracketData=data; renderBracketEditor(); autoSave(); };
-window.rebuildBracket = function() { state.bracketData=autoBracketData(parseInt(document.getElementById('p-format').value)); renderBracketEditor(); autoSave(); };
+function autoBracketDataLower(fmt) { const data={},L='ABCDEFGHIJ'; for(let ri=0;ri<Math.log2(fmt);ri++){ const count=fmt/Math.pow(2,ri+1); for(let mi=0;mi<count;mi++){ data[`${ri}-${mi}`]={t1:ri===0?`${L[mi*2]||'G'}3`:`Переможець М${ri}.${mi*2+1}`,t2:ri===0?`${L[mi*2+1]||'G'}4`:`Переможець М${ri}.${mi*2+2}`,s1:'-',s2:'-',winner:-1}; } } return data; }
+ 
+window.bracketEditorMode = 'upper';
+window.switchBracketTab = function(mode) {
+  // Зберігаємо поточну сітку перед перемиканням
+  if (window.bracketEditorMode === 'upper') state.bracketData = collectBracket('upper');
+  else state.bracketDataLower = collectBracket('lower');
+ 
+  window.bracketEditorMode = mode;
+  document.getElementById('btab-upper').classList.toggle('active', mode==='upper');
+  document.getElementById('btab-lower').classList.toggle('active', mode==='lower');
+  renderBracketEditor();
+};
+ 
+function renderBracketEditor() {
+  const fmt=parseInt(document.getElementById('p-format').value);
+  const mode = window.bracketEditorMode || 'upper';
+  const isLower = mode === 'lower';
+  if (!state.bracketData || !Object.keys(state.bracketData).length) state.bracketData = autoBracketData(fmt);
+  if (!state.bracketDataLower || !Object.keys(state.bracketDataLower).length) state.bracketDataLower = autoBracketDataLower(fmt);
+  const data = isLower ? state.bracketDataLower : state.bracketData;
+  const wrap=document.getElementById('bracket-editor'); wrap.innerHTML='';
+  const labels=fmt===8?['1/8','1/4','1/2','Фінал']:fmt===4?['1/4','1/2','Фінал']:['1/2','Фінал'];
+  const titleSuffix = isLower ? ' (НИЖНЯ СІТКА)' : '';
+  labels.forEach((lbl,ri)=>{
+    const count=fmt/Math.pow(2,ri+1); const card=document.createElement('div'); card.className='card';
+    card.innerHTML=`<div class="card-title">${lbl} ФІНАЛУ${titleSuffix}</div>`;
+    for(let mi=0;mi<count;mi++){
+      const key=`${ri}-${mi}`,m=data[key]||{t1:'',t2:'',s1:'-',s2:'-',winner:-1};
+      const me=document.createElement('div'); me.className='match-editor';
+      me.innerHTML=`<div class="match-editor-title">Матч ${ri+1}.${mi+1}</div><div class="match-teams">${generateTeamSelect(m.t1, `mt1-${ri}-${mi}`)}<input type="text" value="${m.s1}" id="ms1-${ri}-${mi}" placeholder="Рах." style="text-align:center"><button class="win-btn ${m.winner===0?'active':''}" onclick="setWinner(${ri},${mi},0)">W</button></div><div class="match-teams">${generateTeamSelect(m.t2, `mt2-${ri}-${mi}`)}<input type="text" value="${m.s2}" id="ms2-${ri}-${mi}" placeholder="Рах." style="text-align:center"><button class="win-btn ${m.winner===1?'active':''}" onclick="setWinner(${ri},${mi},1)">W</button></div>`;
+      card.appendChild(me);
+    }
+    wrap.appendChild(card);
+  });
+}
+ 
+function collectBracket(mode) {
+  const fmt=parseInt(document.getElementById('p-format').value), data={};
+  const isLower = mode === 'lower';
+  const currentMode = window.bracketEditorMode || 'upper';
+  const oldSet = isLower ? (state.bracketDataLower||{}) : (state.bracketData||{});
+  for(let ri=0;ri<Math.log2(fmt);ri++){
+    const count=fmt/Math.pow(2,ri+1);
+    for(let mi=0;mi<count;mi++){
+      const key=`${ri}-${mi}`, old=oldSet[key]||{};
+      if (mode === currentMode) {
+        data[key]={t1:document.getElementById(`mt1-${ri}-${mi}`)?.value||old.t1||'',t2:document.getElementById(`mt2-${ri}-${mi}`)?.value||old.t2||'',s1:document.getElementById(`ms1-${ri}-${mi}`)?.value||old.s1||'-',s2:document.getElementById(`ms2-${ri}-${mi}`)?.value||old.s2||'-',winner:old.winner??-1};
+      } else {
+        data[key]=old;
+      }
+    }
+  }
+  return data;
+}
+ 
+window.setWinner = function(ri,mi,teamIdx) {
+  const mode = window.bracketEditorMode || 'upper';
+  const isLower = mode === 'lower';
+  const data = isLower ? (state.bracketDataLower||{}) : (state.bracketData||{});
+  const key=`${ri}-${mi}`; if(!data[key]) return;
+  data[key].winner=teamIdx;
+  const winnerName=document.getElementById(`mt${teamIdx+1}-${ri}-${mi}`)?.value;
+  const nk=`${ri+1}-${Math.floor(mi/2)}`;
+  if(!data[nk]) data[nk]={t1:'',t2:'',s1:'-',s2:'-',winner:-1};
+  if(mi%2===0) data[nk].t1=winnerName; else data[nk].t2=winnerName;
+  if (isLower) state.bracketDataLower=data; else state.bracketData=data;
+  renderBracketEditor(); autoSave();
+};
+ 
+window.rebuildBracket = function() {
+  const fmt = parseInt(document.getElementById('p-format').value);
+  state.bracketData = autoBracketData(fmt);
+  state.bracketDataLower = autoBracketDataLower(fmt);
+  renderBracketEditor(); autoSave();
+};
  
 function initUI() {
   window.globalTeamsList = state.globalTeams || [];
@@ -782,9 +922,15 @@ function initUI() {
   document.getElementById('g-layout').value = state.groupLayout||'classic';
   document.getElementById('p-format').value = state.bracketFormat||4;
   document.getElementById('champion-inp').value = state.champion||'— — —';
+  document.getElementById('champion-lower-inp').value = state.championLower||'— — —';
   
   if(!state.groups) state.groups=autoGroups(state.groupCount||4,state.teamCount||4);
   if(!state.bracketData||!Object.keys(state.bracketData).length) state.bracketData=autoBracketData(state.bracketFormat||4);
+  if(!state.bracketDataLower||!Object.keys(state.bracketDataLower).length) state.bracketDataLower=autoBracketDataLower(state.bracketFormat||4);
+ 
+  window.bracketEditorMode = 'upper';
+  document.getElementById('btab-upper')?.classList.add('active');
+  document.getElementById('btab-lower')?.classList.remove('active');
   
   updateThemeDropdown();
   updateTourDropdown();
