@@ -236,8 +236,17 @@ function applyState(s) {
   
   // 3. АВТОМАТИЧНА ФІЛЬТРАЦІЯ ДАНИХ (Якщо це окремий корт)
   if (courtIdx !== null) {
-      s.visibleGroup = courtIdx.toString();
       const targetGroup = 'ABCDEFGHIJ'[courtIdx] || 'A';
+ 
+      // Групи: якщо в контролері вибрано "Всі групи разом" (visibleGroup === 'all'),
+      // показуємо на корт-екрані ВСІ групи так само, як на загальній трансляції.
+      // Якщо вибрано конкретну групу — поведінка як раніше (показуємо групу цього корту).
+      if (s.visibleGroup === 'all') {
+          // нічого не змінюємо — renderGroups сам покаже всі групи (vis === 'all')
+      } else {
+          s.visibleGroup = courtIdx.toString();
+      }
+ 
       if (s.rankings) { s.rankings = s.rankings.filter(r => r.group === targetGroup); }
       if (s.schedHeaders && s.schedRows) {
           const targetCol = courtIdx; 
