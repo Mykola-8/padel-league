@@ -190,6 +190,13 @@ input:checked + .slider:before { transform: translateX(22px); background-color: 
        <button class="btn btn-danger" onclick="deleteTournament()">Видалити</button>
     </div>
     <hr style="border:0; border-top:1px solid var(--border); margin:15px 0;">
+    <div style="font-size:11px; color:var(--muted); margin-bottom:8px; letter-spacing:1px; text-transform:uppercase;">📁 Файл на пристрої (резервна копія/перенесення)</div>
+    <div style="display:flex; gap:8px;">
+       <button class="btn btn-outline" style="flex:1;" onclick="exportTournamentFile()">⬇️ Зберегти турнір у файл</button>
+       <button class="btn btn-outline" style="flex:1;" onclick="document.getElementById('tour-file-input').click()">⬆️ Завантажити турнір з файлу</button>
+       <input type="file" id="tour-file-input" accept=".json,application/json" style="display:none" onchange="importTournamentFile(event)">
+    </div>
+    <hr style="border:0; border-top:1px solid var(--border); margin:15px 0;">
     <div style="display:flex; justify-content:space-between; align-items:center;">
        <span style="font-size:12px; color:var(--muted)">Повне скидання всіх команд, груп та плей-оф:</span>
        <button class="btn btn-danger btn-sm" onclick="resetTournament()">Очистити поточний турнір</button>
@@ -333,7 +340,16 @@ const app = initializeApp(firebaseConfig);
 const db  = getDatabase(app);
 const stateRef = ref(db, 'padel/state');
  
-let state = defaultState();
+const LOCAL_KEY = 'padelControllerState';
+ 
+function saveLocalBackup(s) {
+  try { localStorage.setItem(LOCAL_KEY, JSON.stringify(s)); } catch(e) { /* ignore (наприклад, переповнення сховища) */ }
+}
+function loadLocalBackup() {
+  try { const raw = localStorage.getItem(LOCAL_KEY); return raw ? JSON.parse(raw) : null; } catch(e) { return null; }
+}
+ 
+let state = loadLocalBackup() || defaultState();
 let connected = false;
  
 onValue(ref(db, '.info/connected'), snap => {
@@ -344,8 +360,12 @@ onValue(ref(db, '.info/connected'), snap => {
  
 onValue(stateRef, snap => {
   const val = snap.val();
-  if (val) { state = val; initUI(); }
+  if (val) { state = val; initUI(); saveLocalBackup(state); }
 }, { onlyOnce: true });
+ 
+// Якщо у локальному кеші вже є збережені налаштування — відобразимо їх негайно,
+// не чекаючи на відповідь Firebase (оновляться, коли Firebase відповість).
+if (state && Object.keys(state).length) { initUI(); }
  
 let saveTimeout;
 window.autoSave = function() {
@@ -353,6 +373,11 @@ window.autoSave = function() {
   document.getElementById('status-text').textContent = '⏳ Збереження...';
   saveTimeout = setTimeout(() => { pushState(); }, 500); 
 };
+ 
+// Запам'ятовуємо поточний стан локально при закритті/оновленні сторінки
+window.addEventListener('beforeunload', () => {
+  try { saveLocalBackup(collectState()); } catch(e) { /* ignore */ }
+});
  
 document.addEventListener('input', (e) => { 
   if(!['visibility-toggle','theme-select','theme-name','tour-save-select','tour-save-name', 'target-screen-select', 'bulk-teams-inp'].includes(e.target.id)) autoSave(); 
@@ -430,6 +455,7 @@ function updateBracketViewCardVisibility(v) {
  
 window.pushState = async function() {
   const s = collectState();
+  saveLocalBackup(s);
   try { await set(stateRef, s); document.getElementById('status-text').textContent = '✅ Оновлено о ' + new Date().toLocaleTimeString(); } 
   catch(e) { document.getElementById('status-text').textContent = '❌ Помилка: ' + e.message; }
 };
@@ -502,6 +528,43 @@ function updateTourDropdown() { const select = document.getElementById('tour-sav
 window.saveTournament = function() { const name = document.getElementById('tour-save-name').value.trim(); if(!name) return alert('Введіть назву турніру для збереження!'); if(!state.savedTournaments) state.savedTournaments = {}; const snap = collectState(); delete snap.themes; delete snap.savedTournaments; state.savedTournaments[name] = snap; document.getElementById('tour-save-name').value = ''; updateTourDropdown(); document.getElementById('tour-save-select').value = name; pushState(); alert('Турнір "' + name + '" успішно збережено!'); };
 window.loadTournament = function() { const name = document.getElementById('tour-save-select').value; if(!name || !state.savedTournaments || !state.savedTournaments[name]) return alert('Оберіть турнір зі списку'); if(!confirm('Завантажити турнір? Поточні незбережені дані будуть втрачені.')) return; const savedTours = state.savedTournaments; const savedThemes = state.themes; state = JSON.parse(JSON.stringify(state.savedTournaments[name])); state.savedTournaments = savedTours; state.themes = savedThemes; initUI(); autoSave(); };
 window.deleteTournament = function() { const name = document.getElementById('tour-save-select').value; if(!name || !state.savedTournaments || !state.savedTournaments[name]) return; if(confirm('Видалити турнір?')) { delete state.savedTournaments[name]; updateTourDropdown(); pushState(); } };
+ 
+// === ФАЙЛ НА ПРИСТРОЇ (експорт/імпорт) ===
+window.exportTournamentFile = function() {
+  const snap = collectState();
+  const data = JSON.stringify(snap, null, 2);
+  const blob = new Blob([data], {type: 'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const dateStr = new Date().toISOString().slice(0,10);
+  const nameHint = (document.getElementById('tour-text')?.value || 'turnir').trim().replace(/[^a-zA-Zа-яА-ЯіІїЇєЄ0-9_\- ]/g,'').replace(/\s+/g,'_') || 'turnir';
+  a.href = url; a.download = `padel_${nameHint}_${dateStr}.json`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
+ 
+window.importTournamentFile = function(event) {
+  const file = event.target.files && event.target.files[0];
+  if (!file) return;
+  if (!confirm('Завантажити турнір з файлу? Поточні незбережені дані будуть втрачені.')) { event.target.value = ''; return; }
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    try {
+      const loaded = JSON.parse(e.target.result);
+      const savedTours = state.savedTournaments;
+      const savedThemes = state.themes;
+      state = loaded;
+      if (!state.savedTournaments) state.savedTournaments = savedTours || {};
+      if (!state.themes) state.themes = savedThemes || {};
+      initUI(); autoSave();
+      alert('Турнір успішно завантажено з файлу!');
+    } catch (err) {
+      alert('Помилка читання файлу: ' + err.message);
+    }
+    event.target.value = '';
+  };
+  reader.readAsText(file);
+};
 window.resetTournament = function() { if(!confirm('🚨 УВАГА: Це повністю очистить усі команди, групи та плей-оф. Бажаєте продовжити?')) return; const savedTours = state.savedTournaments; const savedThemes = state.themes; state = defaultState(); state.savedTournaments = savedTours; state.themes = savedThemes; initUI(); autoSave(); };
  
 window.showPage = function(id) { document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); document.getElementById('page-'+id).classList.add('active'); document.getElementById('tab-'+id).classList.add('active'); };
@@ -936,7 +999,6 @@ function initUI() {
   updateTourDropdown();
   renderGlobalTeams(); renderSchedEditor();
 }
-initUI();
 </script>
 </body>
 </html>
