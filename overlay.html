@@ -434,7 +434,7 @@ function renderPlayoff(s) {
   const isLower = bracketView === 'lower';
  
   const titleEl = document.getElementById('playoff-title');
-  if (titleEl) titleEl.textContent = isLower ? `ЗА 3-ТЄ МІСЦЕ` : `TOURNAMENT PLAYOFF`;
+  if (titleEl) titleEl.textContent = isLower ? `НИЖНЯ СІТКА` : `TOURNAMENT PLAYOFF`;
   const data = (isLower ? s.bracketDataLower : s.bracketData) || {};
   const champion = isLower ? s.championLower : s.champion;
   const labels = fmt===8 ? ['1/8 ФІНАЛУ','1/4 ФІНАЛУ','ПІВФІНАЛ','ФІНАЛ'] : fmt===4 ? ['1/4 ФІНАЛУ','ПІВФІНАЛ','ФІНАЛ'] : ['ПІВФІНАЛ','ФІНАЛ'];
@@ -449,7 +449,7 @@ function renderPlayoff(s) {
       const mc = document.createElement('div'); 
       if (isFinalRound) {
         mc.className = 'b-match final-match';
-        mc.innerHTML = `<div class="final-match-header">${isLower ? 'MATCH FOR 3RD PLACE' : 'FINAL MATCH'}</div><div class="b-team ${m.winner===0?'winner':m.winner===1?'loser':''}"><span class="team-name-text">${m.t1 || ''}</span><span class="b-score">${m.s1 || '0'}</span></div><div class="b-team ${m.winner===1?'winner':m.winner===0?'loser':''}"><span class="team-name-text">${m.t2 || ''}</span><span class="b-score">${m.s2 || '0'}</span></div>`;
+        mc.innerHTML = `<div class="final-match-header">${isLower ? 'НИЖНЯ СІТКА' : 'FINAL MATCH'}</div><div class="b-team ${m.winner===0?'winner':m.winner===1?'loser':''}"><span class="team-name-text">${m.t1 || ''}</span><span class="b-score">${m.s1 || '0'}</span></div><div class="b-team ${m.winner===1?'winner':m.winner===0?'loser':''}"><span class="team-name-text">${m.t2 || ''}</span><span class="b-score">${m.s2 || '0'}</span></div>`;
       } else {
         mc.className = 'b-match';
         mc.innerHTML = `<div class="b-team ${m.winner===0?'winner':m.winner===1?'loser':''}"><span class="team-name-text">${m.t1 || ''}</span><span class="b-score">${m.s1 || '0'}</span></div><div class="b-team ${m.winner===1?'winner':m.winner===0?'loser':''}"><span class="team-name-text">${m.t2 || ''}</span><span class="b-score">${m.s2 || '0'}</span></div>`;
@@ -458,7 +458,7 @@ function renderPlayoff(s) {
     }
     if (isFinalRound && champion && champion !== '— — —') {
       const cc = document.createElement('div'); cc.className = 'champ-card';
-      cc.innerHTML = `<div class="champ-trophy">${isLower ? '🥉' : '🏆'}</div><div class="champ-lbl">${isLower ? 'ЗА 3-ТЄ МІСЦЕ' : 'ЧЕМПІОН'}</div><div class="champ-name team-name-text">${champion}</div>`;
+      cc.innerHTML = `<div class="champ-trophy">${isLower ? '🥉' : '🏆'}</div><div class="champ-lbl">${isLower ? 'НИЖНЯ СІТКА' : 'ЧЕМПІОН'}</div><div class="champ-name team-name-text">${champion}</div>`;
       rd.appendChild(cc);
     } outer.appendChild(rd);
   });
