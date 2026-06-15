@@ -329,10 +329,27 @@ function renderGroups(s) {
   if (gc >= 6 && vis === 'all') view.classList.add('compact'); else view.classList.remove('compact');
  
   const safeGroups = s.groups || [];
-  safeGroups.forEach((grp, gi) => {
+ 
+  // Для окремого корту шукаємо групу за БУКВОЮ (а не за індексом масиву),
+  // щоб корти 2,3,4... коректно показували свою групу навіть якщо
+  // масив груп неповний або переставлений.
+  let groupsToRender;
+  if (vis !== 'all') {
+    const visIdx = parseInt(vis);
+    const targetLetter = 'ABCDEFGHIJ'[visIdx] || String.fromCharCode(65 + visIdx);
+    let found = safeGroups.find((g, gi) => g && ((g.letter || 'ABCDEFGHIJ'[gi]) === targetLetter));
+    if (!found) {
+      // Групи ще немає в даних — показуємо порожню заготовку, а не порожній екран
+      found = { letter: targetLetter, teams: Array.from({length: tc}, () => ({name:'', p:0, w:0, l:0, gd:'0:0', pts:0, scores:[]})) };
+    }
+    groupsToRender = [found];
+  } else {
+    groupsToRender = safeGroups;
+  }
+ 
+  groupsToRender.forEach((grp, idx) => {
     if(!grp) return;
-    if (vis !== 'all' && parseInt(vis) !== gi) return;
-    const letter = 'ABCDEFGHIJ'[gi] || String.fromCharCode(65+gi);
+    const letter = grp.letter || 'ABCDEFGHIJ'[idx] || String.fromCharCode(65+idx);
     const card = document.createElement('div'); card.className = 'group-card' + (tc >= 5 ? ' compact-teams' : '');
     if (vis !== 'all') { card.style.minWidth = '600px'; card.style.maxWidth = '90vw'; }
  
@@ -428,3 +445,4 @@ function renderPlayoff(s) {
 </script>
 </body>
 </html>
+ 
