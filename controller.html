@@ -77,6 +77,10 @@ select.dyn-select option { background: var(--bg); color: #fff; }
 .team-stat-row{display:grid;grid-template-columns:1fr 40px 40px 40px 60px 50px;gap:5px;align-items:center;margin-bottom:5px;}
 .team-stat-row input, .team-stat-row select{font-size:12px;}
 .groups-conf{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+.size-tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+.size-tab{padding:8px 10px;border-radius:8px;background:var(--card2);border:1px solid var(--border);text-align:center;cursor:pointer;font-size:12px;font-weight:700;flex:1;min-width:70px;transition:all .15s;}
+.size-tab:hover{border-color:var(--accent);color:var(--accent);}
+.size-tab.active{border-color:var(--accent);background:rgba(0,229,255,.1);color:var(--accent);}
  
 /* STATUS BAR */
 .status-bar{position:fixed;bottom:0;left:0;right:0;background:rgba(4,8,15,.97);border-top:1px solid var(--border);padding:10px 16px;display:flex;align-items:center;justify-content:space-between;backdrop-filter:blur(10px);z-index:200;}
@@ -152,6 +156,14 @@ input:checked + .slider:before { transform: translateX(22px); background-color: 
       <div class="view-btn" id="vbtn-playoff" onclick="setView('playoff')"><span class="icon">🏆</span>Плей-оф</div>
     </div>
   </div>
+ 
+  <div class="card" id="card-bracket-view" style="display:none;">
+    <div class="card-title">Який блок плей-оф показати на цьому екрані</div>
+    <div class="view-btns">
+      <div class="view-btn active" id="vbtn-bracket-upper" onclick="setBracketView('upper')"><span class="icon">🏆</span>Верхня сітка</div>
+      <div class="view-btn" id="vbtn-bracket-lower" onclick="setBracketView('lower')"><span class="icon">🥈</span>Нижня сітка</div>
+    </div>
+  </div>
   
   <div class="card">
     <div class="card-title">🔗 Посилання для OBS</div>
@@ -222,7 +234,13 @@ input:checked + .slider:before { transform: translateX(22px); background-color: 
   </div>
  
   <div class="card">
-    <div class="card-title">Розміри та масштаби</div>
+    <div class="card-title">Розміри та масштаби — окремо для кожного табло</div>
+    <div class="size-tabs" id="size-target-btns">
+      <div class="size-tab active" data-size-target="rankings" onclick="changeSizeTarget('rankings')">🏅 Рейтинг</div>
+      <div class="size-tab" data-size-target="groups" onclick="changeSizeTarget('groups')">📊 Групи</div>
+      <div class="size-tab" data-size-target="schedule" onclick="changeSizeTarget('schedule')">🕐 Розклад</div>
+      <div class="size-tab" data-size-target="playoff" onclick="changeSizeTarget('playoff')">🏆 Плей-оф</div>
+    </div>
     <div class="field"><label>Загальний масштаб екрану</label><div class="range-row"><input type="range" id="s-scale" min="0.4" max="2" step="0.05" value="1" oninput="syncRange('s-scale','rv-scale')"><span class="range-val" id="rv-scale">1×</span></div></div>
     <div class="field"><label>Ширина таблиць (%)</label><div class="range-row"><input type="range" id="s-t-width" min="40" max="100" step="1" value="95" oninput="syncRange('s-t-width','rv-t-width')"><span class="range-val" id="rv-t-width">95%</span></div></div>
     <div class="field"><label>Висота рядків (відступи)</label><div class="range-row"><input type="range" id="s-t-pad" min="2" max="24" step="1" value="9" oninput="syncRange('s-t-pad','rv-t-pad')"><span class="range-val" id="rv-t-pad">9px</span></div></div>
@@ -275,13 +293,22 @@ input:checked + .slider:before { transform: translateX(22px); background-color: 
 <div class="page" id="page-playoff">
   <div class="sec-title">Плей-оф сітка</div>
   <div class="card">
-    <div class="card-title">Авто-заповнення першого раунду</div>
+    <div class="card-title">Авто-заповнення першого раунду (Верхня сітка)</div>
     <button class="btn btn-primary" onclick="seedPlayoffFromGroups()" style="width:100%;">🏆 Сформувати сітку з результатів Груп</button>
     <div style="font-size:11px; color:var(--muted); margin-top:8px; text-align:center;">Автоматично відсортує команди в групах (за очками та різницею) і розставить 1-ші та 2-гі місця у Плей-оф.</div>
   </div>
   <div class="card"><div class="card-title">Формат турніру</div><div class="field"><select id="p-format" onchange="rebuildBracket()"><option value="8">1/8 → Фінал (16 команд)</option><option value="4" selected>1/4 → Фінал (8 команд)</option><option value="2">1/2 → Фінал (4 команди)</option></select></div></div>
   <div id="bracket-editor"></div>
-  <div class="card"><div class="card-title">🏆 Чемпіон</div><div class="field"><input type="text" id="champion-inp" value="— — —"></div></div>
+  <div class="card"><div class="card-title">🏆 Чемпіон (Верхня сітка)</div><div class="field"><input type="text" id="champion-inp" value="— — —"></div></div>
+ 
+  <div class="sec-title" style="margin-top:24px;">Нижня сітка (3-4 місця груп)</div>
+  <div class="card">
+    <div class="card-title">Авто-заповнення першого раунду (Нижня сітка)</div>
+    <button class="btn btn-outline" onclick="seedPlayoffLowerFromGroups()" style="width:100%;">🥈 Сформувати нижню сітку з 3-4 місць груп</button>
+    <div style="font-size:11px; color:var(--muted); margin-top:8px; text-align:center;">Автоматично розставить команди, що зайняли 3-тє та 4-те місце в групах, у окрему сітку розіграшу.</div>
+  </div>
+  <div id="bracket-editor-lower"></div>
+  <div class="card"><div class="card-title">🥈 Переможець нижньої сітки</div><div class="field"><input type="text" id="champion-inp-lower" value="— — —"></div></div>
 </div>
  
 <div class="status-bar">
@@ -373,6 +400,15 @@ window.changeTargetScreen = function() {
     }
     if (visSelect.querySelector(`option[value="${vg}"]`)) visSelect.value = vg;
   }
+ 
+  // Перемикач Верхня/Нижня сітка плей-офу
+  const bvCard = document.getElementById('card-bracket-view');
+  if (bvCard) bvCard.style.display = (v === 'playoff') ? 'block' : 'none';
+  let bv;
+  if (target === 'global') { bv = state.bracketView || 'upper'; }
+  else { bv = (state.courtBracketViews && state.courtBracketViews[target]) || 'upper'; }
+  document.getElementById('vbtn-bracket-upper')?.classList.toggle('active', bv !== 'lower');
+  document.getElementById('vbtn-bracket-lower')?.classList.toggle('active', bv === 'lower');
 };
  
 window.toggleVisibility = function() {
@@ -398,6 +434,20 @@ window.setView = function(v) {
   }
   document.querySelectorAll('.view-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('vbtn-'+v)?.classList.add('active');
+  const bvCard = document.getElementById('card-bracket-view');
+  if (bvCard) bvCard.style.display = (v === 'playoff') ? 'block' : 'none';
+  pushState();
+};
+ 
+window.setBracketView = function(bv) {
+  const target = document.getElementById('target-screen-select').value;
+  if (target === 'global') { state.bracketView = bv; } 
+  else {
+      if (!state.courtBracketViews) state.courtBracketViews = {};
+      state.courtBracketViews[target] = bv;
+  }
+  document.getElementById('vbtn-bracket-upper')?.classList.toggle('active', bv !== 'lower');
+  document.getElementById('vbtn-bracket-lower')?.classList.toggle('active', bv === 'lower');
   pushState();
 };
  
@@ -412,16 +462,22 @@ function defaultState() {
     isVisible: true, view: 'rankings',
     courtVisibility: {}, courtViews: {}, courtVisibleGroup: {},
     tourVisible: false, tourText: 'PADEL TOURNAMENT 2026',
-    tblWidth: 95, tblPadY: 9,
     themes: {}, savedTournaments: {},
     globalTeams: ['Artem Yatsenko / Slava Sedoplatov', 'Fedor Modnikov / Volodymyr Yelizarov'],
-    scale: 1, fontSize: 15, accent: '#00e5ff', bgOpacity: 0.88, teamFont: "'Barlow Condensed', sans-serif",
+    sizes: {
+      rankings: { scale:1, tblWidth:95, tblPadY:9, fontSize:15, teamFont:"'Barlow Condensed', sans-serif" },
+      groups:   { scale:1, tblWidth:95, tblPadY:9, fontSize:15, teamFont:"'Barlow Condensed', sans-serif" },
+      schedule: { scale:1, tblWidth:95, tblPadY:9, fontSize:15, teamFont:"'Barlow Condensed', sans-serif" },
+      playoff:  { scale:1, tblWidth:95, tblPadY:9, fontSize:15, teamFont:"'Barlow Condensed', sans-serif" }
+    },
+    accent: '#00e5ff', bgOpacity: 0.88,
     colors: { rankings: { team: '#ffffff', bg: '#050c1c', head: '#081830' }, groups: { team: '#ffffff', bg: '#050c1c', head: '#081830' }, schedule: { team: '#ffffff', bg: '#050c1c', head: '#000000' }, playoff: { team: '#ffffff', bg: '#161a22', head: '#000000' } },
     rankTitle: 'ГРАВЦІ (ЧОЛОВІКИ) 🇺🇦',
     rankings: [{seed:1,players:'Artem Yatsenko / Slava Sedoplatov',group:'A',pts:13420}],
     groupLayout: 'classic', groupCount:4, teamCount:4, groups: autoGroups(4,4), visibleGroup: 'all',
     schedHeaders:['Час','Корт 1','Корт 2','Корт 3','Корт 4'], schedRows:[{time:'09:00',cells:['A1—A2','B1—B2','C1—C2','D1—D2'],isBreak:false}],
     bracketFormat:4, bracketData:autoBracketData(4), champion:'— — —',
+    bracketDataLower:autoBracketData(4), championLower:'— — —', bracketView:'upper', courtBracketViews:{},
   };
 }
  
@@ -430,14 +486,10 @@ function collectState() {
   state.tourText    = document.getElementById('tour-text').value;
   state.globalTeams = window.globalTeamsList || [];
   
-  state.scale      = parseFloat(document.getElementById('s-scale').value);
-  state.tblWidth   = parseInt(document.getElementById('s-t-width').value);
-  state.tblPadY    = parseInt(document.getElementById('s-t-pad').value);
-  state.fontSize   = parseInt(document.getElementById('s-font').value);
+  saveSizeControlsToState();
   
   state.accent     = document.getElementById('s-accent').value;
   state.bgOpacity  = parseFloat(document.getElementById('s-opacity').value);
-  state.teamFont   = document.getElementById('s-team-font').value;
   
   state.colors = {
     rankings: { team: document.getElementById('c-rank-team').value, bg: document.getElementById('c-rank-bg').value, head: document.getElementById('c-rank-head').value },
@@ -453,6 +505,8 @@ function collectState() {
   state.bracketFormat = parseInt(document.getElementById('p-format').value);
   state.bracketData   = collectBracket();
   state.champion   = document.getElementById('champion-inp').value;
+  state.bracketDataLower = collectBracketLower();
+  state.championLower    = document.getElementById('champion-inp-lower').value;
   state.groupLayout = document.getElementById('g-layout').value || 'classic';
   state.groupCount = parseInt(document.getElementById('g-count').value);
   state.teamCount  = parseInt(document.getElementById('g-teams').value);
@@ -471,8 +525,49 @@ function collectState() {
  
 // === ТЕМИ ===
 function updateThemeDropdown() { const select = document.getElementById('theme-select'); select.innerHTML = '<option value="">-- Оберіть збережену тему --</option>'; if(state.themes) { Object.keys(state.themes).forEach(n => { select.innerHTML += `<option value="${n}">${n}</option>`; }); } }
-window.saveTheme = function() { const name = document.getElementById('theme-name').value.trim(); if(!name) return alert('Будь ласка, введіть назву теми!'); if(!state.themes) state.themes = {}; state.themes[name] = { scale: parseFloat(document.getElementById('s-scale').value), tblWidth: parseInt(document.getElementById('s-t-width').value), tblPadY: parseInt(document.getElementById('s-t-pad').value), fontSize: parseInt(document.getElementById('s-font').value), accent: document.getElementById('s-accent').value, bgOpacity: parseFloat(document.getElementById('s-opacity').value), teamFont: document.getElementById('s-team-font').value, colors: { rankings: { team: document.getElementById('c-rank-team').value, bg: document.getElementById('c-rank-bg').value, head: document.getElementById('c-rank-head').value }, groups: { team: document.getElementById('c-group-team').value, bg: document.getElementById('c-group-bg').value, head: document.getElementById('c-group-head').value }, schedule: { team: document.getElementById('c-sched-team').value, bg: document.getElementById('c-sched-bg').value, head: document.getElementById('c-sched-head').value }, playoff: { team: document.getElementById('c-play-team').value, bg: document.getElementById('c-play-bg').value, head: document.getElementById('c-play-head').value } } }; document.getElementById('theme-name').value = ''; updateThemeDropdown(); document.getElementById('theme-select').value = name; pushState(); alert('Тему збережено!'); };
-window.loadTheme = function() { const name = document.getElementById('theme-select').value; if(!name || !state.themes || !state.themes[name]) return alert('Оберіть тему зі списку'); const t = state.themes[name]; document.getElementById('s-scale').value = t.scale || 1; document.getElementById('s-t-width').value = t.tblWidth || 95; document.getElementById('s-t-pad').value = t.tblPadY || 9; document.getElementById('s-font').value = t.fontSize || 15; document.getElementById('s-accent').value = t.accent || '#00e5ff'; document.getElementById('s-opacity').value = t.bgOpacity || 0.88; document.getElementById('s-team-font').value = t.teamFont || "'Barlow Condensed', sans-serif"; const c = t.colors || defaultState().colors; document.getElementById('c-rank-team').value = c.rankings.team; document.getElementById('c-rank-bg').value = c.rankings.bg; document.getElementById('c-rank-head').value = c.rankings.head; document.getElementById('c-group-team').value = c.groups.team; document.getElementById('c-group-bg').value = c.groups.bg; document.getElementById('c-group-head').value = c.groups.head; document.getElementById('c-sched-team').value = c.schedule.team; document.getElementById('c-sched-bg').value = c.schedule.bg; document.getElementById('c-sched-head').value = c.schedule.head; document.getElementById('c-play-team').value = c.playoff.team; document.getElementById('c-play-bg').value = c.playoff.bg; document.getElementById('c-play-head').value = c.playoff.head; syncRange('s-scale','rv-scale'); syncRange('s-t-width','rv-t-width'); syncRange('s-t-pad','rv-t-pad'); syncRange('s-font','rv-font'); syncRange('s-opacity','rv-opacity'); autoSave(); };
+window.saveTheme = function() {
+  const name = document.getElementById('theme-name').value.trim();
+  if(!name) return alert('Будь ласка, введіть назву теми!');
+  if(!state.themes) state.themes = {};
+  saveSizeControlsToState();
+  state.themes[name] = {
+    sizes: JSON.parse(JSON.stringify(state.sizes || {})),
+    accent: document.getElementById('s-accent').value,
+    bgOpacity: parseFloat(document.getElementById('s-opacity').value),
+    colors: {
+      rankings: { team: document.getElementById('c-rank-team').value, bg: document.getElementById('c-rank-bg').value, head: document.getElementById('c-rank-head').value },
+      groups:   { team: document.getElementById('c-group-team').value, bg: document.getElementById('c-group-bg').value, head: document.getElementById('c-group-head').value },
+      schedule: { team: document.getElementById('c-sched-team').value, bg: document.getElementById('c-sched-bg').value, head: document.getElementById('c-sched-head').value },
+      playoff:  { team: document.getElementById('c-play-team').value, bg: document.getElementById('c-play-bg').value, head: document.getElementById('c-play-head').value }
+    }
+  };
+  document.getElementById('theme-name').value = '';
+  updateThemeDropdown();
+  document.getElementById('theme-select').value = name;
+  pushState();
+  alert('Тему збережено!');
+};
+window.loadTheme = function() {
+  const name = document.getElementById('theme-select').value;
+  if(!name || !state.themes || !state.themes[name]) return alert('Оберіть тему зі списку');
+  const t = state.themes[name];
+  if (t.sizes) {
+    state.sizes = JSON.parse(JSON.stringify(t.sizes));
+  } else {
+    const legacy = { scale: t.scale||1, tblWidth: t.tblWidth||95, tblPadY: t.tblPadY||9, fontSize: t.fontSize||15, teamFont: t.teamFont||"'Barlow Condensed', sans-serif" };
+    state.sizes = { rankings: {...legacy}, groups: {...legacy}, schedule: {...legacy}, playoff: {...legacy} };
+  }
+  loadSizeControls(window.currentSizeTarget);
+  document.getElementById('s-accent').value = t.accent || '#00e5ff';
+  document.getElementById('s-opacity').value = t.bgOpacity || 0.88;
+  const c = t.colors || defaultState().colors;
+  document.getElementById('c-rank-team').value = c.rankings.team; document.getElementById('c-rank-bg').value = c.rankings.bg; document.getElementById('c-rank-head').value = c.rankings.head;
+  document.getElementById('c-group-team').value = c.groups.team; document.getElementById('c-group-bg').value = c.groups.bg; document.getElementById('c-group-head').value = c.groups.head;
+  document.getElementById('c-sched-team').value = c.schedule.team; document.getElementById('c-sched-bg').value = c.schedule.bg; document.getElementById('c-sched-head').value = c.schedule.head;
+  document.getElementById('c-play-team').value = c.playoff.team; document.getElementById('c-play-bg').value = c.playoff.bg; document.getElementById('c-play-head').value = c.playoff.head;
+  syncRange('s-opacity','rv-opacity');
+  autoSave();
+};
 window.deleteTheme = function() { const name = document.getElementById('theme-select').value; if(!name || !state.themes || !state.themes[name]) return; if(confirm('Видалити тему?')) { delete state.themes[name]; updateThemeDropdown(); pushState(); } };
  
 // === ТУРНІРИ ===
@@ -485,8 +580,38 @@ window.resetTournament = function() { if(!confirm('🚨 УВАГА: Це пов�
 window.showPage = function(id) { document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); document.getElementById('page-'+id).classList.add('active'); document.getElementById('tab-'+id).classList.add('active'); };
 window.syncRange = function(inputId, valId) { const v = parseFloat(document.getElementById(inputId).value); const el = document.getElementById(valId); if (inputId==='s-scale') el.textContent = v.toFixed(2)+'×'; else if (inputId==='s-font'||inputId==='s-t-pad') el.textContent = v+'px'; else if (inputId==='s-t-width') el.textContent = v+'%'; else if (inputId==='s-opacity') el.textContent = Math.round(v*100)+'%'; };
  
+// === РОЗМІРИ ОКРЕМО ДЛЯ КОЖНОГО ТАБЛО ===
+window.currentSizeTarget = 'rankings';
+function loadSizeControls(target) {
+  const prof = (state.sizes && state.sizes[target]) || { scale:1, tblWidth:95, tblPadY:9, fontSize:15, teamFont:"'Barlow Condensed', sans-serif" };
+  document.getElementById('s-scale').value   = prof.scale!=null?prof.scale:1;
+  document.getElementById('s-t-width').value = prof.tblWidth!=null?prof.tblWidth:95;
+  document.getElementById('s-t-pad').value   = prof.tblPadY!=null?prof.tblPadY:9;
+  document.getElementById('s-font').value    = prof.fontSize!=null?prof.fontSize:15;
+  document.getElementById('s-team-font').value = prof.teamFont || "'Barlow Condensed', sans-serif";
+  syncRange('s-scale','rv-scale'); syncRange('s-t-width','rv-t-width'); syncRange('s-t-pad','rv-t-pad'); syncRange('s-font','rv-font');
+}
+function saveSizeControlsToState() {
+  if(!state.sizes) state.sizes = {};
+  state.sizes[window.currentSizeTarget] = {
+    scale: parseFloat(document.getElementById('s-scale').value),
+    tblWidth: parseInt(document.getElementById('s-t-width').value),
+    tblPadY: parseInt(document.getElementById('s-t-pad').value),
+    fontSize: parseInt(document.getElementById('s-font').value),
+    teamFont: document.getElementById('s-team-font').value
+  };
+}
+window.changeSizeTarget = function(target) {
+  saveSizeControlsToState();
+  window.currentSizeTarget = target;
+  document.querySelectorAll('#size-target-btns .size-tab').forEach(b=>b.classList.remove('active'));
+  document.querySelector(`#size-target-btns [data-size-target="${target}"]`)?.classList.add('active');
+  loadSizeControls(target);
+  autoSave();
+};
+ 
 window.globalTeamsList = [];
-function renderGlobalTeams() { const wrap = document.getElementById('global-teams-list'); wrap.innerHTML = ''; window.globalTeamsList.forEach((team, i) => { const row = document.createElement('div'); row.style = 'display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:rgba(255,255,255,.05); border-radius:6px; font-size:14px;'; row.innerHTML = `<span>${team}</span><button class="del-btn" onclick="delGlobalTeam(${i})">✕</button>`; wrap.appendChild(row); }); renderRankEditor(); renderGroupEditor(); renderBracketEditor(); }
+function renderGlobalTeams() { const wrap = document.getElementById('global-teams-list'); wrap.innerHTML = ''; window.globalTeamsList.forEach((team, i) => { const row = document.createElement('div'); row.style = 'display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:rgba(255,255,255,.05); border-radius:6px; font-size:14px;'; row.innerHTML = `<span>${team}</span><button class="del-btn" onclick="delGlobalTeam(${i})">✕</button>`; wrap.appendChild(row); }); renderRankEditor(); renderGroupEditor(); renderBracketEditor(); renderBracketEditorLower(); }
  
 window.addGlobalTeam = function() { 
   const inp = document.getElementById('new-team-inp'); const val = inp.value.trim(); 
@@ -723,6 +848,7 @@ function recalcGroupStats(gi) {
  
   // Авто-синхронізація плей-оф без підтвердження
   autoSyncPlayoff();
+  autoSyncPlayoffLower();
 }
  
 function getSortedGroupsForPlayoff() {
@@ -777,11 +903,49 @@ function autoSyncPlayoff() {
  
 window.seedPlayoffFromGroups = function() { if (!confirm('Ця дія перезапише команди в першому раунді Плей-оф. Продовжити?')) return; autoSyncPlayoff(); renderBracketEditor(); autoSave(); alert('Плей-оф успішно сформовано на основі поточних результатів груп!'); };
  
+function autoSyncPlayoffLower() {
+  const fmt = parseInt(document.getElementById('p-format').value);
+  const sortedGroups = getSortedGroupsForPlayoff();
+  const getT = (gIdx, pos) => {
+    if (!sortedGroups[gIdx] || !sortedGroups[gIdx].top[pos] || !sortedGroups[gIdx].top[pos].name) return `Група ${'ABCDEFGHIJ'[gIdx]||''} ${pos+1}`;
+    return sortedGroups[gIdx].top[pos].name;
+  };
+  const bData = (state.bracketDataLower && Object.keys(state.bracketDataLower).length) ? state.bracketDataLower : autoBracketData(fmt);
+  // Беремо команди, що зайняли 3-тє (індекс 2) та 4-те (індекс 3) місце в групі
+  if (fmt === 8) {
+    bData['0-0'].t1=getT(0,2); bData['0-0'].t2=getT(1,3);
+    bData['0-1'].t1=getT(2,2); bData['0-1'].t2=getT(3,3);
+    bData['0-2'].t1=getT(4,2); bData['0-2'].t2=getT(5,3);
+    bData['0-3'].t1=getT(6,2); bData['0-3'].t2=getT(7,3);
+    bData['0-4'].t1=getT(1,2); bData['0-4'].t2=getT(0,3);
+    bData['0-5'].t1=getT(3,2); bData['0-5'].t2=getT(2,3);
+    bData['0-6'].t1=getT(5,2); bData['0-6'].t2=getT(4,3);
+    bData['0-7'].t1=getT(7,2); bData['0-7'].t2=getT(6,3);
+  } else if (fmt === 4) {
+    if(bData['0-0']) { bData['0-0'].t1=getT(0,2); bData['0-0'].t2=getT(1,3); }
+    if(bData['0-1']) { bData['0-1'].t1=getT(2,2); bData['0-1'].t2=getT(3,3); }
+    if(bData['0-2']) { bData['0-2'].t1=getT(1,2); bData['0-2'].t2=getT(0,3); }
+    if(bData['0-3']) { bData['0-3'].t1=getT(3,2); bData['0-3'].t2=getT(2,3); }
+  } else if (fmt === 2) {
+    if(bData['0-0']) { bData['0-0'].t1=getT(0,2); bData['0-0'].t2=getT(1,3); }
+    if(bData['0-1']) { bData['0-1'].t1=getT(1,2); bData['0-1'].t2=getT(0,3); }
+  }
+  state.bracketDataLower = bData;
+  renderBracketEditorLower();
+}
+ 
+window.seedPlayoffLowerFromGroups = function() { if (!confirm('Ця дія перезапише команди в Нижній сітці (3-4 місця груп). Продовжити?')) return; autoSyncPlayoffLower(); renderBracketEditorLower(); autoSave(); alert('Нижню сітку успішно сформовано на основі 3-4 місць груп!'); };
+ 
 function autoBracketData(fmt) { const data={},L='ABCDEFGHIJ'; for(let ri=0;ri<Math.log2(fmt);ri++){ const count=fmt/Math.pow(2,ri+1); for(let mi=0;mi<count;mi++){ data[`${ri}-${mi}`]={t1:ri===0?`${L[mi*2]||'G'}1`:`Переможець М${ri}.${mi*2+1}`,t2:ri===0?`${L[mi*2+1]||'G'}2`:`Переможець М${ri}.${mi*2+2}`,s1:'-',s2:'-',winner:-1}; } } return data; }
 function renderBracketEditor() { const fmt=parseInt(document.getElementById('p-format').value); const data=state.bracketData&&Object.keys(state.bracketData).length?state.bracketData:autoBracketData(fmt); state.bracketData=data; const wrap=document.getElementById('bracket-editor'); wrap.innerHTML=''; const labels=fmt===8?['1/8','1/4','1/2','Фінал']:fmt===4?['1/4','1/2','Фінал']:['1/2','Фінал']; labels.forEach((lbl,ri)=>{ const count=fmt/Math.pow(2,ri+1); const card=document.createElement('div'); card.className='card'; card.innerHTML=`<div class="card-title">${lbl} ФІНАЛУ</div>`; for(let mi=0;mi<count;mi++){ const key=`${ri}-${mi}`,m=data[key]||{t1:'',t2:'',s1:'-',s2:'-',winner:-1}; const me=document.createElement('div'); me.className='match-editor'; me.innerHTML=`<div class="match-editor-title">Матч ${ri+1}.${mi+1}</div><div class="match-teams">${generateTeamSelect(m.t1, `mt1-${ri}-${mi}`)}<input type="text" value="${m.s1}" id="ms1-${ri}-${mi}" placeholder="Рах." style="text-align:center"><button class="win-btn ${m.winner===0?'active':''}" onclick="setWinner(${ri},${mi},0)">W</button></div><div class="match-teams">${generateTeamSelect(m.t2, `mt2-${ri}-${mi}`)}<input type="text" value="${m.s2}" id="ms2-${ri}-${mi}" placeholder="Рах." style="text-align:center"><button class="win-btn ${m.winner===1?'active':''}" onclick="setWinner(${ri},${mi},1)">W</button></div>`; card.appendChild(me); } wrap.appendChild(card); }); }
 function collectBracket() { const fmt=parseInt(document.getElementById('p-format').value),data={}; for(let ri=0;ri<Math.log2(fmt);ri++){ const count=fmt/Math.pow(2,ri+1); for(let mi=0;mi<count;mi++){ const key=`${ri}-${mi}`,old=state.bracketData?.[key]||{}; data[key]={t1:document.getElementById(`mt1-${ri}-${mi}`)?.value||old.t1||'',t2:document.getElementById(`mt2-${ri}-${mi}`)?.value||old.t2||'',s1:document.getElementById(`ms1-${ri}-${mi}`)?.value||old.s1||'-',s2:document.getElementById(`ms2-${ri}-${mi}`)?.value||old.s2||'-',winner:old.winner??-1}; } } return data; }
 window.setWinner = function(ri,mi,teamIdx) { const data=state.bracketData||{},key=`${ri}-${mi}`; if(!data[key]) return; data[key].winner=teamIdx; const winnerName=document.getElementById(`mt${teamIdx+1}-${ri}-${mi}`)?.value; const nk=`${ri+1}-${Math.floor(mi/2)}`; if(!data[nk]) data[nk]={t1:'',t2:'',s1:'-',s2:'-',winner:-1}; if(mi%2===0) data[nk].t1=winnerName; else data[nk].t2=winnerName; state.bracketData=data; renderBracketEditor(); autoSave(); };
-window.rebuildBracket = function() { state.bracketData=autoBracketData(parseInt(document.getElementById('p-format').value)); renderBracketEditor(); autoSave(); };
+window.rebuildBracket = function() { const fmt=parseInt(document.getElementById('p-format').value); state.bracketData=autoBracketData(fmt); renderBracketEditor(); state.bracketDataLower=autoBracketData(fmt); renderBracketEditorLower(); autoSave(); };
+ 
+// === НИЖНЯ СІТКА (3-4 місця груп) ===
+function renderBracketEditorLower() { const fmt=parseInt(document.getElementById('p-format').value); const data=state.bracketDataLower&&Object.keys(state.bracketDataLower).length?state.bracketDataLower:autoBracketData(fmt); state.bracketDataLower=data; const wrap=document.getElementById('bracket-editor-lower'); if(!wrap) return; wrap.innerHTML=''; const labels=fmt===8?['1/8','1/4','1/2','Фінал']:fmt===4?['1/4','1/2','Фінал']:['1/2','Фінал']; labels.forEach((lbl,ri)=>{ const count=fmt/Math.pow(2,ri+1); const card=document.createElement('div'); card.className='card'; card.innerHTML=`<div class="card-title">${lbl} НИЖНЬОЇ СІТКИ</div>`; for(let mi=0;mi<count;mi++){ const key=`${ri}-${mi}`,m=data[key]||{t1:'',t2:'',s1:'-',s2:'-',winner:-1}; const me=document.createElement('div'); me.className='match-editor'; me.innerHTML=`<div class="match-editor-title">Матч ${ri+1}.${mi+1} (Нижня сітка)</div><div class="match-teams">${generateTeamSelect(m.t1, `mt1l-${ri}-${mi}`)}<input type="text" value="${m.s1}" id="ms1l-${ri}-${mi}" placeholder="Рах." style="text-align:center"><button class="win-btn ${m.winner===0?'active':''}" onclick="setWinnerLower(${ri},${mi},0)">W</button></div><div class="match-teams">${generateTeamSelect(m.t2, `mt2l-${ri}-${mi}`)}<input type="text" value="${m.s2}" id="ms2l-${ri}-${mi}" placeholder="Рах." style="text-align:center"><button class="win-btn ${m.winner===1?'active':''}" onclick="setWinnerLower(${ri},${mi},1)">W</button></div>`; card.appendChild(me); } wrap.appendChild(card); }); }
+function collectBracketLower() { const fmt=parseInt(document.getElementById('p-format').value),data={}; for(let ri=0;ri<Math.log2(fmt);ri++){ const count=fmt/Math.pow(2,ri+1); for(let mi=0;mi<count;mi++){ const key=`${ri}-${mi}`,old=state.bracketDataLower?.[key]||{}; data[key]={t1:document.getElementById(`mt1l-${ri}-${mi}`)?.value||old.t1||'',t2:document.getElementById(`mt2l-${ri}-${mi}`)?.value||old.t2||'',s1:document.getElementById(`ms1l-${ri}-${mi}`)?.value||old.s1||'-',s2:document.getElementById(`ms2l-${ri}-${mi}`)?.value||old.s2||'-',winner:old.winner??-1}; } } return data; }
+window.setWinnerLower = function(ri,mi,teamIdx) { const data=state.bracketDataLower||{},key=`${ri}-${mi}`; if(!data[key]) return; data[key].winner=teamIdx; const winnerName=document.getElementById(`mt${teamIdx+1}l-${ri}-${mi}`)?.value; const nk=`${ri+1}-${Math.floor(mi/2)}`; if(!data[nk]) data[nk]={t1:'',t2:'',s1:'-',s2:'-',winner:-1}; if(mi%2===0) data[nk].t1=winnerName; else data[nk].t2=winnerName; state.bracketDataLower=data; renderBracketEditorLower(); autoSave(); };
  
 function initUI() {
   window.globalTeamsList = state.globalTeams || [];
@@ -791,13 +955,16 @@ function initUI() {
   document.getElementById('tour-visible').checked = state.tourVisible || false;
   document.getElementById('tour-text').value = state.tourText || 'PADEL TOURNAMENT 2026';
  
-  document.getElementById('s-scale').value   = state.scale||1;
-  document.getElementById('s-t-width').value = state.tblWidth||95;
-  document.getElementById('s-t-pad').value   = state.tblPadY||9;
-  document.getElementById('s-font').value    = state.fontSize||15;
+  // Міграція старих "плоских" налаштувань розмірів у структуру по табло (якщо потрібно)
+  if (!state.sizes) {
+    const legacy = { scale: state.scale||1, tblWidth: state.tblWidth||95, tblPadY: state.tblPadY||9, fontSize: state.fontSize||15, teamFont: state.teamFont||"'Barlow Condensed', sans-serif" };
+    state.sizes = { rankings: {...legacy}, groups: {...legacy}, schedule: {...legacy}, playoff: {...legacy} };
+  }
+  document.querySelectorAll('#size-target-btns .size-tab').forEach(b=>b.classList.toggle('active', b.dataset.sizeTarget === window.currentSizeTarget));
+  loadSizeControls(window.currentSizeTarget);
+ 
   document.getElementById('s-accent').value  = state.accent||'#00e5ff';
   document.getElementById('s-opacity').value = state.bgOpacity||0.88;
-  document.getElementById('s-team-font').value = state.teamFont||"'Barlow Condensed', sans-serif";
   
   const c = state.colors || defaultState().colors;
   document.getElementById('c-rank-team').value = c.rankings.team; document.getElementById('c-rank-bg').value = c.rankings.bg; document.getElementById('c-rank-head').value = c.rankings.head;
@@ -805,7 +972,7 @@ function initUI() {
   document.getElementById('c-sched-team').value = c.schedule.team; document.getElementById('c-sched-bg').value = c.schedule.bg; document.getElementById('c-sched-head').value = c.schedule.head;
   document.getElementById('c-play-team').value = c.playoff.team;  document.getElementById('c-play-bg').value = c.playoff.bg;  document.getElementById('c-play-head').value = c.playoff.head;
  
-  syncRange('s-scale','rv-scale'); syncRange('s-t-width','rv-t-width'); syncRange('s-t-pad','rv-t-pad'); syncRange('s-font','rv-font'); syncRange('s-opacity','rv-opacity');
+  syncRange('s-opacity','rv-opacity');
   
   document.getElementById('rank-title-inp').value = state.rankTitle||'';
   document.getElementById('g-count').value = state.groupCount||4;
@@ -813,9 +980,11 @@ function initUI() {
   document.getElementById('g-layout').value = state.groupLayout||'classic';
   document.getElementById('p-format').value = state.bracketFormat||4;
   document.getElementById('champion-inp').value = state.champion||'— — —';
+  document.getElementById('champion-inp-lower').value = state.championLower||'— — —';
   
   if(!state.groups) state.groups=autoGroups(state.groupCount||4,state.teamCount||4);
   if(!state.bracketData||!Object.keys(state.bracketData).length) state.bracketData=autoBracketData(state.bracketFormat||4);
+  if(!state.bracketDataLower||!Object.keys(state.bracketDataLower).length) state.bracketDataLower=autoBracketData(state.bracketFormat||4);
   
   updateThemeDropdown();
   updateTourDropdown();
@@ -827,4 +996,3 @@ initUI();
 </script>
 </body>
 </html>
- 
