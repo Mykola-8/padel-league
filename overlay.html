@@ -236,22 +236,23 @@ function applyState(s) {
   
   // 3. АВТОМАТИЧНА ФІЛЬТРАЦІЯ ДАНИХ (Якщо це окремий корт)
   if (courtIdx !== null) {
-      const targetGroup = 'ABCDEFGHIJ'[courtIdx] || 'A';
+      // Визначаємо visibleGroup: спочатку з courtVisibleGroup (вибраного в контролері),
+      // якщо не задано — за замовчуванням рівний індексу корту
+      const vgFromCtrl = (s.courtVisibleGroup && s.courtVisibleGroup[courtParam] !== undefined)
+          ? s.courtVisibleGroup[courtParam]
+          : courtIdx.toString();
+      s.visibleGroup = vgFromCtrl;
  
-      // Групи: якщо в контролері вибрано "Всі групи разом" (visibleGroup === 'all'),
-      // показуємо на корт-екрані ВСІ групи так само, як на загальній трансляції.
-      // Якщо вибрано конкретну групу — поведінка як раніше (показуємо групу цього корту).
-      if (s.visibleGroup === 'all') {
-          // нічого не змінюємо — renderGroups сам покаже всі групи (vis === 'all')
-      } else {
-          s.visibleGroup = courtIdx.toString();
+      if (vgFromCtrl !== 'all') {
+          const groupIdx = parseInt(vgFromCtrl);
+          const targetGroup = 'ABCDEFGHIJ'[groupIdx] || 'A';
+          if (s.rankings) { s.rankings = s.rankings.filter(r => r.group === targetGroup); }
       }
- 
-      if (s.rankings) { s.rankings = s.rankings.filter(r => r.group === targetGroup); }
+      // Фільтрація розкладу — тільки стовпець цього корту
       if (s.schedHeaders && s.schedRows) {
-          const targetCol = courtIdx; 
+          const targetCol = courtIdx;
           const headerText = s.schedHeaders[courtIdx + 1] || `Корт ${courtParam}`;
-          s.schedHeaders = [s.schedHeaders[0], headerText]; 
+          s.schedHeaders = [s.schedHeaders[0], headerText];
           s.schedRows = s.schedRows.map(r => {
               if (r.isBreak) return r;
               return { time: r.time, cells: [r.cells[targetCol] || '-'], isBreak: false };
@@ -338,27 +339,10 @@ function renderGroups(s) {
   if (gc >= 6 && vis === 'all') view.classList.add('compact'); else view.classList.remove('compact');
  
   const safeGroups = s.groups || [];
- 
-  // Для окремого корту шукаємо групу за БУКВОЮ (а не за індексом масиву),
-  // щоб корти 2,3,4... коректно показували свою групу навіть якщо
-  // масив груп неповний або переставлений.
-  let groupsToRender;
-  if (vis !== 'all') {
-    const visIdx = parseInt(vis);
-    const targetLetter = 'ABCDEFGHIJ'[visIdx] || String.fromCharCode(65 + visIdx);
-    let found = safeGroups.find((g, gi) => g && ((g.letter || 'ABCDEFGHIJ'[gi]) === targetLetter));
-    if (!found) {
-      // Групи ще немає в даних — показуємо порожню заготовку, а не порожній екран
-      found = { letter: targetLetter, teams: Array.from({length: tc}, () => ({name:'', p:0, w:0, l:0, gd:'0:0', pts:0, scores:[]})) };
-    }
-    groupsToRender = [found];
-  } else {
-    groupsToRender = safeGroups;
-  }
- 
-  groupsToRender.forEach((grp, idx) => {
+  safeGroups.forEach((grp, gi) => {
     if(!grp) return;
-    const letter = grp.letter || 'ABCDEFGHIJ'[idx] || String.fromCharCode(65+idx);
+    if (vis !== 'all' && parseInt(vis) !== gi) return;
+    const letter = 'ABCDEFGHIJ'[gi] || String.fromCharCode(65+gi);
     const card = document.createElement('div'); card.className = 'group-card' + (tc >= 5 ? ' compact-teams' : '');
     if (vis !== 'all') { card.style.minWidth = '600px'; card.style.maxWidth = '90vw'; }
  
@@ -423,20 +407,8 @@ function renderPlayoff(s) {
   const outer = document.getElementById('bracket-outer'); if(!outer) return; outer.innerHTML = '';
   const headWrap = document.getElementById('bracket-headers'); if(headWrap) headWrap.innerHTML = '';
   const fmt = s.bracketFormat || 4;
- 
-  // Визначаємо яку сітку показувати: верхню чи нижню
-  const urlParams = new URLSearchParams(window.location.search);
-  const courtParam = urlParams.get('court');
-  let bracketView = s.bracketView || 'upper';
-  if (courtParam && s.courtBracketViews && s.courtBracketViews[courtParam]) {
-    bracketView = s.courtBracketViews[courtParam];
-  }
-  const isLower = bracketView === 'lower';
- 
-  const titleEl = document.getElementById('playoff-title');
-  if (titleEl) titleEl.textContent = isLower ? `НИЖНЯ СІТКА` : `TOURNAMENT PLAYOFF`;
-  const data = (isLower ? s.bracketDataLower : s.bracketData) || {};
-  const champion = isLower ? s.championLower : s.champion;
+  const titleEl = document.getElementById('playoff-title'); if (titleEl) titleEl.textContent = `TOURNAMENT PLAYOFF`;
+  const data = s.bracketData || {};
   const labels = fmt===8 ? ['1/8 ФІНАЛУ','1/4 ФІНАЛУ','ПІВФІНАЛ','ФІНАЛ'] : fmt===4 ? ['1/4 ФІНАЛУ','ПІВФІНАЛ','ФІНАЛ'] : ['ПІВФІНАЛ','ФІНАЛ'];
                
   labels.forEach((label, ri) => {
@@ -449,16 +421,16 @@ function renderPlayoff(s) {
       const mc = document.createElement('div'); 
       if (isFinalRound) {
         mc.className = 'b-match final-match';
-        mc.innerHTML = `<div class="final-match-header">${isLower ? 'НИЖНЯ СІТКА' : 'FINAL MATCH'}</div><div class="b-team ${m.winner===0?'winner':m.winner===1?'loser':''}"><span class="team-name-text">${m.t1 || ''}</span><span class="b-score">${m.s1 || '0'}</span></div><div class="b-team ${m.winner===1?'winner':m.winner===0?'loser':''}"><span class="team-name-text">${m.t2 || ''}</span><span class="b-score">${m.s2 || '0'}</span></div>`;
+        mc.innerHTML = `<div class="final-match-header">FINAL MATCH</div><div class="b-team ${m.winner===0?'winner':m.winner===1?'loser':''}"><span class="team-name-text">${m.t1 || ''}</span><span class="b-score">${m.s1 || '0'}</span></div><div class="b-team ${m.winner===1?'winner':m.winner===0?'loser':''}"><span class="team-name-text">${m.t2 || ''}</span><span class="b-score">${m.s2 || '0'}</span></div>`;
       } else {
         mc.className = 'b-match';
         mc.innerHTML = `<div class="b-team ${m.winner===0?'winner':m.winner===1?'loser':''}"><span class="team-name-text">${m.t1 || ''}</span><span class="b-score">${m.s1 || '0'}</span></div><div class="b-team ${m.winner===1?'winner':m.winner===0?'loser':''}"><span class="team-name-text">${m.t2 || ''}</span><span class="b-score">${m.s2 || '0'}</span></div>`;
       }
       rd.appendChild(mc);
     }
-    if (isFinalRound && champion && champion !== '— — —') {
+    if (isFinalRound && s.champion && s.champion !== '— — —') {
       const cc = document.createElement('div'); cc.className = 'champ-card';
-      cc.innerHTML = `<div class="champ-trophy">${isLower ? '🥉' : '🏆'}</div><div class="champ-lbl">${isLower ? 'НИЖНЯ СІТКА' : 'ЧЕМПІОН'}</div><div class="champ-name team-name-text">${champion}</div>`;
+      cc.innerHTML = `<div class="champ-trophy">🏆</div><div class="champ-lbl">ЧЕМПІОН</div><div class="champ-name team-name-text">${s.champion}</div>`;
       rd.appendChild(cc);
     } outer.appendChild(rd);
   });
