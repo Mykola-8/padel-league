@@ -206,7 +206,7 @@ onValue(ref(db, 'padel/state'), (snap) => {
   try { if (state) applyState(state); else applyState(defaultState()); } catch(e) { console.error(e); }
 });
  
-function defaultState() { return { isVisible: true, view: 'rankings', scale: 1, fontSize: 15, accent: '#00e5ff', bgOpacity: 0.88, teamFont: "'Barlow Condensed', sans-serif" }; }
+function defaultState() { return { isVisible: true, view: 'rankings', accent: '#00e5ff', bgOpacity: 0.88, sizes: { rankings:{scale:1,tblWidth:95,tblPadY:9,fontSize:15,teamFont:"'Barlow Condensed', sans-serif"}, groups:{scale:1,tblWidth:95,tblPadY:9,fontSize:15,teamFont:"'Barlow Condensed', sans-serif"}, schedule:{scale:1,tblWidth:95,tblPadY:9,fontSize:15,teamFont:"'Barlow Condensed', sans-serif"}, playoff:{scale:1,tblWidth:95,tblPadY:9,fontSize:15,teamFont:"'Barlow Condensed', sans-serif"} } }; }
  
 function hexToRgba(hex, opacity) {
   if(!hex) return 'transparent'; if(hex.startsWith('rgba')) return hex;
@@ -260,15 +260,19 @@ function applyState(s) {
       }
   }
  
-  // --- ВІЗУАЛЬНІ НАЛАШТУВАННЯ ---
+  // --- ВІЗУАЛЬНІ НАЛАШТУВАННЯ (окремо для кожного табло) ---
   const root = document.documentElement.style;
-  root.setProperty('--scale', s.scale || 1);
-  root.setProperty('--font-size', (s.fontSize || 15)+'px');
+  const sizeDefaults = { scale:1, tblWidth:95, tblPadY:9, fontSize:15, teamFont:"'Barlow Condensed', sans-serif" };
+  const legacySize = { scale:s.scale, tblWidth:s.tblWidth, tblPadY:s.tblPadY, fontSize:s.fontSize, teamFont:s.teamFont };
+  const hasLegacy = Object.values(legacySize).some(v => v !== undefined);
+  const sizeProfile = (s.sizes && s.sizes[safeView]) ? s.sizes[safeView] : (hasLegacy ? Object.assign({}, sizeDefaults, Object.fromEntries(Object.entries(legacySize).filter(([k,v])=>v!==undefined))) : sizeDefaults);
+  root.setProperty('--scale', sizeProfile.scale != null ? sizeProfile.scale : 1);
+  root.setProperty('--font-size', (sizeProfile.fontSize != null ? sizeProfile.fontSize : 15)+'px');
   root.setProperty('--accent', s.accent || '#00e5ff');
-  root.setProperty('--team-font', s.teamFont || "'Barlow Condensed', sans-serif");
-  root.setProperty('--tbl-width', (s.tblWidth || 95) + '%');
-  root.setProperty('--tbl-pad-y', (s.tblPadY || 9) + 'px');
-  root.setProperty('--playoff-h', (20 + (s.tblPadY || 9) * 2) + 'px');
+  root.setProperty('--team-font', sizeProfile.teamFont || sizeDefaults.teamFont);
+  root.setProperty('--tbl-width', (sizeProfile.tblWidth != null ? sizeProfile.tblWidth : 95) + '%');
+  root.setProperty('--tbl-pad-y', (sizeProfile.tblPadY != null ? sizeProfile.tblPadY : 9) + 'px');
+  root.setProperty('--playoff-h', (20 + (sizeProfile.tblPadY != null ? sizeProfile.tblPadY : 9) * 2) + 'px');
   
   const bannerWrap = document.getElementById('tour-banner-wrap');
   const bannerText = document.getElementById('tour-banner-text');
@@ -407,8 +411,21 @@ function renderPlayoff(s) {
   const outer = document.getElementById('bracket-outer'); if(!outer) return; outer.innerHTML = '';
   const headWrap = document.getElementById('bracket-headers'); if(headWrap) headWrap.innerHTML = '';
   const fmt = s.bracketFormat || 4;
-  const titleEl = document.getElementById('playoff-title'); if (titleEl) titleEl.textContent = `TOURNAMENT PLAYOFF`;
-  const data = s.bracketData || {};
+ 
+  // Визначаємо, який блок плей-офу показувати: верхню чи нижню сітку (3-4 місця груп)
+  const urlParams2 = new URLSearchParams(window.location.search);
+  const courtParam2 = urlParams2.get('court');
+  let activeBracket = s.bracketView || 'upper';
+  if (courtParam2 && s.courtBracketViews && s.courtBracketViews[courtParam2]) {
+    activeBracket = s.courtBracketViews[courtParam2];
+  }
+  const isLower = activeBracket === 'lower';
+ 
+  const titleEl = document.getElementById('playoff-title'); if (titleEl) titleEl.textContent = isLower ? 'НИЖНЯ СІТКА' : 'TOURNAMENT PLAYOFF';
+  const data = isLower ? (s.bracketDataLower || {}) : (s.bracketData || {});
+  const champ = isLower ? s.championLower : s.champion;
+  const champLabel = isLower ? 'ПЕРЕМОЖЕЦЬ НИЖНЬОЇ СІТКИ' : 'ЧЕМПІОН';
+  const champIcon = isLower ? '🥈' : '🏆';
   const labels = fmt===8 ? ['1/8 ФІНАЛУ','1/4 ФІНАЛУ','ПІВФІНАЛ','ФІНАЛ'] : fmt===4 ? ['1/4 ФІНАЛУ','ПІВФІНАЛ','ФІНАЛ'] : ['ПІВФІНАЛ','ФІНАЛ'];
                
   labels.forEach((label, ri) => {
@@ -428,9 +445,9 @@ function renderPlayoff(s) {
       }
       rd.appendChild(mc);
     }
-    if (isFinalRound && s.champion && s.champion !== '— — —') {
+    if (isFinalRound && champ && champ !== '— — —') {
       const cc = document.createElement('div'); cc.className = 'champ-card';
-      cc.innerHTML = `<div class="champ-trophy">🏆</div><div class="champ-lbl">ЧЕМПІОН</div><div class="champ-name team-name-text">${s.champion}</div>`;
+      cc.innerHTML = `<div class="champ-trophy">${champIcon}</div><div class="champ-lbl">${champLabel}</div><div class="champ-name team-name-text">${champ}</div>`;
       rd.appendChild(cc);
     } outer.appendChild(rd);
   });
@@ -438,4 +455,3 @@ function renderPlayoff(s) {
 </script>
 </body>
 </html>
- 
