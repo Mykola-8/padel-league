@@ -194,6 +194,15 @@ input:checked + .slider:before { transform: translateX(22px); background-color: 
        <button class="btn btn-danger" onclick="deleteTournament()">Видалити</button>
     </div>
     <hr style="border:0; border-top:1px solid var(--border); margin:15px 0;">
+    <div style="display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap;">
+       <span style="font-size:12px; color:var(--muted)">Зберегти турнір у файл на пристрої / завантажити з файлу:</span>
+       <div style="display:flex; gap:8px;">
+         <button class="btn btn-outline btn-sm" onclick="exportTournamentToFile()">⬇️ Експорт у файл</button>
+         <button class="btn btn-outline btn-sm" onclick="document.getElementById('import-file-inp').click()">⬆️ Імпорт з файлу</button>
+         <input type="file" id="import-file-inp" accept="application/json,.json" style="display:none" onchange="importTournamentFromFile(event)">
+       </div>
+    </div>
+    <hr style="border:0; border-top:1px solid var(--border); margin:15px 0;">
     <div style="display:flex; justify-content:space-between; align-items:center;">
        <span style="font-size:12px; color:var(--muted)">Повне скидання всіх команд, груп та плей-оф:</span>
        <button class="btn btn-danger btn-sm" onclick="resetTournament()">Очистити поточний турнір</button>
@@ -242,7 +251,7 @@ input:checked + .slider:before { transform: translateX(22px); background-color: 
       <div class="size-tab" data-size-target="playoff" onclick="changeSizeTarget('playoff')">🏆 Плей-оф</div>
     </div>
     <div class="field"><label>Загальний масштаб екрану</label><div class="range-row"><input type="range" id="s-scale" min="0.4" max="2" step="0.05" value="1" oninput="syncRange('s-scale','rv-scale')"><span class="range-val" id="rv-scale">1×</span></div></div>
-    <div class="field"><label>Ширина таблиць (%)</label><div class="range-row"><input type="range" id="s-t-width" min="40" max="100" step="1" value="95" oninput="syncRange('s-t-width','rv-t-width')"><span class="range-val" id="rv-t-width">95%</span></div></div>
+    <div class="field"><label>Ширина таблиць (% від стандартного розміру)</label><div class="range-row"><input type="range" id="s-t-width" min="-50" max="200" step="1" value="-5" oninput="syncRange('s-t-width','rv-t-width')"><span class="range-val" id="rv-t-width">-5%</span></div></div>
     <div class="field"><label>Висота рядків (відступи)</label><div class="range-row"><input type="range" id="s-t-pad" min="2" max="24" step="1" value="9" oninput="syncRange('s-t-pad','rv-t-pad')"><span class="range-val" id="rv-t-pad">9px</span></div></div>
     <div class="field"><label>Загальний Розмір тексту (px)</label><div class="range-row"><input type="range" id="s-font" min="10" max="28" step="1" value="15" oninput="syncRange('s-font','rv-font')"><span class="range-val" id="rv-font">15px</span></div></div>
     <div class="field"><label>Шрифт назв команд</label><select id="s-team-font"><option value="'Barlow Condensed', sans-serif">Barlow Condensed (Стандарт)</option><option value="'Bebas Neue', sans-serif">Bebas Neue (Широкий)</option><option value="'Montserrat', sans-serif">Montserrat (Сучасний)</option><option value="'Oswald', sans-serif">Oswald (Високий)</option></select></div>
@@ -264,6 +273,14 @@ input:checked + .slider:before { transform: translateX(22px); background-color: 
 <div class="page" id="page-rankings">
   <div class="sec-title">Таблиця рейтингу</div>
   <div class="card"><div class="card-title">Заголовок таблиці</div><div class="field"><input type="text" id="rank-title-inp" value="ГРАВЦІ (ЧОЛОВІКИ) 🇺🇦"></div></div>
+  <div class="card">
+    <div class="card-title">Якщо команд більше 10 — режим показу рейтингу</div>
+    <div class="field"><select id="rank-split-mode-select" onchange="autoSave()">
+      <option value="side">Два табло поруч (без анімації)</option>
+      <option value="animate">Анімація: по черзі кожні 15 сек</option>
+    </select></div>
+    <div style="font-size:11px; color:var(--muted);">Якщо в рейтингу більше 10 команд, вони автоматично розділяються на два табла, а колонка «Група» приховується. Тут можна обрати — показувати обидва табло одночасно поруч, або перемикати їх по черзі кожні 15 секунд.</div>
+  </div>
   <div class="card"><div class="card-title">Команди — SEED · Гравці · Група · Рейтинг</div><div id="rank-rows"></div><button class="btn btn-primary btn-sm" onclick="addRankRow()">+ Додати команду</button></div>
 </div>
  
@@ -286,8 +303,8 @@ input:checked + .slider:before { transform: translateX(22px); background-color: 
  
 <div class="page" id="page-schedule">
   <div class="sec-title">Розклад ігор</div>
-  <div class="card"><div class="card-title">Заголовки колонок</div><div id="sched-headers" style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:6px;"></div></div>
-  <div class="card"><div class="card-title">Рядки (Час · Корт 1–4)</div><div id="sched-rows"></div><div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;"><button class="btn btn-primary btn-sm" onclick="addSchedRow(false)">+ Гра</button><button class="btn btn-outline btn-sm" onclick="addSchedRow(true)">+ Перерва</button></div></div>
+  <div class="card"><div class="card-title">Заголовки колонок (Корти)</div><div id="sched-headers" style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:10px;"></div><div style="display:flex;gap:8px;flex-wrap:wrap;"><button class="btn btn-primary btn-sm" onclick="addSchedCourt()">+ Додати корт</button><button class="btn btn-danger btn-sm" onclick="removeSchedCourt()">− Видалити останній корт</button></div></div>
+  <div class="card"><div class="card-title">Рядки (Час · Корти)</div><div id="sched-rows"></div><div style="display:flex;gap:8px;margin-top:8px;flex-wrap:wrap;"><button class="btn btn-primary btn-sm" onclick="addSchedRow(false)">+ Гра</button><button class="btn btn-outline btn-sm" onclick="addSchedRow(true)">+ Перерва</button></div></div>
 </div>
  
 <div class="page" id="page-playoff">
@@ -472,7 +489,7 @@ function defaultState() {
     },
     accent: '#00e5ff', bgOpacity: 0.88,
     colors: { rankings: { team: '#ffffff', bg: '#050c1c', head: '#081830' }, groups: { team: '#ffffff', bg: '#050c1c', head: '#081830' }, schedule: { team: '#ffffff', bg: '#050c1c', head: '#000000' }, playoff: { team: '#ffffff', bg: '#161a22', head: '#000000' } },
-    rankTitle: 'ГРАВЦІ (ЧОЛОВІКИ) 🇺🇦',
+    rankTitle: 'ГРАВЦІ (ЧОЛОВІКИ) 🇺🇦', rankSplitMode: 'side',
     rankings: [{seed:1,players:'Artem Yatsenko / Slava Sedoplatov',group:'A',pts:13420}],
     groupLayout: 'classic', groupCount:4, teamCount:4, groups: autoGroups(4,4), visibleGroup: 'all',
     schedHeaders:['Час','Корт 1','Корт 2','Корт 3','Корт 4'], schedRows:[{time:'09:00',cells:['A1—A2','B1—B2','C1—C2','D1—D2'],isBreak:false}],
@@ -499,6 +516,7 @@ function collectState() {
   };
  
   state.rankTitle  = document.getElementById('rank-title-inp').value;
+  state.rankSplitMode = document.getElementById('rank-split-mode-select')?.value || 'side';
   state.rankings   = collectRankings();
   state.schedHeaders = collectSchedHeaders();
   state.schedRows  = collectSchedRows();
@@ -576,16 +594,52 @@ window.saveTournament = function() { const name = document.getElementById('tour-
 window.loadTournament = function() { const name = document.getElementById('tour-save-select').value; if(!name || !state.savedTournaments || !state.savedTournaments[name]) return alert('Оберіть турнір зі списку'); if(!confirm('Завантажити турнір? Поточні незбережені дані будуть втрачені.')) return; const savedTours = state.savedTournaments; const savedThemes = state.themes; state = JSON.parse(JSON.stringify(state.savedTournaments[name])); state.savedTournaments = savedTours; state.themes = savedThemes; initUI(); autoSave(); };
 window.deleteTournament = function() { const name = document.getElementById('tour-save-select').value; if(!name || !state.savedTournaments || !state.savedTournaments[name]) return; if(confirm('Видалити турнір?')) { delete state.savedTournaments[name]; updateTourDropdown(); pushState(); } };
 window.resetTournament = function() { if(!confirm('🚨 УВАГА: Це повністю очистить усі команди, групи та плей-оф. Бажаєте продовжити?')) return; const savedTours = state.savedTournaments; const savedThemes = state.themes; state = defaultState(); state.savedTournaments = savedTours; state.themes = savedThemes; initUI(); autoSave(); };
+
+// === ЕКСПОРТ / ІМПОРТ У ФАЙЛ НА ПРИСТРОЇ ===
+window.exportTournamentToFile = function() {
+  const snap = collectState();
+  const dataStr = JSON.stringify(snap, null, 2);
+  const blob = new Blob([dataStr], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const dateStr = new Date().toISOString().slice(0,10);
+  const a = document.createElement('a');
+  a.href = url; a.download = `padel-tournament-${dateStr}.json`;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
+window.importTournamentFromFile = function(event) {
+  const file = event.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const parsed = JSON.parse(e.target.result);
+      if (!parsed || typeof parsed !== 'object') throw new Error('Невірний формат файлу');
+      if (!confirm(`Завантажити турнір з файлу "${file.name}"? Поточні незбережені дані будуть втрачені.`)) { event.target.value = ''; return; }
+      const savedTours = state.savedTournaments;
+      const savedThemes = state.themes;
+      state = Object.assign(defaultState(), parsed);
+      if (!parsed.savedTournaments) state.savedTournaments = savedTours || {};
+      if (!parsed.themes) state.themes = savedThemes || {};
+      initUI(); autoSave();
+      alert('Турнір успішно імпортовано з файлу!');
+    } catch (err) {
+      alert('Помилка: не вдалося прочитати файл. Перевірте, що це правильний файл турніру (.json). ' + err.message);
+    }
+    event.target.value = '';
+  };
+  reader.readAsText(file);
+};
  
 window.showPage = function(id) { document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); document.getElementById('page-'+id).classList.add('active'); document.getElementById('tab-'+id).classList.add('active'); };
-window.syncRange = function(inputId, valId) { const v = parseFloat(document.getElementById(inputId).value); const el = document.getElementById(valId); if (inputId==='s-scale') el.textContent = v.toFixed(2)+'×'; else if (inputId==='s-font'||inputId==='s-t-pad') el.textContent = v+'px'; else if (inputId==='s-t-width') el.textContent = v+'%'; else if (inputId==='s-opacity') el.textContent = Math.round(v*100)+'%'; };
+window.syncRange = function(inputId, valId) { const v = parseFloat(document.getElementById(inputId).value); const el = document.getElementById(valId); if (inputId==='s-scale') el.textContent = v.toFixed(2)+'×'; else if (inputId==='s-font'||inputId==='s-t-pad') el.textContent = v+'px'; else if (inputId==='s-t-width') el.textContent = (v>=0?'+':'')+v+'%'; else if (inputId==='s-opacity') el.textContent = Math.round(v*100)+'%'; };
  
 // === РОЗМІРИ ОКРЕМО ДЛЯ КОЖНОГО ТАБЛО ===
 window.currentSizeTarget = 'rankings';
 function loadSizeControls(target) {
   const prof = (state.sizes && state.sizes[target]) || { scale:1, tblWidth:95, tblPadY:9, fontSize:15, teamFont:"'Barlow Condensed', sans-serif" };
   document.getElementById('s-scale').value   = prof.scale!=null?prof.scale:1;
-  document.getElementById('s-t-width').value = prof.tblWidth!=null?prof.tblWidth:95;
+  document.getElementById('s-t-width').value = (prof.tblWidth!=null?prof.tblWidth:95) - 100;
   document.getElementById('s-t-pad').value   = prof.tblPadY!=null?prof.tblPadY:9;
   document.getElementById('s-font').value    = prof.fontSize!=null?prof.fontSize:15;
   document.getElementById('s-team-font').value = prof.teamFont || "'Barlow Condensed', sans-serif";
@@ -595,7 +649,7 @@ function saveSizeControlsToState() {
   if(!state.sizes) state.sizes = {};
   state.sizes[window.currentSizeTarget] = {
     scale: parseFloat(document.getElementById('s-scale').value),
-    tblWidth: parseInt(document.getElementById('s-t-width').value),
+    tblWidth: parseInt(document.getElementById('s-t-width').value) + 100,
     tblPadY: parseInt(document.getElementById('s-t-pad').value),
     fontSize: parseInt(document.getElementById('s-font').value),
     teamFont: document.getElementById('s-team-font').value
@@ -640,11 +694,57 @@ function collectRankings() { return Array.from(document.querySelectorAll('.r-row
 window.addRankRow = function() { state.rankings = collectRankings(); const n = state.rankings.length+1; state.rankings.push({seed:n,players:'',group:'ABCDEFGHIJ'[(n-1)%10],pts:0}); renderRankEditor(); autoSave(); };
 window.delRankRow = function(i) { state.rankings = collectRankings(); state.rankings.splice(i,1); renderRankEditor(); autoSave(); };
  
-function renderSchedEditor() { const hw = document.getElementById('sched-headers'); hw.innerHTML = ''; (state.schedHeaders||[]).forEach((h,i) => { const inp = document.createElement('input'); inp.type='text'; inp.value=h; inp.dataset.i=i; hw.appendChild(inp); }); const rw = document.getElementById('sched-rows'); rw.innerHTML = ''; (state.schedRows||[]).forEach((r,i) => { const row = document.createElement('div'); row.className = 'sched-row'+(r.isBreak?' is-break':''); if (r.isBreak) { row.innerHTML = `<input type="text" value="${r.time}" data-si="${i}" data-f="time" placeholder="00:00"><input type="text" value="${r.cells[0]||''}" data-si="${i}" data-f="c0" placeholder="Текст перерви"><button class="del-btn" onclick="delSchedRow(${i})">✕</button>`; } else { row.innerHTML = `<input type="text" value="${r.time}" data-si="${i}" data-f="time" placeholder="00:00"><input type="text" value="${r.cells[0]||''}" data-si="${i}" data-f="c0" placeholder="Корт 1"><input type="text" value="${r.cells[1]||''}" data-si="${i}" data-f="c1" placeholder="Корт 2"><input type="text" value="${r.cells[2]||''}" data-si="${i}" data-f="c2" placeholder="Корт 3"><input type="text" value="${r.cells[3]||''}" data-si="${i}" data-f="c3" placeholder="Корт 4"><button class="del-btn" onclick="delSchedRow(${i})">✕</button>`; } rw.appendChild(row); }); }
+function renderSchedEditor() {
+  const headers = state.schedHeaders || ['Час','Корт 1'];
+  const courtsCount = Math.max(headers.length - 1, 0);
+  const hw = document.getElementById('sched-headers'); hw.innerHTML = ''; hw.style.gridTemplateColumns = `repeat(${headers.length},1fr)`;
+  headers.forEach((h,i) => { const inp = document.createElement('input'); inp.type='text'; inp.value=h; inp.dataset.i=i; hw.appendChild(inp); });
+  const rw = document.getElementById('sched-rows'); rw.innerHTML = '';
+  (state.schedRows||[]).forEach((r,i) => {
+    const row = document.createElement('div'); row.className = 'sched-row'+(r.isBreak?' is-break':'');
+    if (r.isBreak) {
+      row.style.gridTemplateColumns = '70px 1fr 32px';
+      row.innerHTML = `<input type="text" value="${r.time}" data-si="${i}" data-f="time" placeholder="00:00"><input type="text" value="${r.cells[0]||''}" data-si="${i}" data-f="c0" placeholder="Текст перерви"><button class="del-btn" onclick="delSchedRow(${i})">✕</button>`;
+    } else {
+      row.style.gridTemplateColumns = `70px repeat(${courtsCount},1fr) 32px`;
+      let cellsHtml = '';
+      for (let ci=0; ci<courtsCount; ci++) { cellsHtml += `<input type="text" value="${(r.cells&&r.cells[ci])||''}" data-si="${i}" data-f="c${ci}" placeholder="${headers[ci+1]||('Корт '+(ci+1))}">`; }
+      row.innerHTML = `<input type="text" value="${r.time}" data-si="${i}" data-f="time" placeholder="00:00">${cellsHtml}<button class="del-btn" onclick="delSchedRow(${i})">✕</button>`;
+    }
+    rw.appendChild(row);
+  });
+}
 function collectSchedHeaders() { return Array.from(document.querySelectorAll('#sched-headers input')).map(i=>i.value); }
-function collectSchedRows() { return Array.from(document.querySelectorAll('.sched-row')).map(row => { const isBreak=row.classList.contains('is-break'); return {time:row.querySelector('[data-f="time"]').value, isBreak, cells:isBreak?[row.querySelector('[data-f="c0"]').value]:['c0','c1','c2','c3'].map(f=>row.querySelector(`[data-f="${f}"]`)?.value||'')}; }); }
-window.addSchedRow = function(isBreak) { state.schedRows=collectSchedRows(); state.schedRows.push(isBreak?{time:'--:--',cells:['☕ ПЕРЕРВА'],isBreak:true}:{time:'--:--',cells:['','','',''],isBreak:false}); renderSchedEditor(); autoSave(); };
-window.delSchedRow = function(i) { state.schedRows=collectSchedRows(); state.schedRows.splice(i,1); renderSchedEditor(); autoSave(); };
+function collectSchedRows() {
+  const courtsCount = Math.max((state.schedHeaders||collectSchedHeaders()).length - 1, 0);
+  return Array.from(document.querySelectorAll('.sched-row')).map(row => {
+    const isBreak = row.classList.contains('is-break');
+    if (isBreak) return { time: row.querySelector('[data-f="time"]').value, isBreak, cells: [row.querySelector('[data-f="c0"]').value] };
+    const cells = [];
+    for (let ci=0; ci<courtsCount; ci++) { cells.push(row.querySelector(`[data-f="c${ci}"]`)?.value || ''); }
+    return { time: row.querySelector('[data-f="time"]').value, isBreak, cells };
+  });
+}
+window.addSchedRow = function(isBreak) {
+  state.schedHeaders = collectSchedHeaders(); state.schedRows = collectSchedRows();
+  const courtsCount = Math.max(state.schedHeaders.length - 1, 0);
+  state.schedRows.push(isBreak ? {time:'--:--',cells:['☕ ПЕРЕРВА'],isBreak:true} : {time:'--:--',cells:Array(courtsCount).fill(''),isBreak:false});
+  renderSchedEditor(); autoSave();
+};
+window.delSchedRow = function(i) { state.schedHeaders = collectSchedHeaders(); state.schedRows = collectSchedRows(); state.schedRows.splice(i,1); renderSchedEditor(); autoSave(); };
+window.addSchedCourt = function() {
+  state.schedHeaders = collectSchedHeaders(); state.schedRows = collectSchedRows();
+  state.schedHeaders.push('Корт ' + state.schedHeaders.length);
+  state.schedRows.forEach(r => { if (!r.isBreak) { if (!r.cells) r.cells = []; r.cells.push(''); } });
+  renderSchedEditor(); autoSave();
+};
+window.removeSchedCourt = function() {
+  state.schedHeaders = collectSchedHeaders(); state.schedRows = collectSchedRows();
+  if (state.schedHeaders.length <= 2) { alert('Має залишитися хоча б один корт.'); return; }
+  state.schedHeaders.pop();
+  state.schedRows.forEach(r => { if (!r.isBreak && r.cells) r.cells.pop(); });
+  renderSchedEditor(); autoSave();
+};
  
 function autoGroups(gc,tc) { const L='ABCDEFGHIJ'; return Array.from({length:gc},(_,gi)=>({letter:L[gi],teams:Array.from({length:tc},(_,ti)=>({name:`${L[gi]}${ti+1} — Команда`,p:0,w:0,l:0,gd:'0:0',pts:0,scores:Array(tc).fill('')}))})); }
 window.rebuildGroups = function() { 
@@ -975,6 +1075,7 @@ function initUI() {
   syncRange('s-opacity','rv-opacity');
   
   document.getElementById('rank-title-inp').value = state.rankTitle||'';
+  document.getElementById('rank-split-mode-select').value = state.rankSplitMode || 'side';
   document.getElementById('g-count').value = state.groupCount||4;
   document.getElementById('g-teams').value = state.teamCount||4;
   document.getElementById('g-layout').value = state.groupLayout||'classic';
