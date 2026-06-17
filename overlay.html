@@ -64,6 +64,11 @@ html, body { width:100%; height:100%; background:transparent; overflow:hidden; f
 .seed-col { font-family:'Bebas Neue',sans-serif; font-size:22px; color:var(--accent); width:50px; }
 .pts-col { font-family:'Bebas Neue',sans-serif; font-size:18px; color:var(--accent2); text-align:right; }
 .grp-badge { display:inline-block; padding:2px 9px; border-radius:20px; font-size:11px; font-weight:700; letter-spacing:1px; background:rgba(0,229,255,0.12); color:var(--accent); border:1px solid rgba(0,229,255,0.3); }
+.rank-split-wrap { display:flex; gap:24px; align-items:flex-start; justify-content:center; width:var(--tbl-width); max-width:100vw; }
+.rank-card-split { min-width:0; width:auto; max-width:100%; flex:1 1 0; }
+.rank-split-wrap.animate-mode { justify-content:center; }
+.rank-split-wrap.animate-mode .rank-card-split { display:none; opacity:0; flex:1 1 100%; width:100%; transition:opacity .5s ease; }
+.rank-split-wrap.animate-mode .rank-card-split.anim-active { display:block; opacity:1; }
  
 /* GROUPS */
 #v-groups { padding: 90px 60px 50px 60px; width: var(--tbl-width); margin: 0 auto; height:100%; box-sizing: border-box; }
@@ -145,7 +150,7 @@ html, body { width:100%; height:100%; background:transparent; overflow:hidden; f
   </div>
  
   <div class="view active" id="v-rankings">
-    <div class="rank-card">
+    <div class="rank-card" id="rank-card-single">
       <div class="rank-header">
         <div class="rank-header-title" id="rank-title">ГРАВЦІ 🇺🇦</div>
         <div class="rank-header-sub">Padel Tournament</div>
@@ -154,6 +159,16 @@ html, body { width:100%; height:100%; background:transparent; overflow:hidden; f
         <thead><tr><th>SEED</th><th>КОМАНДА / ГРАВЦІ</th><th>ГРУПА</th><th style="text-align:right">РЕЙТИНГ</th></tr></thead>
         <tbody id="rank-body"></tbody>
       </table>
+    </div>
+    <div class="rank-split-wrap" id="rank-split-wrap" style="display:none;">
+      <div class="rank-card rank-card-split" id="rank-card-a">
+        <div class="rank-header"><div class="rank-header-title" id="rank-title-a"></div></div>
+        <table class="rank-table"><thead><tr><th>SEED</th><th>КОМАНДА / ГРАВЦІ</th><th style="text-align:right">РЕЙТИНГ</th></tr></thead><tbody id="rank-body-a"></tbody></table>
+      </div>
+      <div class="rank-card rank-card-split" id="rank-card-b">
+        <div class="rank-header"><div class="rank-header-title" id="rank-title-b"></div></div>
+        <table class="rank-table"><thead><tr><th>SEED</th><th>КОМАНДА / ГРАВЦІ</th><th style="text-align:right">РЕЙТИНГ</th></tr></thead><tbody id="rank-body-b"></tbody></table>
+      </div>
     </div>
   </div>
   <div class="view" id="v-groups"></div>
@@ -295,10 +310,64 @@ function applyState(s) {
   renderRankings(s); renderGroups(s); renderSchedule(s); renderPlayoff(s);
 }
  
+const RANK_SPLIT_THRESHOLD = 10;
+let rankAnimTimer = null;
+function stopRankAnimation() { if (rankAnimTimer) { clearInterval(rankAnimTimer); rankAnimTimer = null; } }
+function startRankAnimation() {
+  const cardA = document.getElementById('rank-card-a'), cardB = document.getElementById('rank-card-b');
+  if (!cardA || !cardB) return;
+  if (rankAnimTimer) return; // вже триває
+  let showingA = true;
+  cardA.classList.add('anim-active'); cardB.classList.remove('anim-active');
+  rankAnimTimer = setInterval(() => {
+    showingA = !showingA;
+    cardA.classList.toggle('anim-active', showingA);
+    cardB.classList.toggle('anim-active', !showingA);
+  }, 15000);
+}
+
 function renderRankings(s) {
   const titleEl = document.getElementById('rank-title'); if(titleEl) titleEl.textContent = s.rankTitle || 'ГРАВЦІ 🇺🇦';
-  const tbody = document.getElementById('rank-body'); if(!tbody) return; tbody.innerHTML = '';
-  (s.rankings || []).forEach(r => { const tr = document.createElement('tr'); tr.innerHTML = `<td class="seed-col">${r.seed || ''}</td><td class="team-name-text">${r.players || ''}</td><td><span class="grp-badge">${r.group || ''}</span></td><td class="pts-col">${r.pts || 0}</td>`; tbody.appendChild(tr); });
+  const rankings = s.rankings || [];
+  const singleCard = document.getElementById('rank-card-single');
+  const splitWrap = document.getElementById('rank-split-wrap');
+
+  if (rankings.length <= RANK_SPLIT_THRESHOLD) {
+    if (singleCard) singleCard.style.display = '';
+    if (splitWrap) splitWrap.style.display = 'none';
+    stopRankAnimation();
+    const tbody = document.getElementById('rank-body'); if(!tbody) return; tbody.innerHTML = '';
+    rankings.forEach(r => { const tr = document.createElement('tr'); tr.innerHTML = `<td class="seed-col">${r.seed || ''}</td><td class="team-name-text">${r.players || ''}</td><td><span class="grp-badge">${r.group || ''}</span></td><td class="pts-col">${r.pts || 0}</td>`; tbody.appendChild(tr); });
+    return;
+  }
+
+  // Команд більше 10 — розділяємо на два табла (без колонки "Група")
+  if (singleCard) singleCard.style.display = 'none';
+  if (splitWrap) splitWrap.style.display = 'flex';
+
+  const half = Math.ceil(rankings.length / 2);
+  const partA = rankings.slice(0, half);
+  const partB = rankings.slice(half);
+  const baseTitle = s.rankTitle || 'ГРАВЦІ 🇺🇦';
+  const titleA = document.getElementById('rank-title-a'); if (titleA) titleA.textContent = `${baseTitle} (1–${half})`;
+  const titleB = document.getElementById('rank-title-b'); if (titleB) titleB.textContent = `${baseTitle} (${half+1}–${rankings.length})`;
+
+  const fillBody = (suffix, list) => {
+    const tbody = document.getElementById('rank-body-' + suffix); if(!tbody) return; tbody.innerHTML = '';
+    list.forEach(r => { const tr = document.createElement('tr'); tr.innerHTML = `<td class="seed-col">${r.seed || ''}</td><td class="team-name-text">${r.players || ''}</td><td class="pts-col">${r.pts || 0}</td>`; tbody.appendChild(tr); });
+  };
+  fillBody('a', partA); fillBody('b', partB);
+
+  const mode = s.rankSplitMode || 'side';
+  if (mode === 'animate') {
+    splitWrap.classList.add('animate-mode');
+    startRankAnimation();
+  } else {
+    splitWrap.classList.remove('animate-mode');
+    stopRankAnimation();
+    document.getElementById('rank-card-a')?.classList.remove('anim-active');
+    document.getElementById('rank-card-b')?.classList.remove('anim-active');
+  }
 }
  
 // Сортування команд: очки → різниця геймів → особиста зустріч → перемоги
