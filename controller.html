@@ -115,7 +115,7 @@ input:checked + .slider:before { transform: translateX(22px); background-color: 
   <div class="tab" onclick="showPage('playoff')" id="tab-playoff">🏆 Плей-оф</div>
 </div>
  
-<div class="page active" id="page-display">
+<div class="page" id="page-display">
   <div class="sec-title">Що показати на трансляції</div>
   
   <div class="card">
@@ -297,10 +297,10 @@ input:checked + .slider:before { transform: translateX(22px); background-color: 
       <div class="field" style="margin:0;flex:1"><label>Команд у групі</label><select id="g-teams" onchange="rebuildGroups()"><option value="3">3</option><option value="4" selected>4</option><option value="5">5</option><option value="6">6</option></select></div>
       <div class="field" style="margin:0;flex:1.5"><label>Вигляд таблиці</label><select id="g-layout" onchange="autoSave()"><option value="classic">Класична (Статистика)</option><option value="chess">Шахова (Матриця з рахунками)</option></select></div>
     </div>
-    <!-- Додано новий перемикач відповідно до запиту -->
+    <!-- Перемикач для показу тільки назв команд (Шахова) -->
     <div class="field" style="margin-top:10px;">
       <label><input type="checkbox" id="g-chess-names-only" onchange="autoSave()"> Показати тільки назви команд (Шахова)</label>
-      <div style="font-size:11px; color:var(--muted); margin-top:4px;">В шаховій таблиці замість цифр 1, 2, 3 у заголовках та рядках виводитимуться повні назви команд.</div>
+      <div style="font-size:11px; color:var(--muted); margin-top:4px;">В шаховій таблиці замість цифр 1, 2, 3 у заголовках та рядках виводитимуться повні назви команд. На оверлеї будуть показані виключно назви команд (без цифр і очків, у стилі огляду груп).</div>
     </div>
   </div>
   <div id="group-editor"></div>
@@ -409,7 +409,6 @@ window.changeTargetScreen = function() {
   document.querySelectorAll('.view-btn').forEach(b=>b.classList.remove('active'));
   document.getElementById('vbtn-'+v)?.classList.add('active');
  
-  // Restore per-court visibleGroup in g-visible dropdown
   const visSelect = document.getElementById('g-visible');
   if (visSelect) {
     let vg;
@@ -423,7 +422,6 @@ window.changeTargetScreen = function() {
     if (visSelect.querySelector(`option[value="${vg}"]`)) visSelect.value = vg;
   }
  
-  // Перемикач Верхня/Нижня сітка плей-офу
   const bvCard = document.getElementById('card-bracket-view');
   if (bvCard) bvCard.style.display = (v === 'playoff') ? 'block' : 'none';
   let bv;
@@ -534,7 +532,7 @@ function collectState() {
   state.groupChessNamesOnly = document.getElementById('g-chess-names-only')?.checked || false;
   state.groupCount = parseInt(document.getElementById('g-count').value);
   state.teamCount  = parseInt(document.getElementById('g-teams').value);
-  // Save visibleGroup per-court
+  
   const _vg = document.getElementById('g-visible').value || 'all';
   const _tgt = document.getElementById('target-screen-select').value;
   if (_tgt === 'global') {
@@ -547,7 +545,6 @@ function collectState() {
   return state;
 }
  
-// === ТЕМИ ===
 function updateThemeDropdown() { const select = document.getElementById('theme-select'); select.innerHTML = '<option value="">-- Оберіть збережену тему --</option>'; if(state.themes) { Object.keys(state.themes).forEach(n => { select.innerHTML += `<option value="${n}">${n}</option>`; }); } }
 window.saveTheme = function() {
   const name = document.getElementById('theme-name').value.trim();
@@ -594,14 +591,12 @@ window.loadTheme = function() {
 };
 window.deleteTheme = function() { const name = document.getElementById('theme-select').value; if(!name || !state.themes || !state.themes[name]) return; if(confirm('Видалити тему?')) { delete state.themes[name]; updateThemeDropdown(); pushState(); } };
  
-// === ТУРНІРИ ===
 function updateTourDropdown() { const select = document.getElementById('tour-save-select'); select.innerHTML = '<option value="">-- Оберіть збережений турнір --</option>'; if(state.savedTournaments) { Object.keys(state.savedTournaments).forEach(n => { select.innerHTML += `<option value="${n}">${n}</option>`; }); } }
 window.saveTournament = function() { const name = document.getElementById('tour-save-name').value.trim(); if(!name) return alert('Введіть назву турніру для збереження!'); if(!state.savedTournaments) state.savedTournaments = {}; const snap = collectState(); delete snap.themes; delete snap.savedTournaments; state.savedTournaments[name] = snap; document.getElementById('tour-save-name').value = ''; updateTourDropdown(); document.getElementById('tour-save-select').value = name; pushState(); alert('Турнір "' + name + '" успішно збережено!'); };
 window.loadTournament = function() { const name = document.getElementById('tour-save-select').value; if(!name || !state.savedTournaments || !state.savedTournaments[name]) return alert('Оберіть турнір зі списку'); if(!confirm('Завантажити турнір? Поточні незбережені дані будуть втрачені.')) return; const savedTours = state.savedTournaments; const savedThemes = state.themes; state = JSON.parse(JSON.stringify(state.savedTournaments[name])); state.savedTournaments = savedTours; state.themes = savedThemes; initUI(); autoSave(); };
 window.deleteTournament = function() { const name = document.getElementById('tour-save-select').value; if(!name || !state.savedTournaments || !state.savedTournaments[name]) return; if(confirm('Видалити турнір?')) { delete state.savedTournaments[name]; updateTourDropdown(); pushState(); } };
 window.resetTournament = function() { if(!confirm('🚨 УВАГА: Це повністю очистить усі команди, групи та плей-оф. Бажаєте продовжити?')) return; const savedTours = state.savedTournaments; const savedThemes = state.themes; state = defaultState(); state.savedTournaments = savedTours; state.themes = savedThemes; initUI(); autoSave(); };
 
-// === ЕКСПОРТ / ІМПОРТ У ФАЙЛ НА ПРИСТРОЇ ===
 window.exportTournamentToFile = function() {
   const snap = collectState();
   const dataStr = JSON.stringify(snap, null, 2);
@@ -640,7 +635,6 @@ window.importTournamentFromFile = function(event) {
 window.showPage = function(id) { document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active')); document.getElementById('page-'+id).classList.add('active'); document.getElementById('tab-'+id).classList.add('active'); };
 window.syncRange = function(inputId, valId) { const v = parseFloat(document.getElementById(inputId).value); const el = document.getElementById(valId); if (inputId==='s-scale') el.textContent = v.toFixed(2)+'×'; else if (inputId==='s-font'||inputId==='s-t-pad') el.textContent = v+'px'; else if (inputId==='s-t-width') el.textContent = (v>=0?'+':'')+v+'%'; else if (inputId==='s-opacity') el.textContent = Math.round(v*100)+'%'; };
  
-// === РОЗМІРИ ОКРЕМО ДЛЯ КОЖНОГО ТАБЛО ===
 window.currentSizeTarget = 'rankings';
 function loadSizeControls(target) {
   const prof = (state.sizes && state.sizes[target]) || { scale:1, tblWidth:95, tblPadY:9, fontSize:15, teamFont:"'Barlow Condensed', sans-serif" };
@@ -794,15 +788,21 @@ function renderGroupEditor() {
       rows+=`<div class="team-stat-row" data-gi="${gi}" data-ti="${ti}">${generateTeamSelect(team.name, null, `data-f="name"`)}<input type="number" value="${team.p||0}" data-f="p"><input type="number" value="${team.w||0}" data-f="w"><input type="number" value="${team.l||0}" data-f="l"><input type="text" value="${team.gd||'0:0'}" data-f="gd"><input type="number" value="${team.pts||0}" data-f="pts"></div>`; 
     }); 
  
-    // Додаємо матрицю (шахматку) в контролер
+    // Матриця рахунків з назвами команд замість цифр у заголовках та рядках
     let matrixRows = `<div style="margin-top:12px; border-top:1px solid var(--border); padding-top:10px;"><div style="font-size:11px; color:var(--muted); margin-bottom:8px; text-transform:uppercase; letter-spacing:1px;">Рахунки між собою (для шахової таблиці)</div>`;
-    matrixRows += `<div style="display:grid; grid-template-columns: 24px repeat(${tc}, 1fr); gap:6px; margin-bottom:6px;"><div></div>`;
-    for(let tj=0; tj<tc; tj++) matrixRows += `<div style="text-align:center; font-size:11px; font-weight:bold; color:var(--muted);">${tj+1}</div>`;
+    
+    // Заголовки стовпчиків матриці з назвами команд (або скороченими)
+    matrixRows += `<div style="display:grid; grid-template-columns: 140px repeat(${tc}, 1fr); gap:6px; margin-bottom:6px; align-items:center;"><div></div>`;
+    for(let tj=0; tj<tc; tj++) {
+      const colTeamName = (grp.teams[tj] && grp.teams[tj].name) ? grp.teams[tj].name : `К${tj+1}`;
+      matrixRows += `<div style="text-align:center; font-size:11px; font-weight:bold; color:var(--accent); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${colTeamName}">${colTeamName}</div>`;
+    }
     matrixRows += `</div>`;
     
     (grp.teams||[]).forEach((team,ti)=>{
-      matrixRows += `<div style="display:grid; grid-template-columns: 24px repeat(${tc}, 1fr); gap:6px; margin-bottom:6px; align-items:center;">`;
-      matrixRows += `<div style="font-size:12px; font-weight:bold; color:var(--accent); text-align:center;">${ti+1}</div>`;
+      const rowTeamName = team.name || `Команда ${ti+1}`;
+      matrixRows += `<div style="display:grid; grid-template-columns: 140px repeat(${tc}, 1fr); gap:6px; margin-bottom:6px; align-items:center;">`;
+      matrixRows += `<div style="font-size:12px; font-weight:bold; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${rowTeamName}">${rowTeamName}</div>`;
       for(let tj=0; tj<tc; tj++) {
         if (ti === tj) {
           matrixRows += `<div style="background:rgba(0,0,0,0.3); border-radius:6px; height:32px; display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,0.2); font-size:10px;">X</div>`;
@@ -835,7 +835,6 @@ function collectGroups() {
       scores:[]
     }; 
   }); 
-  // Збираємо матрицю рахунків
   document.querySelectorAll('input[data-matrix-gi]').forEach(inp => {
      const gi = inp.dataset.matrixGi; const ti = inp.dataset.matrixTi; const tj = inp.dataset.matrixTj;
      if (map[gi] && map[gi].teams[ti]) { map[gi].teams[ti].scores[tj] = inp.value; }
@@ -843,9 +842,7 @@ function collectGroups() {
   return Object.values(map); 
 }
  
-// === ДЗЕРКАЛЬНИЙ ЗАПИС + АВТОМАТИЧНИЙ РОЗРАХУНОК СТАТИСТИКИ ===
 window.onMatrixInput = function(gi, ti, tj, value) {
-  // 1. Дзеркало: якщо ввели "6:4" в [ti][tj], то в [tj][ti] записуємо "4:6"
   const mirror = document.querySelector(`input[data-matrix-gi="${gi}"][data-matrix-ti="${tj}"][data-matrix-tj="${ti}"]`);
   if (mirror) {
     const parts = value.trim().split(':');
@@ -856,12 +853,10 @@ window.onMatrixInput = function(gi, ti, tj, value) {
       mirror.value = '';
     }
   }
-  // 2. Перерахунок статистики для групи
   recalcGroupStats(gi);
   autoSave();
 };
  
-// Універсальна функція сортування команд групи з урахуванням особистих зустрічей
 function sortTeamsByStandings(statsArr, scores) {
   return [...statsArr].sort((a, b) => {
     if (b.pts !== a.pts) return b.pts - a.pts;
@@ -1026,7 +1021,6 @@ function collectBracket() { const fmt=parseInt(document.getElementById('p-format
 window.setWinner = function(ri,mi,teamIdx) { const data=state.bracketData||{},key=`${ri}-${mi}`; if(!data[key]) return; data[key].winner=teamIdx; const winnerName=document.getElementById(`mt${teamIdx+1}-${ri}-${mi}`)?.value; const nk=`${ri+1}-${Math.floor(mi/2)}`; if(!data[nk]) data[nk]={t1:'',t2:'',s1:'-',s2:'-',winner:-1}; if(mi%2===0) data[nk].t1=winnerName; else data[nk].t2=winnerName; state.bracketData=data; renderBracketEditor(); autoSave(); };
 window.rebuildBracket = function() { const fmt=parseInt(document.getElementById('p-format').value); state.bracketData=autoBracketData(fmt); renderBracketEditor(); state.bracketDataLower=autoBracketData(fmt); renderBracketEditorLower(); autoSave(); };
  
-// === НИЖНЯ СІТКА (3-4 місця груп) ===
 function renderBracketEditorLower() { const fmt=parseInt(document.getElementById('p-format').value); const data=state.bracketDataLower&&Object.keys(state.bracketDataLower).length?state.bracketDataLower:autoBracketData(fmt); state.bracketDataLower=data; const wrap=document.getElementById('bracket-editor-lower'); if(!wrap) return; wrap.innerHTML=''; const labels=fmt===8?['1/8','1/4','1/2','Фінал']:fmt===4?['1/4','1/2','Фінал']:['1/2','Фінал']; labels.forEach((lbl,ri)=>{ const count=fmt/Math.pow(2,ri+1); const card=document.createElement('div'); card.className='card'; card.innerHTML=`<div class="card-title">${lbl} НИЖНЬОЇ СІТКИ</div>`; for(let mi=0;mi<count;mi++){ const key=`${ri}-${mi}`,m=data[key]||{t1:'',t2:'',s1:'-',s2:'-',winner:-1}; const me=document.createElement('div'); me.className='match-editor'; me.innerHTML=`<div class="match-editor-title">Матч ${ri+1}.${mi+1} (Нижня сітка)</div><div class="match-teams">${generateTeamSelect(m.t1, `mt1l-${ri}-${mi}`)}<input type="text" value="${m.s1}" id="ms1l-${ri}-${mi}" placeholder="Рах." style="text-align:center"><button class="win-btn ${m.winner===0?'active':''}" onclick="setWinnerLower(${ri},${mi},0)">W</button></div><div class="match-teams">${generateTeamSelect(m.t2, `mt2l-${ri}-${mi}`)}<input type="text" value="${m.s2}" id="ms2l-${ri}-${mi}" placeholder="Рах." style="text-align:center"><button class="win-btn ${m.winner===1?'active':''}" onclick="setWinnerLower(${ri},${mi},1)">W</button></div>`; card.appendChild(me); } wrap.appendChild(card); }); }
 function collectBracketLower() { const fmt=parseInt(document.getElementById('p-format').value),data={}; for(let ri=0;ri<Math.log2(fmt);ri++){ const count=fmt/Math.pow(2,ri+1); for(let mi=0;mi<count;mi++){ const key=`${ri}-${mi}`,old=state.bracketDataLower?.[key]||{}; data[key]={t1:document.getElementById(`mt1l-${ri}-${mi}`)?.value||old.t1||'',t2:document.getElementById(`mt2l-${ri}-${mi}`)?.value||old.t2||'',s1:document.getElementById(`ms1l-${ri}-${mi}`)?.value||old.s1||'-',s2:document.getElementById(`ms2l-${ri}-${mi}`)?.value||old.s2||'-',winner:old.winner??-1}; } } return data; }
 window.setWinnerLower = function(ri,mi,teamIdx) { const data=state.bracketDataLower||{},key=`${ri}-${mi}`; if(!data[key]) return; data[key].winner=teamIdx; const winnerName=document.getElementById(`mt${teamIdx+1}l-${ri}-${mi}`)?.value; const nk=`${ri+1}-${Math.floor(mi/2)}`; if(!data[nk]) data[nk]={t1:'',t2:'',s1:'-',s2:'-',winner:-1}; if(mi%2===0) data[nk].t1=winnerName; else data[nk].t2=winnerName; state.bracketDataLower=data; renderBracketEditorLower(); autoSave(); };
