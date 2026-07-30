@@ -85,6 +85,29 @@ html, body { width:100%; height:100%; background:transparent; overflow:hidden; f
 .advance-star { color:var(--gold); }
 .pos-n { color:var(--muted); font-size:11px; margin-right:5px; }
 .name-col { text-align:left; max-width:180px; }
+
+/* Стиль для списку тільки з назвами команд (як на фото Євро-2020) */
+.groups-names-only-list {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.group-name-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.1em;
+  padding: 6px 10px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 6px;
+  border-left: 3px solid var(--accent);
+}
+.group-name-row .team-name-text {
+  font-weight: 700;
+  letter-spacing: 0.8px;
+}
+
 .group-card.compact-teams .g-table td { padding: calc(var(--tbl-pad-y)/1.5) 8px; font-size:0.88em; }
 .group-card.compact-teams .g-table th { padding:4px 8px; font-size:9px; }
 .group-card.compact-teams .group-letter { font-size:26px; }
@@ -230,12 +253,10 @@ function hexToRgba(hex, opacity) {
 }
  
 function applyState(s) {
-  // ПЕРЕВІРКА ПАРАМЕТРУ ?court=X ДЛЯ РОЗДІЛЕННЯ ЕКРАНІВ
   const urlParams = new URLSearchParams(window.location.search);
   const courtParam = urlParams.get('court');
   const courtIdx = courtParam ? parseInt(courtParam) - 1 : null;
  
-  // 1. ВИДИМІСТЬ (Глобальна або для конкретного корту)
   let isVis = s.isVisible !== false;
   if (courtParam && s.courtVisibility && s.courtVisibility[courtParam] !== undefined) {
       isVis = s.courtVisibility[courtParam] !== false;
@@ -243,16 +264,12 @@ function applyState(s) {
   const rootEl = document.getElementById('overlay-root');
   if (!isVis) { rootEl.style.opacity = '0'; } else { rootEl.style.opacity = '1'; }
  
-  // 2. АКТИВНИЙ ЕКРАН (Глобальний або для конкретного корту)
   let safeView = s.view || 'rankings';
   if (courtParam && s.courtViews && s.courtViews[courtParam]) {
       safeView = s.courtViews[courtParam];
   }
   
-  // 3. АВТОМАТИЧНА ФІЛЬТРАЦІЯ ДАНИХ (Якщо це окремий корт)
   if (courtIdx !== null) {
-      // Визначаємо visibleGroup: спочатку з courtVisibleGroup (вибраного в контролері),
-      // якщо не задано — за замовчуванням рівний індексу корту
       const vgFromCtrl = (s.courtVisibleGroup && s.courtVisibleGroup[courtParam] !== undefined)
           ? s.courtVisibleGroup[courtParam]
           : courtIdx.toString();
@@ -263,7 +280,6 @@ function applyState(s) {
           const targetGroup = 'ABCDEFGHIJ'[groupIdx] || 'A';
           if (s.rankings) { s.rankings = s.rankings.filter(r => r.group === targetGroup); }
       }
-      // Фільтрація розкладу — тільки стовпець цього корту
       if (s.schedHeaders && s.schedRows) {
           const targetCol = courtIdx;
           const headerText = s.schedHeaders[courtIdx + 1] || `Корт ${courtParam}`;
@@ -275,7 +291,6 @@ function applyState(s) {
       }
   }
  
-  // --- ВІЗУАЛЬНІ НАЛАШТУВАННЯ (окремо для кожного табло) ---
   const root = document.documentElement.style;
   const sizeDefaults = { scale:1, tblWidth:95, tblPadY:9, fontSize:15, teamFont:"'Barlow Condensed', sans-serif" };
   const legacySize = { scale:s.scale, tblWidth:s.tblWidth, tblPadY:s.tblPadY, fontSize:s.fontSize, teamFont:s.teamFont };
@@ -316,7 +331,7 @@ function stopRankAnimation() { if (rankAnimTimer) { clearInterval(rankAnimTimer)
 function startRankAnimation() {
   const cardA = document.getElementById('rank-card-a'), cardB = document.getElementById('rank-card-b');
   if (!cardA || !cardB) return;
-  if (rankAnimTimer) return; // вже триває
+  if (rankAnimTimer) return;
   let showingA = true;
   cardA.classList.add('anim-active'); cardB.classList.remove('anim-active');
   rankAnimTimer = setInterval(() => {
@@ -341,7 +356,6 @@ function renderRankings(s) {
     return;
   }
 
-  // Команд більше 10 — розділяємо на два табла (без колонки "Група")
   if (singleCard) singleCard.style.display = 'none';
   if (splitWrap) splitWrap.style.display = 'flex';
 
@@ -370,20 +384,16 @@ function renderRankings(s) {
   }
 }
  
-// Сортування команд: очки → різниця геймів → особиста зустріч → перемоги
 function sortTeamsLive(teams) {
   const indexed = teams.map((t, ti) => ({ ...t, _ti: ti }));
   return indexed.sort((a, b) => {
-    // 1. Очки
     if ((b.pts||0) !== (a.pts||0)) return (b.pts||0) - (a.pts||0);
-    // 2. Різниця геймів
     const parseDiff = t => {
       const raw = (t.gd||'0:0').replace(/\s*\(.*\)/,'').split(':').map(Number);
       return (raw[0]||0) - (raw[1]||0);
     };
     const da = parseDiff(a), db = parseDiff(b);
     if (db !== da) return db - da;
-    // 3. Особиста зустріч
     const scA = a.scores && a.scores[b._ti] ? a.scores[b._ti] : '';
     if (scA && scA.includes(':')) {
       const p = scA.split(':'); const pa = parseInt(p[0]), pb = parseInt(p[1]);
@@ -392,7 +402,6 @@ function sortTeamsLive(teams) {
         if (pa < pb) return 1;
       }
     }
-    // 4. Перемоги
     return (b.w||0) - (a.w||0);
   });
 }
@@ -402,6 +411,7 @@ function renderGroups(s) {
   const gc = s.groupCount || 4; const tc = s.teamCount || 4; 
   const vis = s.visibleGroup || 'all';
   const isChess = (s.groupLayout === 'chess');
+  const namesOnly = s.groupChessNamesOnly || false;
  
   let cols = 2;
   if (vis === 'all') { if(gc === 3) cols = 3; else if(gc === 4) cols = 2; else if(gc === 6) cols = 2; else if(gc >= 8) cols = 4; } 
@@ -419,14 +429,24 @@ function renderGroups(s) {
     const card = document.createElement('div'); card.className = 'group-card' + (tc >= 5 ? ' compact-teams' : '');
     if (vis !== 'all') { card.style.minWidth = '600px'; card.style.maxWidth = '90vw'; }
  
-    // Сортуємо команди перед рендером
     const sortedTeams = sortTeamsLive(grp.teams || []);
  
-    let rows = '';
-    sortedTeams.forEach((team, pos) => {
-      if(!team) return;
-      if (isChess) {
-        let scoreCells = '';
+    if (namesOnly) {
+      // Режим "Тільки назви команд" у стилі Євро-2020
+      let listRows = '';
+      sortedTeams.forEach((team) => {
+        if(!team || !team.name) return;
+        listRows += `<div class="group-name-row"><span class="team-name-text">${team.name}</span></div>`;
+      });
+      card.innerHTML = `<div class="group-card-head"><div class="group-letter">${letter}</div><div><div class="group-title">Група ${letter}</div></div></div><div class="groups-names-only-list">${listRows}</div>`;
+    } else if (isChess) {
+      let scoreCells = '';
+      let headCols = '';
+      for(let tj=0; tj<tc; tj++) headCols += `<th>${tj+1}</th>`;
+      let rows = '';
+      sortedTeams.forEach((team, pos) => {
+        if(!team) return;
+        scoreCells = '';
         for(let tj=0; tj<tc; tj++) {
           if (team._ti === tj) {
             scoreCells += `<td class="chess-x"></td>`;
@@ -443,21 +463,19 @@ function renderGroups(s) {
           <td style="color:var(--accent2); font-weight:bold; font-size:1.1em;">${team.pts||0}</td>
           <td>${pos<2?'<span class="advance-star">★</span>':''}</td>
         </tr>`;
-      } else {
-        rows += `<tr><td class="team-name-text name-col"><span class="pos-n">${pos+1}</span>${team.name || ''}</td><td>${team.p||0}</td><td>${team.w||0}</td><td>${team.l||0}</td><td>${team.gd||'0:0'}</td><td style="color:var(--accent2); font-weight:bold; font-size:1.1em;">${team.pts||0}</td><td>${pos<2?'<span class="advance-star">★</span>':''}</td></tr>`;
-      }
-    });
- 
-    let theadHTML = '';
-    if (isChess) {
-      let headCols = '';
-      for(let tj=0; tj<tc; tj++) headCols += `<th>${tj+1}</th>`;
-      theadHTML = `<tr><th>Команда</th>${headCols}<th>В</th><th>П</th><th>Очки</th><th></th></tr>`;
+      });
+      let theadHTML = `<tr><th>Команда</th>${headCols}<th>В</th><th>П</th><th>Очки</th><th></th></tr>`;
+      card.innerHTML = `<div class="group-card-head"><div class="group-letter">${letter}</div><div><div class="group-title">Група ${letter}</div><div class="group-sub">★ Top 2 → Плей-оф</div></div></div><table class="g-table"><thead>${theadHTML}</thead><tbody>${rows}</tbody></table>`;
     } else {
-      theadHTML = `<tr><th>Команда</th><th>І</th><th>В</th><th>П</th><th>МГ</th><th>Очки</th><th></th></tr>`;
+      let rows = '';
+      sortedTeams.forEach((team, pos) => {
+        if(!team) return;
+        rows += `<tr><td class="team-name-text name-col"><span class="pos-n">${pos+1}</span>${team.name || ''}</td><td>${team.p||0}</td><td>${team.w||0}</td><td>${team.l||0}</td><td>${team.gd||'0:0'}</td><td style="color:var(--accent2); font-weight:bold; font-size:1.1em;">${team.pts||0}</td><td>${pos<2?'<span class="advance-star">★</span>':''}</td></tr>`;
+      });
+      let theadHTML = `<tr><th>Команда</th><th>І</th><th>В</th><th>П</th><th>МГ</th><th>Очки</th><th></th></tr>`;
+      card.innerHTML = `<div class="group-card-head"><div class="group-letter">${letter}</div><div><div class="group-title">Група ${letter}</div><div class="group-sub">★ Top 2 → Плей-оф</div></div></div><table class="g-table"><thead>${theadHTML}</thead><tbody>${rows}</tbody></table>`;
     }
- 
-    card.innerHTML = `<div class="group-card-head"><div class="group-letter">${letter}</div><div><div class="group-title">Група ${letter}</div><div class="group-sub">★ Top 2 → Плей-оф</div></div></div><table class="g-table"><thead>${theadHTML}</thead><tbody>${rows}</tbody></table>`;
+
     view.appendChild(card);
   });
 }
@@ -481,7 +499,6 @@ function renderPlayoff(s) {
   const headWrap = document.getElementById('bracket-headers'); if(headWrap) headWrap.innerHTML = '';
   const fmt = s.bracketFormat || 4;
  
-  // Визначаємо, який блок плей-офу показувати: верхню чи нижню сітку (3-4 місця груп)
   const urlParams2 = new URLSearchParams(window.location.search);
   const courtParam2 = urlParams2.get('court');
   let activeBracket = s.bracketView || 'upper';
