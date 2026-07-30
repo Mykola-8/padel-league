@@ -73,10 +73,10 @@ html, body { width:100%; height:100%; background:transparent; overflow:hidden; f
 /* GROUPS */
 #v-groups { padding: 90px 60px 50px 60px; width: var(--tbl-width); margin: 0 auto; height:100%; box-sizing: border-box; }
 #v-groups .team-name-text { color: var(--group-team, #ffffff); }
-.group-card { background:var(--group-bg, var(--card-bg)); border:1px solid var(--border); border-radius:8px; overflow:hidden; min-width:0; max-width: 100%; animation:slideIn .4s cubic-bezier(.22,.68,0,1.2); box-shadow:0 8px 40px rgba(0,0,0,0.7); font-size:var(--font-size); transition: all 0.3s ease; }
-.group-card-head { background:var(--group-head, rgba(8,24,48,0.9)); padding:8px 14px; display:flex; align-items:center; gap:10px; border-bottom:2px solid var(--accent); }
-.group-letter { font-family:'Bebas Neue',sans-serif; font-size:34px; line-height:1; color:var(--accent); }
-.group-title { font-size:13px; font-weight:700; }
+.group-card { background:var(--group-bg, var(--card-bg)); border:1px solid var(--border); border-radius:12px; overflow:hidden; min-width:0; max-width: 100%; animation:slideIn .4s cubic-bezier(.22,.68,0,1.2); box-shadow:0 10px 40px rgba(0,0,0,0.7); font-size:var(--font-size); transition: all 0.3s ease; }
+.group-card-head { background:var(--group-head, rgba(8,24,48,0.95)); padding:12px 18px; display:flex; align-items:center; gap:12px; border-bottom:2px solid var(--accent); }
+.group-letter { font-family:'Bebas Neue',sans-serif; font-size:32px; line-height:1; color:var(--accent); }
+.group-title { font-size:16px; font-weight:700; font-family:'Bebas Neue',sans-serif; letter-spacing:1.5px; color:#fff; text-transform:uppercase; }
 .group-sub { font-size:10px; color:var(--muted); }
 .g-table { width:100%; border-collapse:collapse; }
 .g-table th { background:var(--group-head, rgba(0,0,0,0.4)); padding:6px 10px; font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; text-align:center; }
@@ -86,34 +86,35 @@ html, body { width:100%; height:100%; background:transparent; overflow:hidden; f
 .pos-n { color:var(--muted); font-size:11px; margin-right:5px; }
 .name-col { text-align:left; max-width:180px; }
 
-/* Стиль для списку тільки з назвами команд (як на фото Євро-2020) */
+/* Стиль для огляду груп у вигляді плашок (як на фото Євро) */
 .groups-names-only-list {
-  padding: 16px 20px;
+  padding: 14px 16px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
 .group-name-row {
   display: flex;
   align-items: center;
-  gap: 10px;
-  font-size: 1.1em;
-  padding: 6px 10px;
-  background: rgba(255,255,255,0.03);
-  border-radius: 6px;
-  border-left: 3px solid var(--accent);
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.05);
 }
 .group-name-row .team-name-text {
+  font-size: 1.15em;
   font-weight: 700;
   letter-spacing: 0.8px;
+  color: #ffffff;
 }
 
 .group-card.compact-teams .g-table td { padding: calc(var(--tbl-pad-y)/1.5) 8px; font-size:0.88em; }
 .group-card.compact-teams .g-table th { padding:4px 8px; font-size:9px; }
 .group-card.compact-teams .group-letter { font-size:26px; }
 .group-card.compact-teams .group-card-head { padding:6px 12px; }
-#v-groups.compact .group-card-head { padding:4px 10px; }
-#v-groups.compact .group-letter { font-size:24px; }
+#v-groups.compact .group-card-head { padding:6px 14px; }
+#v-groups.compact .group-letter { font-size:26px; }
 #v-groups.compact .g-table td, #v-groups.compact .g-table th { padding: calc(var(--tbl-pad-y)/1.5) 8px; font-size:0.9em; }
 .chess-x { background: rgba(0,0,0,0.4) !important; border-radius: 4px; }
 .chess-val { font-family: 'Bebas Neue', sans-serif; font-size: 1.1em; color: var(--accent); letter-spacing: 0.5px; }
@@ -432,7 +433,7 @@ function renderGroups(s) {
     const sortedTeams = sortTeamsLive(grp.teams || []);
  
     if (namesOnly) {
-      // Режим "Тільки назви команд" у стилі Євро-2020
+      // Режим "Тільки назви команд" у вигляді елегантних плашок (як на фото)
       let listRows = '';
       sortedTeams.forEach((team) => {
         if(!team || !team.name) return;
