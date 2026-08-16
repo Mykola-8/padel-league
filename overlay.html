@@ -86,7 +86,7 @@ html, body { width:100%; height:100%; background:transparent; overflow:hidden; f
 .pos-n { color:var(--muted); font-size:11px; margin-right:5px; }
 .name-col { text-align:left; max-width:180px; }
 
-/* Стиль для огляду груп у вигляді плашок (як на фото Євро) */
+/* Стиль для огляду груп у вигляді плашок (як на фото) */
 .groups-names-only-list {
   padding: 14px 16px;
   display: flex;
@@ -430,17 +430,20 @@ function renderGroups(s) {
     const card = document.createElement('div'); card.className = 'group-card' + (tc >= 5 ? ' compact-teams' : '');
     if (vis !== 'all') { card.style.minWidth = '600px'; card.style.maxWidth = '90vw'; }
  
-    const sortedTeams = sortTeamsLive(grp.teams || []);
+    const teamsList = grp.teams || [];
  
     if (namesOnly) {
-      // Режим "Тільки назви команд" у вигляді елегантних плашок (як на фото)
       let listRows = '';
-      sortedTeams.forEach((team) => {
-        if(!team || !team.name) return;
+      teamsList.forEach((team) => {
+        if(!team || !team.name || team.name.trim() === '') return;
         listRows += `<div class="group-name-row"><span class="team-name-text">${team.name}</span></div>`;
       });
+      if (listRows === '') {
+        listRows = `<div style="color:var(--muted); font-size:0.9em; text-align:center; padding:10px;">Команди відсутні</div>`;
+      }
       card.innerHTML = `<div class="group-card-head"><div class="group-letter">${letter}</div><div><div class="group-title">Група ${letter}</div></div></div><div class="groups-names-only-list">${listRows}</div>`;
     } else if (isChess) {
+      const sortedTeams = sortTeamsLive(teamsList);
       let scoreCells = '';
       let headCols = '';
       for(let tj=0; tj<tc; tj++) headCols += `<th>${tj+1}</th>`;
@@ -468,6 +471,7 @@ function renderGroups(s) {
       let theadHTML = `<tr><th>Команда</th>${headCols}<th>В</th><th>П</th><th>Очки</th><th></th></tr>`;
       card.innerHTML = `<div class="group-card-head"><div class="group-letter">${letter}</div><div><div class="group-title">Група ${letter}</div><div class="group-sub">★ Top 2 → Плей-оф</div></div></div><table class="g-table"><thead>${theadHTML}</thead><tbody>${rows}</tbody></table>`;
     } else {
+      const sortedTeams = sortTeamsLive(teamsList);
       let rows = '';
       sortedTeams.forEach((team, pos) => {
         if(!team) return;
