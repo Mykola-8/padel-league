@@ -702,7 +702,7 @@ window.addBulkTeams = function() {
   if (added) { inp.value = ''; renderGlobalTeams(); autoSave(); }
 };
  
-function generateTeamSelect(selectedValue, id, dataAttrs = "") { let options = `<option value="">-- Оберіть команду --</option>`; const teams = window.globalTeamsList || []; if (selectedValue && !teams.includes(selectedValue)) options += `<option value="${selectedValue}" selected>${selectedValue}</option>`; teams.forEach(team => { options += `<option value="${team}" ${team === selectedValue ? 'selected' : ''}>${team}</option>`; }); return `<select class="dyn-select" ${id ? `id="${id}"` : ''} ${dataAttrs}>${options}</select>`; }
+function generateTeamSelect(selectedValue, id, dataAttrs = "", onChangeHandler = "") { let options = `<option value="">-- Оберіть команду --</option>`; const teams = window.globalTeamsList || []; if (selectedValue && !teams.includes(selectedValue)) options += `<option value="${selectedValue}" selected>${selectedValue}</option>`; teams.forEach(team => { options += `<option value="${team}" ${team === selectedValue ? 'selected' : ''}>${team}</option>`; }); return `<select class="dyn-select" ${id ? `id="${id}"` : ''} ${dataAttrs} ${onChangeHandler ? `onchange="${onChangeHandler}"` : ''}>${options}</select>`; }
  
 function renderRankEditor() { const wrap = document.getElementById('rank-rows'); wrap.innerHTML = ''; (state.rankings || []).forEach((r,i) => { const row = document.createElement('div'); row.className = 'r-row'; row.innerHTML = `<input type="number" value="${r.seed||(i+1)}" data-ri="${i}" data-f="seed" style="text-align:center">${generateTeamSelect(r.players, null, `data-ri="${i}" data-f="players"`)}<input type="text" value="${r.group||''}" data-ri="${i}" data-f="group" style="text-align:center"><input type="number" value="${r.pts||0}" data-ri="${i}" data-f="pts" style="text-align:right"><button class="del-btn" onclick="delRankRow(${i})">✕</button>`; wrap.appendChild(row); }); }
 function collectRankings() { return Array.from(document.querySelectorAll('.r-row')).map(row => ({ seed:parseInt(row.querySelector('[data-f="seed"]').value)||0, players:row.querySelector('[data-f="players"]').value, group:row.querySelector('[data-f="group"]').value, pts:parseInt(row.querySelector('[data-f="pts"]').value)||0 })); }
@@ -779,6 +779,11 @@ window.rebuildGroups = function() {
   renderGroupEditor(); autoSave(); 
 };
  
+window.onTeamSelectChange = function(gi, ti, selectEl) {
+  renderGroupEditor();
+  autoSave();
+};
+
 function renderGroupEditor() { 
   const gc=parseInt(document.getElementById('g-count').value); const tc=parseInt(document.getElementById('g-teams').value);
   const grps=state.groups||emptyGroups(gc,tc); 
@@ -800,19 +805,23 @@ function renderGroupEditor() {
     const L='ABCDEFGHIJ'; const letter=L[gi]; const sec=document.createElement('div'); sec.className='card grp-section'; 
     let rows=''; 
     (grp.teams||[]).forEach((team,ti)=>{ 
-      rows+=`<div class="team-stat-row" data-gi="${gi}" data-ti="${ti}">${generateTeamSelect(team.name, null, `data-f="name"`)}<input type="number" value="${team.p||0}" data-f="p"><input type="number" value="${team.w||0}" data-f="w"><input type="number" value="${team.l||0}" data-f="l"><input type="text" value="${team.gd||'0:0'}" data-f="gd"><input type="number" value="${team.pts||0}" data-f="pts"></div>`; 
+      rows+=`<div class="team-stat-row" data-gi="${gi}" data-ti="${ti}">${generateTeamSelect(team.name, `team-sel-${gi}-${ti}`, `data-f="name"`, `onTeamSelectChange(${gi},${ti},this)`)}<input type="number" value="${team.p||0}" data-f="p"><input type="number" value="${team.w||0}" data-f="w"><input type="number" value="${team.l||0}" data-f="l"><input type="text" value="${team.gd||'0:0'}" data-f="gd"><input type="number" value="${team.pts||0}" data-f="pts"></div>`; 
     }); 
  
     let matrixRows = `<div style="margin-top:12px; border-top:1px solid var(--border); padding-top:10px;"><div style="font-size:11px; color:var(--muted); margin-bottom:8px; text-transform:uppercase; letter-spacing:1px;">Рахунки між собою (для шахової таблиці)</div>`;
     matrixRows += `<div style="display:grid; grid-template-columns: 140px repeat(${tc}, 1fr); gap:6px; margin-bottom:6px; align-items:center;"><div></div>`;
     for(let tj=0; tj<tc; tj++) {
-      const colTeamName = (grp.teams[tj] && grp.teams[tj].name) ? grp.teams[tj].name : `К${tj+1}`;
+      const selEl = document.getElementById(`team-sel-${gi}-${tj}`);
+      const valFromSelect = selEl ? selEl.value : '';
+      const colTeamName = (valFromSelect && valFromSelect.trim() !== '') ? valFromSelect : ((grp.teams[tj] && grp.teams[tj].name && grp.teams[tj].name.trim() !== '') ? grp.teams[tj].name : `Команда ${tj+1}`);
       matrixRows += `<div style="text-align:center; font-size:11px; font-weight:bold; color:var(--accent); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${colTeamName}">${colTeamName}</div>`;
     }
     matrixRows += `</div>`;
     
     (grp.teams||[]).forEach((team,ti)=>{
-      const rowTeamName = team.name || `Команда ${ti+1}`;
+      const selEl = document.getElementById(`team-sel-${gi}-${ti}`);
+      const valFromSelect = selEl ? selEl.value : '';
+      const rowTeamName = (valFromSelect && valFromSelect.trim() !== '') ? valFromSelect : ((team.name && team.name.trim() !== '') ? team.name : `Команда ${ti+1}`);
       matrixRows += `<div style="display:grid; grid-template-columns: 140px repeat(${tc}, 1fr); gap:6px; margin-bottom:6px; align-items:center;">`;
       matrixRows += `<div style="font-size:12px; font-weight:bold; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${rowTeamName}">${rowTeamName}</div>`;
       for(let tj=0; tj<tc; tj++) {
