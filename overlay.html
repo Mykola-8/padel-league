@@ -7,14 +7,15 @@
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700&family=Montserrat:wght@400;600;700&family=Oswald:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --accent:#00e5ff; --bg:#04080f; --card:#0a1628; --border:rgba(0,229,255,0.18);
+  --accent:#00e5ff; --bg:#04080f; --border:rgba(0,229,255,0.18);
   --text:#fff; --muted:#5a7a94; --gold:#ffd700; --green:#00c46a; --red:#ff4455;
+  --bg-opacity: 0.88;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Barlow Condensed',sans-serif;background:var(--bg);color:var(--text);overflow:hidden;width:1920px;height:1080px;position:relative;}
+body{font-family:'Barlow Condensed',sans-serif;background:transparent;color:var(--text);overflow:hidden;width:1920px;height:1080px;position:relative;}
 
 /* TOP BANNER */
-.tour-banner{position:absolute;top:20px;left:50px;right:50px;background:rgba(10,22,40,0.85);border:2px solid var(--accent);border-radius:12px;padding:12px 24px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 30px rgba(0,229,255,0.2);z-index:100;backdrop-filter:blur(10px);display:none;}
+.tour-banner{position:absolute;top:20px;left:50px;right:50px;background:rgba(10,22,40, var(--bg-opacity));border:2px solid var(--accent);border-radius:12px;padding:12px 24px;display:flex;align-items:center;justify-content:center;box-shadow:0 0 30px rgba(0,229,255,0.2);z-index:100;backdrop-filter:blur(10px);display:none;}
 .tour-banner.visible{display:flex;}
 .tour-banner-text{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:3px;color:var(--accent);text-transform:uppercase;text-align:center;}
 
@@ -23,7 +24,7 @@ body{font-family:'Barlow Condensed',sans-serif;background:var(--bg);color:var(--
 .view-pane.active{display:flex;}
 
 /* TABLES GENERAL */
-.table-wrap{background:var(--card);border:2px solid var(--accent);border-radius:16px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,0.6);width:100%;max-width:1400px;}
+.table-wrap{background:rgba(10,22,40, var(--bg-opacity));border:2px solid var(--accent);border-radius:16px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,0.6);width:100%;max-width:1400px;backdrop-filter:blur(10px);}
 .table-header{background:var(--head-bg, #081830);padding:16px 24px;font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:2px;color:var(--accent);text-align:center;border-bottom:2px solid var(--border);}
 .table-row{display:grid;grid-template-columns:80px 1fr 120px 120px;border-bottom:1px solid var(--border);align-items:center;font-size:22px;}
 .table-row:last-child{border-bottom:none;}
@@ -35,13 +36,13 @@ body{font-family:'Barlow Condensed',sans-serif;background:var(--bg);color:var(--
 .bracket-container { display: flex; gap: 20px; align-items: center; justify-content: center; width: 100%; height: 100%; overflow-x: auto; padding: 20px; }
 .round-col { display: flex; flex-direction: column; justify-content: space-around; flex: 1; min-width: 240px; height: 100%; position: relative; }
 .round-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--accent); text-align: center; margin-bottom: 8px; letter-spacing: 2px; text-transform: uppercase; border-bottom: 2px solid var(--accent); padding-bottom: 4px; }
-.bracket-match { background: rgba(10,22,40,0.9); border: 2px solid var(--border); border-radius: 8px; margin: 6px 0; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
+.bracket-match { background: rgba(10,22,40, var(--bg-opacity)); border: 2px solid var(--border); border-radius: 8px; margin: 6px 0; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.4); backdrop-filter: blur(10px); }
 .b-team { display: flex; justify-content: space-between; align-items: center; padding: 7px 12px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 17px; font-weight: 600; background: rgba(255,255,255,0.02); }
 .b-team:last-child { border-bottom: none; }
 .b-team.winner { color: var(--gold); background: rgba(255,215,0,0.08); }
 .b-score { font-family: 'Bebas Neue', sans-serif; font-size: 19px; background: rgba(0,229,255,0.1); padding: 2px 8px; border-radius: 6px; color: var(--accent); min-width: 32px; text-align: center; }
 
-.champion-box { margin-top: 15px; background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(0,229,255,0.15)); border: 2px solid var(--gold); border-radius: 12px; padding: 12px 25px; text-align: center; font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--gold); letter-spacing: 3px; box-shadow: 0 0 30px rgba(255,215,0,0.3); }
+.champion-box { margin-top: 15px; background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(0,229,255,0.15)); border: 2px solid var(--gold); border-radius: 12px; padding: 12px 25px; text-align: center; font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--gold); letter-spacing: 3px; box-shadow: 0 0 30px rgba(255,215,0,0.3); backdrop-filter: blur(10px); }
 
 /* THIRD PLACE SECTION */
 .third-place-wrap { margin-top: 10px; border-top: 2px dashed var(--accent); padding-top: 10px; width: 100%; max-width: 350px; text-align: center; }
@@ -160,6 +161,8 @@ function renderOverlay(state) {
 function applyStylesAndSizes(state, view) {
   const accent = state.accent || '#00e5ff';
   document.documentElement.style.setProperty('--accent', accent);
+  const opacity = state.bgOpacity !== undefined ? state.bgOpacity : 0.88;
+  document.documentElement.style.setProperty('--bg-opacity', opacity);
   const colors = state.colors?.[view] || { team: '#fff', bg: '#050c1c', head: '#081830' };
   document.documentElement.style.setProperty('--head-bg', colors.head);
 }
@@ -247,7 +250,6 @@ function renderPlayoff(state, bracketView) {
   const champion = (bracketView === 'lower') ? (state.championLower || '— — —') : (state.champion || '— — —');
 
   const numRounds = Math.log2(fmt);
-  // Автоматичні підписи етапів для 32 команд (1/16), 16 команд (1/8), 8 команд (1/4) тощо.
   const allLabels = fmt === 32 ? ['1/16', '1/8', '1/4', 'Півфінал', 'Фінал'] :
                     fmt === 16 ? ['1/8', '1/4', 'Півфінал', 'Фінал'] :
                     fmt === 8  ? ['1/4', 'Півфінал', 'Фінал'] :
