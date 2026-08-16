@@ -1050,11 +1050,11 @@ function renderBracketEditor() {
   const data=state.bracketData&&Object.keys(state.bracketData).length?state.bracketData:emptyBracketData(fmt); 
   state.bracketData=data; 
   const wrap=document.getElementById('bracket-editor'); wrap.innerHTML=''; 
-  const labels = fmt===16 ? ['1/16','1/8','1/4','1/2','Фінал'] : fmt===8 ? ['1/8','1/4','1/2','Фінал'] : fmt===4 ? ['1/4','1/2','Фінал'] : ['1/2','Фінал']; 
+  const labels = fmt===16 ? ['1/16','1/8','1/4','Півфінал','Фінал'] : fmt===8 ? ['1/8','1/4','Півфінал','Фінал'] : fmt===4 ? ['1/4','Півфінал','Фінал'] : ['Півфінал','Фінал']; 
   labels.forEach((lbl,ri)=>{ 
     const count=fmt/Math.pow(2,ri+1); 
     const card=document.createElement('div'); card.className='card'; 
-    card.innerHTML=`<div class="card-title">${lbl} ФІНАЛУ</div>`; 
+    card.innerHTML=`<div class="card-title">${lbl}</div>`; 
     for(let mi=0;mi<count;mi++){ 
       const key=`${ri}-${mi}`,m=data[key]||{t1:'',t2:'',s1:'-',s2:'-',winner:-1}; 
       const me=document.createElement('div'); me.className='match-editor'; 
@@ -1091,7 +1091,6 @@ window.setWinner = function(ri,mi,teamIdx) {
     if(!data[nk]) data[nk]={t1:'',t2:'',s1:'-',s2:'-',winner:-1}; 
     if(mi%2===0) data[nk].t1=winnerName; else data[nk].t2=winnerName; 
   } else if (ri === numRounds - 1) {
-    // Півфінал: автоматично передаємо програвших у матч за 3-тє місце
     if(!state.thirdPlaceMatch) state.thirdPlaceMatch = {t1:'',t2:'',s1:'-',s2:'-',winner:-1};
     if(mi === 0) state.thirdPlaceMatch.t1 = loserName;
     if(mi === 1) state.thirdPlaceMatch.t2 = loserName;
@@ -1117,7 +1116,7 @@ function renderThirdPlaceEditor() {
   const wrap = document.getElementById('third-place-editor');
   if(!wrap) return;
   const m = state.thirdPlaceMatch || {t1:'',t2:'',s1:'-',s2:'-',winner:-1};
-  wrap.innerHTML = `<div class="match-editor"><div class="match-editor-title">Матч за 3-тє місце</div><div class="match-teams">${generateTeamSelect(m.t1, `tp-t1`)}<input type="text" value="${m.s1}" id="tp-s1" placeholder="Рах." style="text-align:center"><button class="win-btn ${m.winner===0?'active':''}" onclick="setThirdWinner(0)">W</button></div><div class="match-teams">${generateTeamSelect(m.t2, `tp-t2`)}<input type="text" value="${m.s2}" id="tp-s2" placeholder="Рах." style="text-align:center"><button class="win-btn ${m.winner===1?'active':''}" onclick="setThirdWinner(1)">W</button></div></div>`;
+  wrap.innerHTML = `<div class="match-editor"><div class="match-editor-title">Матч за третє місце</div><div class="match-teams">${generateTeamSelect(m.t1, `tp-t1`)}<input type="text" value="${m.s1}" id="tp-s1" placeholder="Рах." style="text-align:center"><button class="win-btn ${m.winner===0?'active':''}" onclick="setThirdWinner(0)">W</button></div><div class="match-teams">${generateTeamSelect(m.t2, `tp-t2`)}<input type="text" value="${m.s2}" id="tp-s2" placeholder="Рах." style="text-align:center"><button class="win-btn ${m.winner===1?'active':''}" onclick="setThirdWinner(1)">W</button></div></div>`;
 }
 
 function collectThirdPlace() {
@@ -1147,11 +1146,11 @@ function renderBracketEditorLower() {
   const data=state.bracketDataLower&&Object.keys(state.bracketDataLower).length?state.bracketDataLower:emptyBracketData(fmt); 
   state.bracketDataLower=data; 
   const wrap=document.getElementById('bracket-editor-lower'); if(!wrap) return; wrap.innerHTML=''; 
-  const labels = fmt===16 ? ['1/16','1/8','1/4','1/2','Фінал'] : fmt===8 ? ['1/8','1/4','1/2','Фінал'] : fmt===4 ? ['1/4','1/2','Фінал'] : ['1/2','Фінал']; 
+  const labels = fmt===16 ? ['1/16','1/8','1/4','Півфінал','Фінал'] : fmt===8 ? ['1/8','1/4','Півфінал','Фінал'] : fmt===4 ? ['1/4','Півфінал','Фінал'] : ['Півфінал','Фінал']; 
   labels.forEach((lbl,ri)=>{ 
     const count=fmt/Math.pow(2,ri+1); 
     const card=document.createElement('div'); card.className='card'; 
-    card.innerHTML=`<div class="card-title">${lbl} НИЖНЬОЇ СІТКИ</div>`; 
+    card.innerHTML=`<div class="card-title">${lbl} (Нижня сітка)</div>`; 
     for(let mi=0;mi<count;mi++){ 
       const key=`${ri}-${mi}`,m=data[key]||{t1:'',t2:'',s1:'-',s2:'-',winner:-1}; 
       const me=document.createElement('div'); me.className='match-editor'; 
