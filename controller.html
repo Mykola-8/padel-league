@@ -318,7 +318,17 @@ input:checked + .slider:before { transform: translateX(22px); background-color: 
     <button class="btn btn-primary" onclick="seedPlayoffFromGroups()" style="width:100%;">🏆 Сформувати сітку з результатів Груп</button>
     <div style="font-size:11px; color:var(--muted); margin-top:8px; text-align:center;">Автоматично відсортує команди в групах (за очками та різницею) і розставить команди у Плей-оф.</div>
   </div>
-  <div class="card"><div class="card-title">Формат турніру</div><div class="field"><select id="p-format" onchange="rebuildBracket()"><option value="16">1/16 → Фінал (32 команди)</option><option value="8" selected>1/8 → Фінал (16 команд)</option><option value="4">1/4 → Фінал (8 команд)</option><option value="2">1/2 → Фінал (4 команди)</option></select></div></div>
+  <div class="card">
+    <div class="card-title">Формат турніру</div>
+    <div class="field">
+      <select id="p-format" onchange="rebuildBracket()">
+        <option value="32">1/16 → Фінал (32 команди)</option>
+        <option value="16">1/8 → Фінал (16 команд)</option>
+        <option value="8" selected>1/4 → Фінал (8 команд)</option>
+        <option value="4">1/2 → Фінал (4 команди)</option>
+      </select>
+    </div>
+  </div>
   <div id="bracket-editor"></div>
   <div class="card" style="margin-top:16px;">
     <div class="card-title">🥉 Гра за третє місце (Верхня сітка)</div>
@@ -980,7 +990,15 @@ function autoSyncPlayoff() {
     return sortedGroups[gIdx].top[pos].name;
   };
   const bData = state.bracketData || {};
-  if (fmt === 16) {
+  if (fmt === 32) {
+    let tIdx = 0;
+    for(let g=0; g<8; g++) {
+      if(bData[`0-${tIdx}`]) { bData[`0-${tIdx}`].t1 = getT(g, 0); bData[`0-${tIdx}`].t2 = getT((g+1)%8, 3); }
+      tIdx++;
+      if(bData[`0-${tIdx}`]) { bData[`0-${tIdx}`].t1 = getT(g, 1); bData[`0-${tIdx}`].t2 = getT((g+1)%8, 2); }
+      tIdx++;
+    }
+  } else if (fmt === 16) {
     let tIdx = 0;
     for(let g=0; g<8; g++) {
       if(bData[`0-${tIdx}`]) { bData[`0-${tIdx}`].t1 = getT(g, 0); bData[`0-${tIdx}`].t2 = getT((g+1)%8, 3); }
@@ -1020,7 +1038,15 @@ function autoSyncPlayoffLower() {
     return sortedGroups[gIdx].top[pos].name;
   };
   const bData = (state.bracketDataLower && Object.keys(state.bracketDataLower).length) ? state.bracketDataLower : emptyBracketData(fmt);
-  if (fmt === 16) {
+  if (fmt === 32) {
+    let tIdx = 0;
+    for(let g=0; g<8; g++) {
+      if(bData[`0-${tIdx}`]) { bData[`0-${tIdx}`].t1 = getT(g, 2); bData[`0-${tIdx}`].t2 = getT((g+1)%8, 5); }
+      tIdx++;
+      if(bData[`0-${tIdx}`]) { bData[`0-${tIdx}`].t1 = getT(g, 3); bData[`0-${tIdx}`].t2 = getT((g+1)%8, 4); }
+      tIdx++;
+    }
+  } else if (fmt === 16) {
     let tIdx = 0;
     for(let g=0; g<8; g++) {
       if(bData[`0-${tIdx}`]) { bData[`0-${tIdx}`].t1 = getT(g, 2); bData[`0-${tIdx}`].t2 = getT((g+1)%8, 5); }
@@ -1059,7 +1085,7 @@ function renderBracketEditor() {
   const data=state.bracketData&&Object.keys(state.bracketData).length?state.bracketData:emptyBracketData(fmt); 
   state.bracketData=data; 
   const wrap=document.getElementById('bracket-editor'); wrap.innerHTML=''; 
-  const labels = fmt===16 ? ['1/16','1/8','1/4','Півфінал','Фінал'] : fmt===8 ? ['1/8','1/4','Півфінал','Фінал'] : fmt===4 ? ['1/4','Півфінал','Фінал'] : ['Півфінал','Фінал']; 
+  const labels = fmt===32 ? ['1/16','1/8','1/4','Півфінал','Фінал'] : fmt===16 ? ['1/8','1/4','Півфінал','Фінал'] : fmt===8 ? ['1/4','Півфінал','Фінал'] : fmt===4 ? ['1/4','Півфінал','Фінал'] : ['Півфінал','Фінал']; 
   labels.forEach((lbl,ri)=>{ 
     const count=fmt/Math.pow(2,ri+1); 
     const card=document.createElement('div'); card.className='card'; 
@@ -1155,7 +1181,7 @@ function renderBracketEditorLower() {
   const data=state.bracketDataLower&&Object.keys(state.bracketDataLower).length?state.bracketDataLower:emptyBracketData(fmt); 
   state.bracketDataLower=data; 
   const wrap=document.getElementById('bracket-editor-lower'); if(!wrap) return; wrap.innerHTML=''; 
-  const labels = fmt===16 ? ['1/16','1/8','1/4','Півфінал','Фінал'] : fmt===8 ? ['1/8','1/4','Півфінал','Фінал'] : fmt===4 ? ['1/4','Півфінал','Фінал'] : ['Півфінал','Фінал']; 
+  const labels = fmt===32 ? ['1/16','1/8','1/4','Півфінал','Фінал'] : fmt===16 ? ['1/8','1/4','Півфінал','Фінал'] : fmt===8 ? ['1/4','Півфінал','Фінал'] : fmt===4 ? ['1/4','Півфінал','Фінал'] : ['Півфінал','Фінал']; 
   labels.forEach((lbl,ri)=>{ 
     const count=fmt/Math.pow(2,ri+1); 
     const card=document.createElement('div'); card.className='card'; 
