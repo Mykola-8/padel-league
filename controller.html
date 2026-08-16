@@ -47,8 +47,6 @@ body{font-family:'Barlow Condensed',sans-serif;background:var(--bg);color:var(--
 .field label{display:block;font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:5px;}
 .field input,.field select,.field textarea, select.dyn-select{width:100%;padding:9px 12px;background:rgba(255,255,255,.06);color:var(--text);border:1px solid var(--border);border-radius:8px;font-family:'Barlow Condensed',sans-serif;font-size:14px;}
 .field input:focus,.field select:focus, select.dyn-select:focus, .field textarea:focus{outline:none;border-color:var(--accent);}
-.field input[type=range]{padding:4px 0;background:transparent;border:none;}
-.field input[type=color]{padding:2px;height:36px;cursor:pointer;}
 select.dyn-select { padding: 6px; font-size: 13px; }
 select.dyn-select option { background: var(--bg); color: #fff; }
 .range-row{display:flex;align-items:center;gap:10px;}
@@ -74,7 +72,7 @@ select.dyn-select option { background: var(--bg); color: #fff; }
  
 .grp-section{margin-bottom:14px;}
 .grp-section-title{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--accent);letter-spacing:1px;margin-bottom:8px;display:flex;align-items:center;gap:8px;}
-.team-stat-row{display:grid;grid-template-columns:1fr 40px 40px 40px 60px 50px;gap:5px;align-items:center;margin-bottom:5px;}
+.team-stat-row{display:grid;grid-template-columns:1fr 40px 40px 40px 90px 50px;gap:5px;align-items:center;margin-bottom:5px;}
 .team-stat-row input, .team-stat-row select{font-size:12px;}
 .groups-conf{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
 .size-tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
@@ -316,7 +314,7 @@ input:checked + .slider:before { transform: translateX(22px); background-color: 
   <div class="card">
     <div class="card-title">Авто-заповнення першого раунду (Верхня сітка)</div>
     <button class="btn btn-primary" onclick="seedPlayoffFromGroups()" style="width:100%;">🏆 Сформувати сітку з результатів Груп</button>
-    <div style="font-size:11px; color:var(--muted); margin-top:8px; text-align:center;">Автоматично відсортує команди в групах (за очками та різницею) і розставить команди у Плей-оф.</div>
+    <div style="font-size:11px; color:var(--muted); margin-top:8px; text-align:center;">Автоматично відсортує команди в групах (за очками та різницею) і розставить команди у Плей-оф (напр. A1 грає з C2 тощо).</div>
   </div>
   <div class="card">
     <div class="card-title">Формат турніру</div>
@@ -815,7 +813,7 @@ function renderGroupEditor() {
     const L='ABCDEFGHIJ'; const letter=L[gi]; const sec=document.createElement('div'); sec.className='card grp-section'; 
     let rows=''; 
     (grp.teams||[]).forEach((team,ti)=>{ 
-      rows+=`<div class="team-stat-row" data-gi="${gi}" data-ti="${ti}">${generateTeamSelect(team.name, `team-sel-${gi}-${ti}`, `data-f="name"`, `onTeamSelectChange(${gi},${ti},this)`)}<input type="number" value="${team.p||0}" data-f="p"><input type="number" value="${team.w||0}" data-f="w"><input type="number" value="${team.l||0}" data-f="l"><input type="text" value="${team.gd||'0:0'}" data-f="gd"><input type="number" value="${team.pts||0}" data-f="pts"></div>`; 
+      rows+=`<div class="team-stat-row" data-gi="${gi}" data-ti="${ti}">${generateTeamSelect(team.name, `team-sel-${gi}-${ti}`, `data-f="name"`, `onTeamSelectChange(${gi},${ti},this)`)}<input type="number" value="${team.p||0}" data-f="p" readonly style="opacity:0.7"><input type="number" value="${team.w||0}" data-f="w" readonly style="opacity:0.7"><input type="number" value="${team.l||0}" data-f="l" readonly style="opacity:0.7"><input type="text" value="${team.gd||'0:0'}" data-f="gd" readonly style="opacity:0.7"><input type="number" value="${team.pts||0}" data-f="pts" readonly style="opacity:0.7; font-weight:bold; color:var(--accent);"></div>`; 
     }); 
  
     let matrixRows = `<div style="margin-top:12px; border-top:1px solid var(--border); padding-top:10px;"><div style="font-size:11px; color:var(--muted); margin-bottom:8px; text-transform:uppercase; letter-spacing:1px;">Рахунки між собою (для шахової таблиці)</div>`;
@@ -846,7 +844,7 @@ function renderGroupEditor() {
     });
     matrixRows += `</div>`;
  
-    sec.innerHTML=`<div class="grp-section-title"><span style="font-size:28px;color:var(--accent)">${letter}</span>Група ${letter}</div><div style="display:grid;grid-template-columns:1fr 40px 40px 40px 60px 50px;gap:5px;margin-bottom:4px;"><span style="font-size:10px;color:var(--muted)">Команда</span><span style="font-size:10px;color:var(--muted);text-align:center">І</span><span style="font-size:10px;color:var(--muted);text-align:center">В</span><span style="font-size:10px;color:var(--muted);text-align:center">П</span><span style="font-size:10px;color:var(--muted);text-align:center">МГ</span><span style="font-size:10px;color:var(--muted);text-align:center">Очки</span></div>${rows}${matrixRows}`; 
+    sec.innerHTML=`<div class="grp-section-title"><span style="font-size:28px;color:var(--accent)">${letter}</span>Група ${letter}</div><div style="display:grid;grid-template-columns:1fr 40px 40px 40px 90px 50px;gap:5px;margin-bottom:4px;"><span style="font-size:10px;color:var(--muted)">Команда</span><span style="font-size:10px;color:var(--muted);text-align:center" title="Ігри">І</span><span style="font-size:10px;color:var(--muted);text-align:center" title="Виграші">Вигр</span><span style="font-size:10px;color:var(--muted);text-align:center" title="Програші">Прог</span><span style="font-size:10px;color:var(--muted);text-align:center" title="М'ячі та різниця">Різн (МГ)</span><span style="font-size:10px;color:var(--muted);text-align:center" title="Очки">Очки</span></div>${rows}${matrixRows}`; 
     wrap.appendChild(sec); 
   }); 
 }
@@ -993,42 +991,36 @@ function autoSyncPlayoff() {
   if (fmt === 32) {
     let tIdx = 0;
     for(let g=0; g<8; g++) {
-      if(bData[`0-${tIdx}`]) { bData[`0-${tIdx}`].t1 = getT(g, 0); bData[`0-${tIdx}`].t2 = getT((g+1)%8, 3); }
+      if(bData[`0-${tIdx}`]) { bData[`0-${tIdx}`].t1 = getT(g, 0); bData[`0-${tIdx}`].t2 = getT((g+1)%8, 1); }
       tIdx++;
-      if(bData[`0-${tIdx}`]) { bData[`0-${tIdx}`].t1 = getT(g, 1); bData[`0-${tIdx}`].t2 = getT((g+1)%8, 2); }
+      if(bData[`0-${tIdx}`]) { bData[`0-${tIdx}`].t1 = getT(g, 1); bData[`0-${tIdx}`].t2 = getT((g+2)%8, 0); }
       tIdx++;
     }
   } else if (fmt === 16) {
-    let tIdx = 0;
-    for(let g=0; g<8; g++) {
-      if(bData[`0-${tIdx}`]) { bData[`0-${tIdx}`].t1 = getT(g, 0); bData[`0-${tIdx}`].t2 = getT((g+1)%8, 3); }
-      tIdx++;
-      if(bData[`0-${tIdx}`]) { bData[`0-${tIdx}`].t1 = getT(g, 1); bData[`0-${tIdx}`].t2 = getT((g+1)%8, 2); }
-      tIdx++;
-    }
+    if(bData['0-0']) { bData['0-0'].t1 = getT(0,0); bData['0-0'].t2 = getT(2,1); } // Група A1 грає з Група C2 (згідно із запитом)
+    if(bData['0-1']) { bData['0-1'].t1 = getT(2,0); bData['0-1'].t2 = getT(0,1); }
+    if(bData['0-2']) { bData['0-2'].t1 = getT(1,0); bData['0-2'].t2 = getT(3,1); }
+    if(bData['0-3']) { bData['0-3'].t1 = getT(3,0); bData['0-3'].t2 = getT(1,1); }
+    if(bData['0-4']) { bData['0-4'].t1 = getT(4,0); bData['0-4'].t2 = getT(6,1); }
+    if(bData['0-5']) { bData['0-5'].t1 = getT(6,0); bData['0-5'].t2 = getT(4,1); }
+    if(bData['0-6']) { bData['0-6'].t1 = getT(5,0); bData['0-6'].t2 = getT(7,1); }
+    if(bData['0-7']) { bData['0-7'].t1 = getT(7,0); bData['0-7'].t2 = getT(5,1); }
   } else if (fmt === 8) {
-    if(bData['0-0']) { bData['0-0'].t1=getT(0,0); bData['0-0'].t2=getT(1,1); }
-    if(bData['0-1']) { bData['0-1'].t1=getT(2,0); bData['0-1'].t2=getT(3,1); }
-    if(bData['0-2']) { bData['0-2'].t1=getT(4,0); bData['0-2'].t2=getT(5,1); }
-    if(bData['0-3']) { bData['0-3'].t1=getT(6,0); bData['0-3'].t2=getT(7,1); }
-    if(bData['0-4']) { bData['0-4'].t1=getT(1,0); bData['0-4'].t2=getT(0,1); }
-    if(bData['0-5']) { bData['0-5'].t1=getT(3,0); bData['0-5'].t2=getT(2,1); }
-    if(bData['0-6']) { bData['0-6'].t1=getT(5,0); bData['0-6'].t2=getT(4,1); }
-    if(bData['0-7']) { bData['0-7'].t1=getT(7,0); bData['0-7'].t2=getT(6,1); }
+    if(bData['0-0']) { bData['0-0'].t1 = getT(0,0); bData['0-0'].t2 = getT(2,1); } // A1 проти C2
+    if(bData['0-1']) { bData['0-1'].t1 = getT(2,0); bData['0-1'].t2 = getT(0,1); } // C1 проти A2
+    if(bData['0-2']) { bData['0-2'].t1 = getT(1,0); bData['0-2'].t2 = getT(3,1); } // B1 проти D2
+    if(bData['0-3']) { bData['0-3'].t1 = getT(3,0); bData['0-3'].t2 = getT(1,1); } // D1 проти B2
   } else if (fmt === 4) {
-    if(bData['0-0']) { bData['0-0'].t1=getT(0,0); bData['0-0'].t2=getT(1,1); }
-    if(bData['0-1']) { bData['0-1'].t1=getT(2,0); bData['0-1'].t2=getT(3,1); }
-    if(bData['0-2']) { bData['0-2'].t1=getT(1,0); bData['0-2'].t2=getT(0,1); }
-    if(bData['0-3']) { bData['0-3'].t1=getT(3,0); bData['0-3'].t2=getT(2,1); }
+    if(bData['0-0']) { bData['0-0'].t1 = getT(0,0); bData['0-0'].t2 = getT(1,1); }
+    if(bData['0-1']) { bData['0-1'].t1 = getT(1,0); bData['0-1'].t2 = getT(0,1); }
   } else if (fmt === 2) {
-    if(bData['0-0']) { bData['0-0'].t1=getT(0,0); bData['0-0'].t2=getT(1,1); }
-    if(bData['0-1']) { bData['0-1'].t1=getT(1,0); bData['0-1'].t2=getT(0,1); }
+    if(bData['0-0']) { bData['0-0'].t1 = getT(0,0); bData['0-0'].t2 = getT(0,1); }
   }
   state.bracketData = bData;
   renderBracketEditor();
 }
  
-window.seedPlayoffFromGroups = function() { if (!confirm('Ця дія перезапише команди в першому раунді Плей-оф. Продовжити?')) return; autoSyncPlayoff(); renderBracketEditor(); autoSave(); alert('Плей-оф успішно сформовано на основі поточних результатів груп!'); };
+window.seedPlayoffFromGroups = function() { if (!confirm('Ця дія перезапише команди в першому раунді Плей-оф. Продовжитич?')) return; autoSyncPlayoff(); renderBracketEditor(); autoSave(); alert('Плей-оф успішно сформовано на основі поточних результатів груп!'); };
  
 function autoSyncPlayoffLower() {
   const fmt = parseInt(document.getElementById('p-format').value);
@@ -1038,39 +1030,22 @@ function autoSyncPlayoffLower() {
     return sortedGroups[gIdx].top[pos].name;
   };
   const bData = (state.bracketDataLower && Object.keys(state.bracketDataLower).length) ? state.bracketDataLower : emptyBracketData(fmt);
-  if (fmt === 32) {
+  if (fmt === 32 || fmt === 16) {
     let tIdx = 0;
     for(let g=0; g<8; g++) {
-      if(bData[`0-${tIdx}`]) { bData[`0-${tIdx}`].t1 = getT(g, 2); bData[`0-${tIdx}`].t2 = getT((g+1)%8, 5); }
-      tIdx++;
-      if(bData[`0-${tIdx}`]) { bData[`0-${tIdx}`].t1 = getT(g, 3); bData[`0-${tIdx}`].t2 = getT((g+1)%8, 4); }
-      tIdx++;
-    }
-  } else if (fmt === 16) {
-    let tIdx = 0;
-    for(let g=0; g<8; g++) {
-      if(bData[`0-${tIdx}`]) { bData[`0-${tIdx}`].t1 = getT(g, 2); bData[`0-${tIdx}`].t2 = getT((g+1)%8, 5); }
-      tIdx++;
-      if(bData[`0-${tIdx}`]) { bData[`0-${tIdx}`].t1 = getT(g, 3); bData[`0-${tIdx}`].t2 = getT((g+1)%8, 4); }
+      if(bData[`0-${tIdx}`]) { bData[`0-${tIdx}`].t1 = getT(g, 2); bData[`0-${tIdx}`].t2 = getT((g+1)%8, 3); }
       tIdx++;
     }
   } else if (fmt === 8) {
-    bData['0-0'].t1=getT(0,2); bData['0-0'].t2=getT(1,3);
-    bData['0-1'].t1=getT(2,2); bData['0-1'].t2=getT(3,3);
-    bData['0-2'].t1=getT(4,2); bData['0-2'].t2=getT(5,3);
-    bData['0-3'].t1=getT(6,2); bData['0-3'].t2=getT(7,3);
-    bData['0-4'].t1=getT(1,2); bData['0-4'].t2=getT(0,3);
-    bData['0-5'].t1=getT(3,2); bData['0-5'].t2=getT(2,3);
-    bData['0-6'].t1=getT(5,2); bData['0-6'].t2=getT(4,3);
-    bData['0-7'].t1=getT(7,2); bData['0-7'].t2=getT(6,3);
+    if(bData['0-0']) { bData['0-0'].t1=getT(0,2); bData['0-0'].t2=getT(1,3); }
+    if(bData['0-1']) { bData['0-1'].t1=getT(2,2); bData['0-1'].t2=getT(3,3); }
+    if(bData['0-2']) { bData['0-2'].t1=getT(4,2); bData['0-2'].t2=getT(5,3); }
+    if(bData['0-3']) { bData['0-3'].t1=getT(6,2); bData['0-3'].t2=getT(7,3); }
   } else if (fmt === 4) {
     if(bData['0-0']) { bData['0-0'].t1=getT(0,2); bData['0-0'].t2=getT(1,3); }
     if(bData['0-1']) { bData['0-1'].t1=getT(2,2); bData['0-1'].t2=getT(3,3); }
-    if(bData['0-2']) { bData['0-2'].t1=getT(1,2); bData['0-2'].t2=getT(0,3); }
-    if(bData['0-3']) { bData['0-3'].t1=getT(3,2); bData['0-3'].t2=getT(2,3); }
   } else if (fmt === 2) {
-    if(bData['0-0']) { bData['0-0'].t1=getT(0,2); bData['0-0'].t2=getT(1,3); }
-    if(bData['0-1']) { bData['0-1'].t1=getT(1,2); bData['0-1'].t2=getT(0,3); }
+    if(bData['0-0']) { bData['0-0'].t1=getT(0,2); bData['0-0'].t2=getT(0,3); }
   }
   state.bracketDataLower = bData;
   renderBracketEditorLower();
@@ -1085,7 +1060,7 @@ function renderBracketEditor() {
   const data=state.bracketData&&Object.keys(state.bracketData).length?state.bracketData:emptyBracketData(fmt); 
   state.bracketData=data; 
   const wrap=document.getElementById('bracket-editor'); wrap.innerHTML=''; 
-  const labels = fmt===32 ? ['1/16','1/8','1/4','Півфінал','Фінал'] : fmt===16 ? ['1/8','1/4','Півфінал','Фінал'] : fmt===8 ? ['1/4','Півфінал','Фінал'] : fmt===4 ? ['1/4','Півфінал','Фінал'] : ['Півфінал','Фінал']; 
+  const labels = fmt===32 ? ['1/16','1/8','1/4','Півфінал','Фінал'] : fmt===16 ? ['1/8','1/4','Півфінал','Фінал'] : fmt===8 ? ['1/4','Півфінал','Фінал'] : fmt===4 ? ['Півфінал','Фінал'] : ['Фінал']; 
   labels.forEach((lbl,ri)=>{ 
     const count=fmt/Math.pow(2,ri+1); 
     const card=document.createElement('div'); card.className='card'; 
@@ -1181,7 +1156,7 @@ function renderBracketEditorLower() {
   const data=state.bracketDataLower&&Object.keys(state.bracketDataLower).length?state.bracketDataLower:emptyBracketData(fmt); 
   state.bracketDataLower=data; 
   const wrap=document.getElementById('bracket-editor-lower'); if(!wrap) return; wrap.innerHTML=''; 
-  const labels = fmt===32 ? ['1/16','1/8','1/4','Півфінал','Фінал'] : fmt===16 ? ['1/8','1/4','Півфінал','Фінал'] : fmt===8 ? ['1/4','Півфінал','Фінал'] : fmt===4 ? ['1/4','Півфінал','Фінал'] : ['Півфінал','Фінал']; 
+  const labels = fmt===32 ? ['1/16','1/8','1/4','Півфінал','Фінал'] : fmt===16 ? ['1/8','1/4','Півфінал','Фінал'] : fmt===8 ? ['1/4','Півфінал','Фінал'] : fmt===4 ? ['Півфінал','Фінал'] : ['Фінал']; 
   labels.forEach((lbl,ri)=>{ 
     const count=fmt/Math.pow(2,ri+1); 
     const card=document.createElement('div'); card.className='card'; 
