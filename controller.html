@@ -472,7 +472,9 @@ window.setBracketView = function(bv) {
  
 window.pushState = async function() {
   const s = collectState();
-  try { await set(stateRef, s); document.getElementById('status-text').textContent = '✅ Оновлено о ' + new Date().toLocaleTimeString(); } 
+  // Безпечне очищення об'єктів від undefined, щоб Firebase не видавав помилку
+  const cleanState = JSON.parse(JSON.stringify(s, (k, v) => v === undefined ? null : v));
+  try { await set(stateRef, cleanState); document.getElementById('status-text').textContent = '✅ Оновлено о ' + new Date().toLocaleTimeString(); } 
   catch(e) { document.getElementById('status-text').textContent = '❌ Помилка: ' + e.message; }
 };
  
@@ -595,11 +597,10 @@ window.saveTournament = function() { const name = document.getElementById('tour-
 window.loadTournament = function() { const name = document.getElementById('tour-save-select').value; if(!name || !state.savedTournaments || !state.savedTournaments[name]) return alert('Оберіть турнір зі списку'); if(!confirm('Завантажити турнір? Поточні незбережені дані будуть втрачені.')) return; const savedTours = state.savedTournaments; const savedThemes = state.themes; state = JSON.parse(JSON.stringify(state.savedTournaments[name])); state.savedTournaments = savedTours; state.themes = savedThemes; initUI(); autoSave(); };
 window.deleteTournament = function() { const name = document.getElementById('tour-save-select').value; if(!name || !state.savedTournaments || !state.savedTournaments[name]) return; if(confirm('Видалити турнір?')) { delete state.savedTournaments[name]; updateTourDropdown(); pushState(); } };
  
-// Повне очищення поточного турніру відповідно до вимог
 window.resetTournament = function() { 
   if(!confirm('🚨 УВАГА: Це повністю очистить усі назви команд, рейтинг, групи, розклад та плей-оф (верхню й нижню сітки). Бажаєте продовжити?')) return; 
-  const savedTours = state.savedTournaments; 
-  const savedThemes = state.themes; 
+  const savedTours = state.savedTournaments || {}; 
+  const savedThemes = state.themes || {}; 
   state = defaultState(); 
   state.savedTournaments = savedTours; 
   state.themes = savedThemes; 
