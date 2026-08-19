@@ -29,7 +29,7 @@ body{font-family:'Barlow Condensed',sans-serif;background:transparent;color:var(
 .view-pane.active{display:flex;}
 
 /* TABLES GENERAL */
-.table-wrap{background:rgba(10,22,40, var(--bg-opacity));border:2px solid var(--accent);border-radius:16px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,0.6);width:var(--table-width);max-width:none;backdrop-filter:blur(10px);}
+.table-wrap{background:rgba(10,22,40, var(--bg-opacity));border:2px solid var(--accent);border-radius:16px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,0.6);width:var(--table-width);max-width:none;backdrop-filter:blur(10px);margin-bottom:15px;}
 .table-header{background:var(--head-bg, #081830);padding:16px 24px;font-family:'Bebas Neue',sans-serif;font-size:calc(var(--base-font-size) + 10px);letter-spacing:2px;color:var(--accent);text-align:center;border-bottom:2px solid var(--border);}
 .table-row{display:grid;grid-template-columns:80px 1fr 120px 120px;border-bottom:1px solid var(--border);align-items:center;font-size:var(--base-font-size);font-family:var(--team-font);}
 .table-row:last-child{border-bottom:none;}
@@ -78,7 +78,7 @@ body.hidden-overlay .page-container { display: none !important; }
 
   <!-- GROUPS VIEW -->
   <div class="view-pane" id="pane-groups">
-    <div id="groups-content" style="width:100%; display:flex; flex-wrap:wrap; gap:20px; justify-content:center; align-items:center;"></div>
+    <div id="groups-content" style="width:100%; display:flex; flex-wrap:wrap; gap:20px; justify-content:center; align-items:center; max-height: 95vh; overflow-y: auto;"></div>
   </div>
 
   <!-- SCHEDULE VIEW -->
@@ -203,6 +203,9 @@ function renderRankings(state) {
 function renderGroups(state, court) {
   const wrap = document.getElementById('groups-content');
   const groups = state.groups || [];
+  const layout = state.groupLayout || 'classic';
+  const namesOnly = state.groupChessNamesOnly || false;
+
   let vis = 'all';
   if (court) {
     vis = (state.courtVisibleGroup && state.courtVisibleGroup[court] !== undefined) ? state.courtVisibleGroup[court] : String(parseInt(court) - 1);
@@ -218,19 +221,68 @@ function renderGroups(state, court) {
 
   let html = '';
   filtered.forEach((g) => {
-    html += `<div class="table-wrap" style="flex: 1 1 45%; min-width: 500px;">
-      <div class="table-header">ГРУПА ${g.letter}</div>`;
-    g.teams.forEach((t) => {
-      html += `<div class="table-row" style="grid-template-columns: 1fr 60px 60px 60px 100px 80px;">
-        <div class="cell" style="font-weight:600;">${t.name || '—'}</div>
-        <div class="cell center">${t.p || 0}</div>
-        <div class="cell center">${t.w || 0}</div>
-        <div class="cell center">${t.l || 0}</div>
-        <div class="cell center">${t.gd || '0:0'}</div>
-        <div class="cell right" style="font-family:'Bebas Neue'; color:var(--accent);">${t.pts || 0}</div>
-      </div>`;
-    });
-    html += `</div>`;
+    const teamCount = g.teams.length;
+    
+    if (layout === 'chess') {
+      // Шахова таблиця (матриця рахунків або чисті назви)
+      html += `<div class="table-wrap" style="flex: 1 1 45%; min-width: 500px; padding-bottom: 10px;">
+        <div class="table-header">ГРУПА ${g.letter}</div>`;
+      
+      if (namesOnly) {
+        // Тільки огляд команд групи без цифр
+        g.teams.forEach((t, i) => {
+          const tName = (t.name && t.name.trim() !== '') ? t.name : `Команда ${String.fromCharCode(65 + i)}`;
+          html += `<div class="table-row" style="grid-template-columns: 60px 1fr;">
+            <div class="cell center" style="font-weight:700; color:var(--accent);">${i+1}</div>
+            <div class="cell" style="font-weight:600;">${tName}</div>
+          </div>`;
+        });
+      } else {
+        // Повна шахматка рахунків
+        let gridCols = `140px repeat(${teamCount}, 1fr)`;
+        html += `<div style="padding: 10px; overflow-x: auto;">`;
+        html += `<div class="table-row" style="grid-template-columns: ${gridCols}; font-weight:bold; color:var(--accent); border-bottom:2px solid var(--accent);">`;
+        html += `<div class="cell">Команда</div>`;
+        g.teams.forEach((t, tj) => {
+          const colName = (t.name && t.name.trim() !== '') ? t.name : `К.${tj+1}`;
+          html += `<div class="cell center" style="font-size:12px; overflow:hidden; text-overflow:ellipsis;" title="${colName}">${colName}</div>`;
+        });
+        html += `</div>`;
+
+        g.teams.forEach((t, ti) => {
+          const rowName = (t.name && t.name.trim() !== '') ? t.name : `Команда ${String.fromCharCode(65 + ti)}`;
+          html += `<div class="table-row" style="grid-template-columns: ${gridCols};">`;
+          html += `<div class="cell" style="font-weight:600; overflow:hidden; text-overflow:ellipsis;" title="${rowName}">${rowName}</div>`;
+          for (let tj = 0; tj < teamCount; tj++) {
+            if (ti === tj) {
+              html += `<div class="cell center" style="color:rgba(255,255,255,0.2);">X</div>`;
+            } else {
+              const sc = (t.scores && t.scores[tj]) ? t.scores[tj] : '-';
+              html += `<div class="cell center" style="font-family:'Bebas Neue';">${sc}</div>`;
+            }
+          }
+          html += `</div>`;
+        });
+        html += `</div>`;
+      }
+      html += `</div>`;
+    } else {
+      // Класична таблиця зі статистикою
+      html += `<div class="table-wrap" style="flex: 1 1 45%; min-width: 500px;">
+        <div class="table-header">ГРУПА ${g.letter}</div>`;
+      g.teams.forEach((t, i) => {
+        const tName = (t.name && t.name.trim() !== '') ? t.name : `Команда ${String.fromCharCode(65 + i)}`;
+        html += `<div class="table-row" style="grid-template-columns: 1fr 60px 60px 60px 100px 80px;">
+          <div class="cell" style="font-weight:600;">${tName}</div>
+          <div class="cell center">${t.p || 0}</div>
+          <div class="cell center">${t.w || 0}</div>
+          <div class="cell center">${t.l || 0}</div>
+          <div class="cell center">${t.gd || '0:0'}</div>
+          <div class="cell right" style="font-family:'Bebas Neue'; color:var(--accent);">${t.pts || 0}</div>
+        </div>`;
+      });
+      html += `</div>`;
+    }
   });
   wrap.innerHTML = html;
 }
@@ -268,12 +320,10 @@ function renderPlayoff(state, bracketView) {
   const data = isLower ? (state.bracketDataLower || {}) : (state.bracketData || {});
   const champion = isLower ? (state.championLower || '— — —') : (state.champion || '— — —');
 
-  // Встановлюємо текст індикатора сітки
   if (typeIndicator) {
     typeIndicator.textContent = isLower ? '🥈 НИЖНЯ СІТКА' : '🏆 ВЕРХНЯ СІТКА';
   }
 
-  // Повернено оригінальний повноцінний двосторонній режим для 32 команд (1/16)
   if (fmt === 32) {
     container.style.display = 'grid';
     container.style.gridTemplateColumns = '1fr 140px 1fr';
@@ -374,7 +424,6 @@ function renderPlayoff(state, bracketView) {
     return;
   }
 
-  // Стандартний рендеринг для інших форматів
   container.style.display = 'flex';
   container.style.gridTemplateColumns = '';
   
@@ -418,7 +467,6 @@ function renderPlayoff(state, bracketView) {
     container.appendChild(roundCol);
   }
 
-  // Champion
   if (champion && champion !== '— — —') {
     championBox.style.display = 'block';
     document.getElementById('champion-name').textContent = champion;
@@ -426,7 +474,6 @@ function renderPlayoff(state, bracketView) {
     championBox.style.display = 'none';
   }
 
-  // Third place match (відображаємо тільки у верхній сітці)
   if (!isLower && state.thirdPlaceMatch && (state.thirdPlaceMatch.t1 || state.thirdPlaceMatch.t2)) {
     thirdWrap.style.display = 'block';
     const tp = state.thirdPlaceMatch;
