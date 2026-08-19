@@ -10,6 +10,11 @@
   --accent:#00e5ff; --bg:#04080f; --border:rgba(0,229,255,0.18);
   --text:#fff; --muted:#5a7a94; --gold:#ffd700; --green:#00c46a; --red:#ff4455;
   --bg-opacity: 0.88;
+  --table-width: 95%;
+  --table-pad-y: 14px;
+  --base-font-size: 22px;
+  --team-font: 'Barlow Condensed', sans-serif;
+  --ui-scale: 1;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Barlow Condensed',sans-serif;background:transparent;color:var(--text);overflow:hidden;width:1920px;height:1080px;position:relative;}
@@ -20,33 +25,33 @@ body{font-family:'Barlow Condensed',sans-serif;background:transparent;color:var(
 .tour-banner-text{font-family:'Bebas Neue',sans-serif;font-size:36px;letter-spacing:3px;color:var(--accent);text-transform:uppercase;text-align:center;}
 
 .page-container{position:absolute;top:100px;left:50px;right:50px;bottom:30px;display:flex;align-items:center;justify-content:center;}
-.view-pane{display:none;width:100%;height:100%;flex-direction:column;align-items:center;justify-content:center;}
+.view-pane{display:none;width:100%;height:100%;flex-direction:column;align-items:center;justify-content:center;transform: scale(var(--ui-scale));transform-origin: center center;transition: transform 0.15s ease;}
 .view-pane.active{display:flex;}
 
 /* TABLES GENERAL */
-.table-wrap{background:rgba(10,22,40, var(--bg-opacity));border:2px solid var(--accent);border-radius:16px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,0.6);width:100%;max-width:1400px;backdrop-filter:blur(10px);}
-.table-header{background:var(--head-bg, #081830);padding:16px 24px;font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:2px;color:var(--accent);text-align:center;border-bottom:2px solid var(--border);}
-.table-row{display:grid;grid-template-columns:80px 1fr 120px 120px;border-bottom:1px solid var(--border);align-items:center;font-size:22px;}
+.table-wrap{background:rgba(10,22,40, var(--bg-opacity));border:2px solid var(--accent);border-radius:16px;overflow:hidden;box-shadow:0 10px 40px rgba(0,0,0,0.6);width:var(--table-width);max-width:none;backdrop-filter:blur(10px);}
+.table-header{background:var(--head-bg, #081830);padding:16px 24px;font-family:'Bebas Neue',sans-serif;font-size:calc(var(--base-font-size) + 10px);letter-spacing:2px;color:var(--accent);text-align:center;border-bottom:2px solid var(--border);}
+.table-row{display:grid;grid-template-columns:80px 1fr 120px 120px;border-bottom:1px solid var(--border);align-items:center;font-size:var(--base-font-size);font-family:var(--team-font);}
 .table-row:last-child{border-bottom:none;}
-.cell{padding:14px 20px;display:flex;align-items:center;}
+.cell{padding:var(--table-pad-y) 20px;display:flex;align-items:center;}
 .cell.center{justify-content:center;}
 .cell.right{justify-content:flex-end;}
 
 /* BRACKET STYLES */
 .bracket-container { display: flex; gap: 20px; align-items: center; justify-content: center; width: 100%; height: 100%; overflow-x: auto; padding: 20px; }
 .round-col { display: flex; flex-direction: column; justify-content: space-around; flex: 1; min-width: 220px; height: 100%; position: relative; }
-.round-title { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--accent); text-align: center; margin-bottom: 6px; letter-spacing: 2px; text-transform: uppercase; border-bottom: 2px solid var(--accent); padding-bottom: 4px; }
+.round-title { font-family: 'Bebas Neue', sans-serif; font-size: calc(var(--base-font-size) - 2px); color: var(--accent); text-align: center; margin-bottom: 6px; letter-spacing: 2px; text-transform: uppercase; border-bottom: 2px solid var(--accent); padding-bottom: 4px; }
 .bracket-match { background: rgba(10,22,40, var(--bg-opacity)); border: 2px solid var(--border); border-radius: 8px; margin: 4px 0; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.4); backdrop-filter: blur(10px); }
-.b-team { display: flex; justify-content: space-between; align-items: center; padding: 5px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 15px; font-weight: 600; background: rgba(255,255,255,0.02); }
+.b-team { display: flex; justify-content: space-between; align-items: center; padding: calc(var(--table-pad-y) / 2) 10px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: calc(var(--base-font-size) - 7px); font-weight: 600; font-family: var(--team-font); background: rgba(255,255,255,0.02); }
 .b-team:last-child { border-bottom: none; }
 .b-team.winner { color: var(--gold); background: rgba(255,215,0,0.08); }
-.b-score { font-family: 'Bebas Neue', sans-serif; font-size: 16px; background: rgba(0,229,255,0.1); padding: 1px 6px; border-radius: 4px; color: var(--accent); min-width: 28px; text-align: center; }
+.b-score { font-family: 'Bebas Neue', sans-serif; font-size: calc(var(--base-font-size) - 6px); background: rgba(0,229,255,0.1); padding: 1px 6px; border-radius: 4px; color: var(--accent); min-width: 28px; text-align: center; }
 
-.champion-box { margin-top: 15px; background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(0,229,255,0.15)); border: 2px solid var(--gold); border-radius: 12px; padding: 12px 25px; text-align: center; font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--gold); letter-spacing: 3px; box-shadow: 0 0 30px rgba(255,215,0,0.3); backdrop-filter: blur(10px); }
+.champion-box { margin-top: 15px; background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(0,229,255,0.15)); border: 2px solid var(--gold); border-radius: 12px; padding: 12px 25px; text-align: center; font-family: 'Bebas Neue', sans-serif; font-size: calc(var(--base-font-size) + 6px); color: var(--gold); letter-spacing: 3px; box-shadow: 0 0 30px rgba(255,215,0,0.3); backdrop-filter: blur(10px); }
 
 /* THIRD PLACE SECTION */
 .third-place-wrap { margin-top: 10px; border-top: 2px dashed var(--accent); padding-top: 10px; width: 100%; max-width: 350px; text-align: center; }
-.third-place-title { font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: var(--gold); margin-bottom: 6px; letter-spacing: 1px; }
+.third-place-title { font-family: 'Bebas Neue', sans-serif; font-size: calc(var(--base-font-size) - 4px); color: var(--gold); margin-bottom: 6px; letter-spacing: 1px; }
 
 /* HIDDEN STATE */
 body.hidden-overlay .tour-banner,
@@ -165,6 +170,15 @@ function applyStylesAndSizes(state, view) {
   document.documentElement.style.setProperty('--bg-opacity', opacity);
   const colors = state.colors?.[view] || { team: '#fff', bg: '#050c1c', head: '#081830' };
   document.documentElement.style.setProperty('--head-bg', colors.head);
+
+  // Зчитування індивідуальних розмірів та масштабів для кожного табла
+  const sizes = state.sizes?.[view] || { scale: 1, tblWidth: 95, tblPadY: 9, fontSize: 15, teamFont: "'Barlow Condensed', sans-serif" };
+  
+  document.documentElement.style.setProperty('--ui-scale', sizes.scale != null ? sizes.scale : 1);
+  document.documentElement.style.setProperty('--table-width', (sizes.tblWidth != null ? sizes.tblWidth : 95) + '%');
+  document.documentElement.style.setProperty('--table-pad-y', (sizes.tblPadY != null ? sizes.tblPadY : 9) + 'px');
+  document.documentElement.style.setProperty('--base-font-size', (sizes.fontSize != null ? sizes.fontSize : 15) + 'px');
+  document.documentElement.style.setProperty('--team-font', sizes.teamFont || "'Barlow Condensed', sans-serif");
 }
 
 function renderRankings(state) {
@@ -264,10 +278,9 @@ function renderPlayoff(state, bracketView) {
     const rightSide = document.createElement('div');
     rightSide.style.cssText = 'display:flex; gap:8px; height:100%; justify-content:space-between; flex-direction:row-reverse; width:100%;';
 
-    const numRounds = 5; // 1/16, 1/8, 1/4, Півфінал, Фінал
+    const numRounds = 5; 
     const labels = ['1/16', '1/8', '1/4', 'Півфінал', 'Фінал'];
 
-    // Ліва сторона (мористи 0 до 15 у першому раунді)
     for (let ri = 0; ri < numRounds; ri++) {
       const count = 16 / Math.pow(2, ri);
       const col = document.createElement('div');
@@ -280,8 +293,6 @@ function renderPlayoff(state, bracketView) {
       col.appendChild(title);
 
       for (let mi = 0; mi < count; mi++) {
-        // Умовно розділяємо матчі верхнього рівня на ліву та праву половину сітки
-        const matchIdx = (ri === 0) ? mi : (16 + mi); // спрощений маппінг або прямий ключ
         const key = `${ri}-${mi}`;
         const m = data[key] || { t1: '—', t2: '—', s1: '-', s2: '-', winner: -1 };
         
@@ -306,7 +317,6 @@ function renderPlayoff(state, bracketView) {
       leftSide.appendChild(col);
     }
 
-    // Права сторона (матчі з іншої половини сітки)
     for (let ri = 0; ri < numRounds; ri++) {
       const count = 16 / Math.pow(2, ri);
       const col = document.createElement('div');
@@ -319,7 +329,6 @@ function renderPlayoff(state, bracketView) {
       col.appendChild(title);
 
       for (let mi = 0; mi < count; mi++) {
-        // Зсуваємо індекси для правого крила (наприклад, друга половина ключів)
         const rightMi = mi + count;
         const key = `${ri}-${rightMi}`;
         const m = data[key] || { t1: '—', t2: '—', s1: '-', s2: '-', winner: -1 };
@@ -355,7 +364,7 @@ function renderPlayoff(state, bracketView) {
     return;
   }
 
-  // Стандартний рендеринг для інших форматів (8, 16 тощо)
+  // Стандартний рендеринг для інших форматів
   container.style.display = 'flex';
   container.style.gridTemplateColumns = '';
   
