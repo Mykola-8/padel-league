@@ -660,7 +660,8 @@ window.syncRange = function(inputId, valId) { const v = parseFloat(document.getE
  
 window.currentSizeTarget = 'rankings';
 function loadSizeControls(target) {
-  const prof = (state.sizes && state.sizes[target]) || { scale:1, tblWidth:95, tblPadY:9, fontSize:15, teamFont:"'Barlow Condensed', sans-serif" };
+  if (!state.sizes) state.sizes = {};
+  const prof = state.sizes[target] || { scale:1, tblWidth:95, tblPadY:9, fontSize:15, teamFont:"'Barlow Condensed', sans-serif" };
   document.getElementById('s-scale').value   = prof.scale!=null?prof.scale:1;
   document.getElementById('s-t-width').value = (prof.tblWidth!=null?prof.tblWidth:95) - 100;
   document.getElementById('s-t-pad').value   = prof.tblPadY!=null?prof.tblPadY:9;
