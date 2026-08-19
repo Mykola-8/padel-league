@@ -257,7 +257,7 @@ input:checked + .slider:before { transform: translateX(22px); background-color: 
  
   <div class="card">
     <div class="card-title">Індивідуальні кольори екранів</div>
-    <div class="field"><label>Загальний Акцент (лінії, обведення)</label><input type="color" id="s-accent" value="#00e5ff" style="margin-bottom:15px"><label>Прозорість фону таблиць</label><div class="range-row" style="margin-bottom:15px"><input type="range" id="s-opacity" min="0.3" max="1" step="0.05" value="0.88" oninput="syncRange('s-opacity','rv-opacity')"><span class="range-val" id="rv-opacity">88%</span></div></div>
+    <div class="field"><label>Загальний Акцент (лінії, обведення)</label><input type="color" id="s-accent" value="#00e5ff" style="margin-bottom:15px"><label>Прозорість фону таблиць</label><div class="range-row" style="margin-bottom:15px"><input type="range" id="s-opacity" min="0.3" max="1" step="0.05" value="0.88" oninput="syncRange('s-opacity','rv-opacity'); autoSave();"><span class="range-val" id="rv-opacity">88%</span></div></div>
     <div style="display:grid; grid-template-columns:70px 1fr 1fr 1fr; gap:8px; align-items:center; background:var(--card2); padding:10px; border-radius:8px; border:1px solid var(--border);">
       <div style="font-size:10px; color:var(--muted); text-transform:uppercase;">Екран</div><div style="font-size:10px; color:var(--muted); text-transform:uppercase; text-align:center;">Команди</div><div style="font-size:10px; color:var(--muted); text-transform:uppercase; text-align:center;">Таблиця</div><div style="font-size:10px; color:var(--muted); text-transform:uppercase; text-align:center;">Шапка</div>
       <div style="font-size:12px; font-weight:bold;">Рейтинг</div><input type="color" id="c-rank-team" class="color-picker-sm"><input type="color" id="c-rank-bg" class="color-picker-sm"><input type="color" id="c-rank-head" class="color-picker-sm">
@@ -393,7 +393,7 @@ let saveTimeout;
 window.autoSave = function() {
   clearTimeout(saveTimeout);
   document.getElementById('status-text').textContent = '⏳ Збереження...';
-  saveTimeout = setTimeout(() => { pushState(); }, 500); 
+  saveTimeout = setTimeout(() => { pushState(); }, 300); 
 };
  
 document.addEventListener('input', (e) => { 
@@ -684,7 +684,6 @@ window.changeSizeTarget = function(target) {
   document.querySelectorAll('#size-target-btns .size-tab').forEach(b=>b.classList.remove('active'));
   document.querySelector(`#size-target-btns [data-size-target="${target}"]`)?.classList.add('active');
   loadSizeControls(target);
-  autoSave();
 };
  
 window.globalTeamsList = [];
@@ -1006,10 +1005,10 @@ function autoSyncPlayoff() {
     if(bData['0-6']) { bData['0-6'].t1 = getT(5,0); bData['0-6'].t2 = getT(7,1); }
     if(bData['0-7']) { bData['0-7'].t1 = getT(7,0); bData['0-7'].t2 = getT(5,1); }
   } else if (fmt === 8) {
-    if(bData['0-0']) { bData['0-0'].t1 = getT(0,0); bData['0-0'].t2 = getT(2,1); } // A1 проти C2
-    if(bData['0-1']) { bData['0-1'].t1 = getT(2,0); bData['0-1'].t2 = getT(0,1); } // C1 проти A2
-    if(bData['0-2']) { bData['0-2'].t1 = getT(1,0); bData['0-2'].t2 = getT(3,1); } // B1 проти D2
-    if(bData['0-3']) { bData['0-3'].t1 = getT(3,0); bData['0-3'].t2 = getT(1,1); } // D1 проти B2
+    if(bData['0-0']) { bData['0-0'].t1 = getT(0,0); bData['0-0'].t2 = getT(2,1); }
+    if(bData['0-1']) { bData['0-1'].t1 = getT(2,0); bData['0-1'].t2 = getT(0,1); }
+    if(bData['0-2']) { bData['0-2'].t1 = getT(1,0); bData['0-2'].t2 = getT(3,1); }
+    if(bData['0-3']) { bData['0-3'].t1 = getT(3,0); bData['0-3'].t2 = getT(1,1); }
   } else if (fmt === 4) {
     if(bData['0-0']) { bData['0-0'].t1 = getT(0,0); bData['0-0'].t2 = getT(1,1); }
     if(bData['0-1']) { bData['0-1'].t1 = getT(1,0); bData['0-1'].t2 = getT(0,1); }
