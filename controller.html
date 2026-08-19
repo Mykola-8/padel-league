@@ -376,6 +376,7 @@ const stateRef = ref(db, 'padel/state');
  
 let state = defaultState();
 let connected = false;
+let isRenderingGroups = false;
  
 onValue(ref(db, '.info/connected'), snap => {
   connected = snap.val() === true;
@@ -385,7 +386,10 @@ onValue(ref(db, '.info/connected'), snap => {
  
 onValue(stateRef, snap => {
   const val = snap.val();
-  if (val) { state = val; initUI(); }
+  if (val) { 
+    state = val; 
+    if(!isRenderingGroups) initUI(); 
+  }
 }, { onlyOnce: true });
  
 let saveTimeout;
@@ -797,12 +801,16 @@ window.rebuildGroups = function() {
 };
  
 window.onTeamSelectChange = function(gi, ti, selectEl) {
+  state.groups = collectGroups();
   renderGroupEditor();
   recalcGroupStats(gi);
   autoSave();
 };
 
 function renderGroupEditor() { 
+  if (isRenderingGroups) return;
+  isRenderingGroups = true;
+  
   const gc=parseInt(document.getElementById('g-count').value); const tc=parseInt(document.getElementById('g-teams').value);
   const grps=state.groups||emptyGroups(gc,tc); 
   const visSelect = document.getElementById('g-visible');
@@ -829,19 +837,14 @@ function renderGroupEditor() {
     let matrixRows = `<div style="margin-top:12px; border-top:1px solid var(--border); padding-top:10px;"><div style="font-size:11px; color:var(--muted); margin-bottom:8px; text-transform:uppercase; letter-spacing:1px;">Рахунки між собою (для шахової таблиці)</div>`;
     matrixRows += `<div style="display:grid; grid-template-columns: 140px repeat(${tc}, 1fr); gap:6px; margin-bottom:6px; align-items:center;"><div></div>`;
     for(let tj=0; tj<tc; tj++) {
-      const selEl = document.getElementById(`team-sel-${gi}-${tj}`);
-      const valFromSelect = selEl ? selEl.value : '';
-      const fallbackName = (grp.teams[tj] && grp.teams[tj].name) ? grp.teams[tj].name : '';
-      const colTeamName = (valFromSelect && valFromSelect.trim() !== '') ? valFromSelect : ((fallbackName.trim() !== '') ? fallbackName : `Команда ${String.fromCharCode(65 + tj)}`);
+      const teamObj = grp.teams[tj] || {};
+      const colTeamName = (teamObj.name && teamObj.name.trim() !== '') ? teamObj.name : `Команда ${String.fromCharCode(65 + tj)}`;
       matrixRows += `<div style="text-align:center; font-size:11px; font-weight:bold; color:var(--accent); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${colTeamName}">${colTeamName}</div>`;
     }
     matrixRows += `</div>`;
     
     (grp.teams||[]).forEach((team,ti)=>{
-      const selEl = document.getElementById(`team-sel-${gi}-${ti}`);
-      const valFromSelect = selEl ? selEl.value : '';
-      const fallbackName = team.name || '';
-      const rowTeamName = (valFromSelect && valFromSelect.trim() !== '') ? valFromSelect : ((fallbackName.trim() !== '') ? fallbackName : `Команда ${String.fromCharCode(65 + ti)}`);
+      const rowTeamName = (team.name && team.name.trim() !== '') ? team.name : `Команда ${String.fromCharCode(65 + ti)}`;
       matrixRows += `<div style="display:grid; grid-template-columns: 140px repeat(${tc}, 1fr); gap:6px; margin-bottom:6px; align-items:center;">`;
       matrixRows += `<div style="font-size:12px; font-weight:bold; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${rowTeamName}">${rowTeamName}</div>`;
       for(let tj=0; tj<tc; tj++) {
@@ -858,7 +861,9 @@ function renderGroupEditor() {
  
     sec.innerHTML=`<div class="grp-section-title"><span style="font-size:28px;color:var(--accent)">${letter}</span>Група ${letter}</div><div style="display:grid;grid-template-columns:40px 1fr 40px 40px 40px 90px 50px;gap:5px;margin-bottom:4px;"><span style="font-size:10px;color:var(--muted);text-align:center">Місце</span><span style="font-size:10px;color:var(--muted)">Команда</span><span style="font-size:10px;color:var(--muted);text-align:center" title="Ігри">І</span><span style="font-size:10px;color:var(--muted);text-align:center" title="Виграші">Вигр</span><span style="font-size:10px;color:var(--muted);text-align:center" title="Програші">Прог</span><span style="font-size:10px;color:var(--muted);text-align:center" title="М'ячі та різниця">Різн (МГ)</span><span style="font-size:10px;color:var(--muted);text-align:center" title="Очки">Очки</span></div>${rows}${matrixRows}`; 
     wrap.appendChild(sec); 
-  }); 
+  });
+  
+  isRenderingGroups = false;
 }
  
 function collectGroups() { 
