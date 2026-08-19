@@ -821,7 +821,7 @@ function renderGroupEditor() {
     for(let tj=0; tj<tc; tj++) {
       const selEl = document.getElementById(`team-sel-${gi}-${tj}`);
       const valFromSelect = selEl ? selEl.value : '';
-      const colTeamName = (valFromSelect && valFromSelect.trim() !== '') ? valFromSelect : ((grp.teams[tj] && grp.teams[tj].name && grp.teams[tj].name.trim() !== '') ? grp.teams[tj].name : `Команда ${tj+1}`);
+      const colTeamName = (valFromSelect && valFromSelect.trim() !== '') ? valFromSelect : ((grp.teams[tj] && grp.teams[tj].name && grp.teams[tj].name.trim() !== '') ? grp.teams[tj].name : `Команда ${String.fromCharCode(65 + tj)}`);
       matrixRows += `<div style="text-align:center; font-size:11px; font-weight:bold; color:var(--accent); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${colTeamName}">${colTeamName}</div>`;
     }
     matrixRows += `</div>`;
@@ -829,7 +829,7 @@ function renderGroupEditor() {
     (grp.teams||[]).forEach((team,ti)=>{
       const selEl = document.getElementById(`team-sel-${gi}-${ti}`);
       const valFromSelect = selEl ? selEl.value : '';
-      const rowTeamName = (valFromSelect && valFromSelect.trim() !== '') ? valFromSelect : ((team.name && team.name.trim() !== '') ? team.name : `Команда ${ti+1}`);
+      const rowTeamName = (valFromSelect && valFromSelect.trim() !== '') ? valFromSelect : ((team.name && team.name.trim() !== '') ? team.name : `Команда ${String.fromCharCode(65 + ti)}`);
       matrixRows += `<div style="display:grid; grid-template-columns: 140px repeat(${tc}, 1fr); gap:6px; margin-bottom:6px; align-items:center;">`;
       matrixRows += `<div style="font-size:12px; font-weight:bold; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${rowTeamName}">${rowTeamName}</div>`;
       for(let tj=0; tj<tc; tj++) {
