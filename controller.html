@@ -606,7 +606,7 @@ window.deleteTheme = function() { const name = document.getElementById('theme-se
  
 function updateTourDropdown() { const select = document.getElementById('tour-save-select'); select.innerHTML = '<option value="">-- Оберіть збережений турнір --</option>'; if(state.savedTournaments) { Object.keys(state.savedTournaments).forEach(n => { select.innerHTML += `<option value="${n}">${n}</option>`; }); } }
 window.saveTournament = function() { const name = document.getElementById('tour-save-name').value.trim(); if(!name) return alert('Введіть назву турніру для збереження!'); if(!state.savedTournaments) state.savedTournaments = {}; const snap = collectState(); delete snap.themes; delete snap.savedTournaments; state.savedTournaments[name] = snap; document.getElementById('tour-save-name').value = ''; updateTourDropdown(); document.getElementById('tour-save-select').value = name; pushState(); alert('Турнір "' + name + '" успішно збережено!'); };
-window.loadTournament = function() { const name = document.getElementById('tour-save-select').value; if(!name || !state.savedTournaments || !state.savedTournaments[name]) return alert('Оберіть турнір зі списку'); if(!confirm('Завантажити турнір? Поточні незбережені дані будуть втрачені.')) return; const savedTours = state.savedTournaments; const savedThemes = state.themes; state = JSON.parse(JSON.stringify(state.savedTournaments[name])); state.savedTournaments = savedTours; state.themes = savedThemes; initUI(); autoSave(); };
+window.loadTournament = function() { const name = document.getElementById('tour-save-select').value; if(!name || !state.savedTournaments || !state.savedTournaments[name]) return alert('Оберіть тему зі списку'); if(!confirm('Завантажити турнір? Поточні незбережені дані будуть втрачені.')) return; const savedTours = state.savedTournaments; const savedThemes = state.themes; state = JSON.parse(JSON.stringify(state.savedTournaments[name])); state.savedTournaments = savedTours; state.themes = savedThemes; initUI(); autoSave(); };
 window.deleteTournament = function() { const name = document.getElementById('tour-save-select').value; if(!name || !state.savedTournaments || !state.savedTournaments[name]) return; if(confirm('Видалити турнір?')) { delete state.savedTournaments[name]; updateTourDropdown(); pushState(); } };
  
 window.resetTournament = function() { 
@@ -823,7 +823,6 @@ function renderGroupEditor() {
     const L='ABCDEFGHIJ'; const letter=L[gi]; const sec=document.createElement('div'); sec.className='card grp-section'; 
     let rows=''; 
     (grp.teams||[]).forEach((team,ti)=>{ 
-      const defaultTeamLabel = `Команда ${String.fromCharCode(65 + ti)}`;
       rows+=`<div class="team-stat-row" data-gi="${gi}" data-ti="${ti}">${generateTeamSelect(team.name, `team-sel-${gi}-${ti}`, `data-f="name"`, `onTeamSelectChange(${gi},${ti},this)`)}<input type="number" value="${team.p||0}" data-f="p" readonly style="opacity:0.7"><input type="number" value="${team.w||0}" data-f="w" readonly style="opacity:0.7"><input type="number" value="${team.l||0}" data-f="l" readonly style="opacity:0.7"><input type="text" value="${team.gd||'0:0'}" data-f="gd" readonly style="opacity:0.7"><input type="number" value="${team.pts||0}" data-f="pts" readonly style="opacity:0.7; font-weight:bold; color:var(--accent);"></div>`; 
     }); 
  
@@ -832,7 +831,8 @@ function renderGroupEditor() {
     for(let tj=0; tj<tc; tj++) {
       const selEl = document.getElementById(`team-sel-${gi}-${tj}`);
       const valFromSelect = selEl ? selEl.value : '';
-      const colTeamName = (valFromSelect && valFromSelect.trim() !== '') ? valFromSelect : ((grp.teams[tj] && grp.teams[tj].name && grp.teams[tj].name.trim() !== '') ? grp.teams[tj].name : `Команда ${String.fromCharCode(65 + tj)}`);
+      const fallbackName = (grp.teams[tj] && grp.teams[tj].name) ? grp.teams[tj].name : '';
+      const colTeamName = (valFromSelect && valFromSelect.trim() !== '') ? valFromSelect : ((fallbackName.trim() !== '') ? fallbackName : `Команда ${String.fromCharCode(65 + tj)}`);
       matrixRows += `<div style="text-align:center; font-size:11px; font-weight:bold; color:var(--accent); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${colTeamName}">${colTeamName}</div>`;
     }
     matrixRows += `</div>`;
@@ -840,7 +840,8 @@ function renderGroupEditor() {
     (grp.teams||[]).forEach((team,ti)=>{
       const selEl = document.getElementById(`team-sel-${gi}-${ti}`);
       const valFromSelect = selEl ? selEl.value : '';
-      const rowTeamName = (valFromSelect && valFromSelect.trim() !== '') ? valFromSelect : ((team.name && team.name.trim() !== '') ? team.name : `Команда ${String.fromCharCode(65 + ti)}`);
+      const fallbackName = team.name || '';
+      const rowTeamName = (valFromSelect && valFromSelect.trim() !== '') ? valFromSelect : ((fallbackName.trim() !== '') ? fallbackName : `Команда ${String.fromCharCode(65 + ti)}`);
       matrixRows += `<div style="display:grid; grid-template-columns: 140px repeat(${tc}, 1fr); gap:6px; margin-bottom:6px; align-items:center;">`;
       matrixRows += `<div style="font-size:12px; font-weight:bold; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${rowTeamName}">${rowTeamName}</div>`;
       for(let tj=0; tj<tc; tj++) {
@@ -1001,11 +1002,10 @@ function autoSyncPlayoff() {
   const bData = state.bracketData || {};
   
   if (fmt === 8 && sortedGroups.length === 4) {
-    // 4 групи по 5 команд: 1 та 2 місця груп переходять у верхню сітку 1/4 (8 команд = 4 матчі в 1/4)
-    if(bData['0-0']) { bData['0-0'].t1 = getT(0,0); bData['0-0'].t2 = getT(3,1); } // A1 vs D2
-    if(bData['0-1']) { bData['0-1'].t1 = getT(1,0); bData['0-1'].t2 = getT(2,1); } // B1 vs C2
-    if(bData['0-2']) { bData['0-2'].t1 = getT(2,0); bData['0-2'].t2 = getT(1,1); } // C1 vs B2
-    if(bData['0-3']) { bData['0-3'].t1 = getT(3,0); bData['0-3'].t2 = getT(0,1); } // D1 vs A2
+    if(bData['0-0']) { bData['0-0'].t1 = getT(0,0); bData['0-0'].t2 = getT(3,1); }
+    if(bData['0-1']) { bData['0-1'].t1 = getT(1,0); bData['0-1'].t2 = getT(2,1); }
+    if(bData['0-2']) { bData['0-2'].t1 = getT(2,0); bData['0-2'].t2 = getT(1,1); }
+    if(bData['0-3']) { bData['0-3'].t1 = getT(3,0); bData['0-3'].t2 = getT(0,1); }
   } else {
     if (fmt === 32) {
       let tIdx = 0;
@@ -1052,18 +1052,10 @@ function autoSyncPlayoffLower() {
   const bData = (state.bracketDataLower && Object.keys(state.bracketDataLower).length) ? state.bracketDataLower : emptyBracketData(fmt);
   
   if (fmt === 8 && sortedGroups.length === 4) {
-    // 4 групи по 5 команд:
-    // 3 місця переходять в 1/4 нижньої сітки (це раунд ri=0 для fmt=8: матчі 0, 1, 2, 3)
-    // 4 та 5 місця грають в 1/8 нижньої сітки. Але якщо формат турніру 1/4 (fmt=8), у нижній сітці першим раундом є 1/4 (куди автоматично ставляться 3 місця). 
-    // За правилом: "команда яка виграла в 1/8 переходить грати в 1/4 проти команди яка вийшла 3 місце в групу".
-    // Тому для нижньої сітки створимо структуру нижньої сітки з 1/8, якщо вона підтримується, або розставимо так:
-    // 3 місця (A3, B3, C3, D3) чекають у 1/4 нижньої сітки.
-    // 4 та 5 місця грають 1/8 (чи попередні кваліфікаційні матчі нижньої сітки). 
-    // Зробимо автоматичне заповнення відповідних слотів нижньої сітки:
-    if(bData['0-0']) { bData['0-0'].t1 = getT(0,2); bData['0-0'].t2 = 'Переможець 1/8 (A4/B5)'; } // A3 проти переможця 1/8
-    if(bData['0-1']) { bData['0-1'].t1 = getT(1,2); bData['0-1'].t2 = 'Переможець 1/8 (C4/D5)'; } // B3 проти переможця 1/8
-    if(bData['0-2']) { bData['0-2'].t1 = getT(2,2); bData['0-2'].t2 = 'Переможець 1/8 (B4/A5)'; } // C3 проти переможця 1/8
-    if(bData['0-3']) { bData['0-3'].t1 = getT(3,2); bData['0-3'].t2 = 'Переможець 1/8 (D4/C5)'; } // D3 проти переможця 1/8
+    if(bData['0-0']) { bData['0-0'].t1 = getT(0,2); bData['0-0'].t2 = 'Переможець 1/8 (A4/B5)'; }
+    if(bData['0-1']) { bData['0-1'].t1 = getT(1,2); bData['0-1'].t2 = 'Переможець 1/8 (C4/D5)'; }
+    if(bData['0-2']) { bData['0-2'].t1 = getT(2,2); bData['0-2'].t2 = 'Переможець 1/8 (B4/A5)'; }
+    if(bData['0-3']) { bData['0-3'].t1 = getT(3,2); bData['0-3'].t2 = 'Переможець 1/8 (D4/C5)'; }
   } else {
     if (fmt === 32 || fmt === 16) {
       let tIdx = 0;
