@@ -200,6 +200,34 @@ function renderRankings(state) {
   wrap.innerHTML = html;
 }
 
+function sortTeams(teams, scores) {
+  const stats = teams.map((team, ti) => {
+    let p = 0, w = 0, l = 0, gf = 0, ga = 0, pts = 0;
+    for (let tj = 0; tj < teams.length; tj++) {
+      if (ti === tj) continue;
+      const sc = (scores && scores[ti]) ? scores[ti][tj] : '';
+      if (!sc || !sc.includes(':')) continue;
+      const parts = sc.split(':');
+      const a = parseInt(parts[0]), b = parseInt(parts[1]);
+      if (isNaN(a) || isNaN(b)) continue;
+      p++; gf += a; ga += b;
+      if (a > b) { w++; pts += 2; }
+      else if (a < b) { l++; }
+      else { pts += 1; }
+    }
+    const diff = gf - ga;
+    const diffStr = diff > 0 ? '+' + diff : String(diff);
+    const gdVal = p > 0 ? gf + ':' + ga + ' (' + diffStr + ')' : '0:0 (0)';
+    return { ti, team, p, w, l, gdVal, pts, diff };
+  });
+
+  return stats.sort((a, b) => {
+    if (b.pts !== a.pts) return b.pts - a.pts;
+    if (b.diff !== a.diff) return b.diff - a.diff;
+    return b.w - a.w;
+  });
+}
+
 function renderGroups(state, court) {
   const wrap = document.getElementById('groups-content');
   const groups = state.groups || [];
@@ -222,42 +250,42 @@ function renderGroups(state, court) {
   let html = '';
   filtered.forEach((g) => {
     const teamCount = g.teams.length;
-    
+    const allScores = g.teams.map(t => t.scores || []);
+    const sortedStats = sortTeams(g.teams, allScores);
+
     if (layout === 'chess') {
-      // Шахова таблиця (матриця рахунків або чисті назви)
       html += `<div class="table-wrap" style="flex: 1 1 45%; min-width: 500px; padding-bottom: 10px;">
         <div class="table-header">ГРУПА ${g.letter}</div>`;
       
       if (namesOnly) {
-        // Тільки огляд команд групи без цифр
-        g.teams.forEach((t, i) => {
-          const tName = (t.name && t.name.trim() !== '') ? t.name : `Команда ${String.fromCharCode(65 + i)}`;
+        sortedStats.forEach((st, i) => {
+          const tName = (st.team.name && st.team.name.trim() !== '') ? st.team.name : `Команда ${i+1}`;
           html += `<div class="table-row" style="grid-template-columns: 60px 1fr;">
             <div class="cell center" style="font-weight:700; color:var(--accent);">${i+1}</div>
             <div class="cell" style="font-weight:600;">${tName}</div>
           </div>`;
         });
       } else {
-        // Повна шахматка рахунків
-        let gridCols = `140px repeat(${teamCount}, 1fr)`;
+        let gridCols = `40px 140px repeat(${teamCount}, 1fr)`;
         html += `<div style="padding: 10px; overflow-x: auto;">`;
         html += `<div class="table-row" style="grid-template-columns: ${gridCols}; font-weight:bold; color:var(--accent); border-bottom:2px solid var(--accent);">`;
-        html += `<div class="cell">Команда</div>`;
-        g.teams.forEach((t, tj) => {
-          const colName = (t.name && t.name.trim() !== '') ? t.name : `К.${tj+1}`;
+        html += `<div class="cell center">#</div><div class="cell">Команда</div>`;
+        sortedStats.forEach((st, tj) => {
+          const colName = (st.team.name && st.team.name.trim() !== '') ? st.team.name : `К.${tj+1}`;
           html += `<div class="cell center" style="font-size:12px; overflow:hidden; text-overflow:ellipsis;" title="${colName}">${colName}</div>`;
         });
         html += `</div>`;
 
-        g.teams.forEach((t, ti) => {
-          const rowName = (t.name && t.name.trim() !== '') ? t.name : `Команда ${String.fromCharCode(65 + ti)}`;
+        sortedStats.forEach((st, sortedIdx) => {
+          const rowName = (st.team.name && st.team.name.trim() !== '') ? st.team.name : `Команда ${sortedIdx+1}`;
           html += `<div class="table-row" style="grid-template-columns: ${gridCols};">`;
+          html += `<div class="cell center" style="font-weight:bold; color:var(--accent);">${sortedIdx+1}</div>`;
           html += `<div class="cell" style="font-weight:600; overflow:hidden; text-overflow:ellipsis;" title="${rowName}">${rowName}</div>`;
           for (let tj = 0; tj < teamCount; tj++) {
-            if (ti === tj) {
+            if (st.ti === tj) {
               html += `<div class="cell center" style="color:rgba(255,255,255,0.2);">X</div>`;
             } else {
-              const sc = (t.scores && t.scores[tj]) ? t.scores[tj] : '-';
+              const sc = (st.team.scores && st.team.scores[tj]) ? st.team.scores[tj] : '-';
               html += `<div class="cell center" style="font-family:'Bebas Neue';">${sc}</div>`;
             }
           }
@@ -267,18 +295,18 @@ function renderGroups(state, court) {
       }
       html += `</div>`;
     } else {
-      // Класична таблиця зі статистикою
       html += `<div class="table-wrap" style="flex: 1 1 45%; min-width: 500px;">
         <div class="table-header">ГРУПА ${g.letter}</div>`;
-      g.teams.forEach((t, i) => {
-        const tName = (t.name && t.name.trim() !== '') ? t.name : `Команда ${String.fromCharCode(65 + i)}`;
-        html += `<div class="table-row" style="grid-template-columns: 1fr 60px 60px 60px 100px 80px;">
+      sortedStats.forEach((st, sortedIdx) => {
+        const tName = (st.team.name && st.team.name.trim() !== '') ? st.team.name : `Команда ${sortedIdx+1}`;
+        html += `<div class="table-row" style="grid-template-columns: 40px 1fr 60px 60px 60px 100px 80px;">
+          <div class="cell center" style="font-weight:bold; color:var(--accent);">${sortedIdx+1}</div>
           <div class="cell" style="font-weight:600;">${tName}</div>
-          <div class="cell center">${t.p || 0}</div>
-          <div class="cell center">${t.w || 0}</div>
-          <div class="cell center">${t.l || 0}</div>
-          <div class="cell center">${t.gd || '0:0'}</div>
-          <div class="cell right" style="font-family:'Bebas Neue'; color:var(--accent);">${t.pts || 0}</div>
+          <div class="cell center">${st.p || 0}</div>
+          <div class="cell center">${st.w || 0}</div>
+          <div class="cell center">${st.l || 0}</div>
+          <div class="cell center">${st.gdVal || '0:0'}</div>
+          <div class="cell right" style="font-family:'Bebas Neue'; color:var(--accent);">${st.pts || 0}</div>
         </div>`;
       });
       html += `</div>`;
