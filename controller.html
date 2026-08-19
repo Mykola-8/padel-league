@@ -997,7 +997,7 @@ function autoSyncPlayoff() {
       tIdx++;
     }
   } else if (fmt === 16) {
-    if(bData['0-0']) { bData['0-0'].t1 = getT(0,0); bData['0-0'].t2 = getT(2,1); } // Група A1 грає з Група C2 (згідно із запитом)
+    if(bData['0-0']) { bData['0-0'].t1 = getT(0,0); bData['0-0'].t2 = getT(2,1); }
     if(bData['0-1']) { bData['0-1'].t1 = getT(2,0); bData['0-1'].t2 = getT(0,1); }
     if(bData['0-2']) { bData['0-2'].t1 = getT(1,0); bData['0-2'].t2 = getT(3,1); }
     if(bData['0-3']) { bData['0-3'].t1 = getT(3,0); bData['0-3'].t2 = getT(1,1); }
@@ -1020,7 +1020,7 @@ function autoSyncPlayoff() {
   renderBracketEditor();
 }
  
-window.seedPlayoffFromGroups = function() { if (!confirm('Ця дія перезапише команди в першому раунді Плей-оф. Продовжитич?')) return; autoSyncPlayoff(); renderBracketEditor(); autoSave(); alert('Плей-оф успішно сформовано на основі поточних результатів груп!'); };
+window.seedPlayoffFromGroups = function() { if (!confirm('Ця дія перезапише команди в першому раунді Плей-оф. Продовжити?')) return; autoSyncPlayoff(); renderBracketEditor(); autoSave(); alert('Плей-оф успішно сформовано на основі поточних результатів груп!'); };
  
 function autoSyncPlayoffLower() {
   const fmt = parseInt(document.getElementById('p-format').value);
