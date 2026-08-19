@@ -34,13 +34,13 @@ body{font-family:'Barlow Condensed',sans-serif;background:transparent;color:var(
 
 /* BRACKET STYLES */
 .bracket-container { display: flex; gap: 20px; align-items: center; justify-content: center; width: 100%; height: 100%; overflow-x: auto; padding: 20px; }
-.round-col { display: flex; flex-direction: column; justify-content: space-around; flex: 1; min-width: 240px; height: 100%; position: relative; }
-.round-title { font-family: 'Bebas Neue', sans-serif; font-size: 22px; color: var(--accent); text-align: center; margin-bottom: 8px; letter-spacing: 2px; text-transform: uppercase; border-bottom: 2px solid var(--accent); padding-bottom: 4px; }
-.bracket-match { background: rgba(10,22,40, var(--bg-opacity)); border: 2px solid var(--border); border-radius: 8px; margin: 6px 0; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.4); backdrop-filter: blur(10px); }
-.b-team { display: flex; justify-content: space-between; align-items: center; padding: 7px 12px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 17px; font-weight: 600; background: rgba(255,255,255,0.02); }
+.round-col { display: flex; flex-direction: column; justify-content: space-around; flex: 1; min-width: 220px; height: 100%; position: relative; }
+.round-title { font-family: 'Bebas Neue', sans-serif; font-size: 20px; color: var(--accent); text-align: center; margin-bottom: 6px; letter-spacing: 2px; text-transform: uppercase; border-bottom: 2px solid var(--accent); padding-bottom: 4px; }
+.bracket-match { background: rgba(10,22,40, var(--bg-opacity)); border: 2px solid var(--border); border-radius: 8px; margin: 4px 0; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.4); backdrop-filter: blur(10px); }
+.b-team { display: flex; justify-content: space-between; align-items: center; padding: 5px 10px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 15px; font-weight: 600; background: rgba(255,255,255,0.02); }
 .b-team:last-child { border-bottom: none; }
 .b-team.winner { color: var(--gold); background: rgba(255,215,0,0.08); }
-.b-score { font-family: 'Bebas Neue', sans-serif; font-size: 19px; background: rgba(0,229,255,0.1); padding: 2px 8px; border-radius: 6px; color: var(--accent); min-width: 32px; text-align: center; }
+.b-score { font-family: 'Bebas Neue', sans-serif; font-size: 16px; background: rgba(0,229,255,0.1); padding: 1px 6px; border-radius: 4px; color: var(--accent); min-width: 28px; text-align: center; }
 
 .champion-box { margin-top: 15px; background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(0,229,255,0.15)); border: 2px solid var(--gold); border-radius: 12px; padding: 12px 25px; text-align: center; font-family: 'Bebas Neue', sans-serif; font-size: 28px; color: var(--gold); letter-spacing: 3px; box-shadow: 0 0 30px rgba(255,215,0,0.3); backdrop-filter: blur(10px); }
 
@@ -249,9 +249,118 @@ function renderPlayoff(state, bracketView) {
   const data = (bracketView === 'lower') ? (state.bracketDataLower || {}) : (state.bracketData || {});
   const champion = (bracketView === 'lower') ? (state.championLower || '— — —') : (state.champion || '— — —');
 
+  // Спеціальний двосторонній режим для 32 команд (1/16)
+  if (fmt === 32) {
+    container.style.display = 'grid';
+    container.style.gridTemplateColumns = '1fr 140px 1fr';
+    container.style.alignItems = 'center';
+    container.style.gap = '15px';
+    container.style.width = '100%';
+    container.style.maxWidth = '1800px';
+
+    const leftSide = document.createElement('div');
+    leftSide.style.cssText = 'display:flex; gap:8px; height:100%; justify-content:space-between; width:100%;';
+    
+    const rightSide = document.createElement('div');
+    rightSide.style.cssText = 'display:flex; gap:8px; height:100%; justify-content:space-between; flex-direction:row-reverse; width:100%;';
+
+    const numRounds = 5; // 1/16, 1/8, 1/4, Півфінал, Фінал
+    const labels = ['1/16', '1/8', '1/4', 'Півфінал', 'Фінал'];
+
+    // Ліва сторона (мористи 0 до 15 у першому раунді)
+    for (let ri = 0; ri < numRounds; ri++) {
+      const count = 16 / Math.pow(2, ri);
+      const col = document.createElement('div');
+      col.className = 'round-col';
+      col.style.minWidth = '160px';
+      
+      const title = document.createElement('div');
+      title.className = 'round-title';
+      title.textContent = labels[ri];
+      col.appendChild(title);
+
+      for (let mi = 0; mi < count; mi++) {
+        // Умовно розділяємо матчі верхнього рівня на ліву та праву половину сітки
+        const matchIdx = (ri === 0) ? mi : (16 + mi); // спрощений маппінг або прямий ключ
+        const key = `${ri}-${mi}`;
+        const m = data[key] || { t1: '—', t2: '—', s1: '-', s2: '-', winner: -1 };
+        
+        const matchBox = document.createElement('div');
+        matchBox.className = 'bracket-match';
+        
+        const t1Class = m.winner === 0 ? 'b-team winner' : 'b-team';
+        const t2Class = m.winner === 1 ? 'b-team winner' : 'b-team';
+
+        matchBox.innerHTML = `
+          <div class="${t1Class}">
+            <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:110px;" title="${m.t1 || '—'}">${m.t1 || '—'}</span>
+            <span class="b-score">${m.s1}</span>
+          </div>
+          <div class="${t2Class}">
+            <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:110px;" title="${m.t2 || '—'}">${m.t2 || '—'}</span>
+            <span class="b-score">${m.s2}</span>
+          </div>
+        `;
+        col.appendChild(matchBox);
+      }
+      leftSide.appendChild(col);
+    }
+
+    // Права сторона (матчі з іншої половини сітки)
+    for (let ri = 0; ri < numRounds; ri++) {
+      const count = 16 / Math.pow(2, ri);
+      const col = document.createElement('div');
+      col.className = 'round-col';
+      col.style.minWidth = '160px';
+      
+      const title = document.createElement('div');
+      title.className = 'round-title';
+      title.textContent = labels[ri];
+      col.appendChild(title);
+
+      for (let mi = 0; mi < count; mi++) {
+        // Зсуваємо індекси для правого крила (наприклад, друга половина ключів)
+        const rightMi = mi + count;
+        const key = `${ri}-${rightMi}`;
+        const m = data[key] || { t1: '—', t2: '—', s1: '-', s2: '-', winner: -1 };
+        
+        const matchBox = document.createElement('div');
+        matchBox.className = 'bracket-match';
+        
+        const t1Class = m.winner === 0 ? 'b-team winner' : 'b-team';
+        const t2Class = m.winner === 1 ? 'b-team winner' : 'b-team';
+
+        matchBox.innerHTML = `
+          <div class="${t1Class}">
+            <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:110px;" title="${m.t1 || '—'}">${m.t1 || '—'}</span>
+            <span class="b-score">${m.s1}</span>
+          </div>
+          <div class="${t2Class}">
+            <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:110px;" title="${m.t2 || '—'}">${m.t2 || '—'}</span>
+            <span class="b-score">${m.s2}</span>
+          </div>
+        `;
+        col.appendChild(matchBox);
+      }
+      rightSide.appendChild(col);
+    }
+
+    const centerBadge = document.createElement('div');
+    centerBadge.style.cssText = 'display:flex; align-items:center; justify-content:center; font-family:"Bebas Neue"; font-size:48px; color:var(--accent); text-shadow:0 0 20px rgba(0,229,255,0.4); background:rgba(10,22,40, var(--bg-opacity)); border:2px solid var(--accent); border-radius:16px; padding:30px 10px; backdrop-filter:blur(10px);';
+    centerBadge.textContent = '1/16';
+
+    container.appendChild(leftSide);
+    container.appendChild(centerBadge);
+    container.appendChild(rightSide);
+    return;
+  }
+
+  // Стандартний рендеринг для інших форматів (8, 16 тощо)
+  container.style.display = 'flex';
+  container.style.gridTemplateColumns = '';
+  
   const numRounds = Math.log2(fmt);
-  const allLabels = fmt === 32 ? ['1/16', '1/8', '1/4', 'Півфінал', 'Фінал'] :
-                    fmt === 16 ? ['1/8', '1/4', 'Півфінал', 'Фінал'] :
+  const allLabels = fmt === 16 ? ['1/8', '1/4', 'Півфінал', 'Фінал'] :
                     fmt === 8  ? ['1/4', 'Півфінал', 'Фінал'] :
                     fmt === 4  ? ['Півфінал', 'Фінал'] : ['Фінал'];
 
