@@ -1005,7 +1005,6 @@ function autoSyncPlayoff() {
   const bData = state.bracketData || {};
   
   if (fmt === 8 && sortedGroups.length === 4) {
-    // A1 vs C2, B1 vs D2 і т.д.
     if(bData['0-0']) { bData['0-0'].t1 = getT(0,0); bData['0-0'].t2 = getT(2,1); } // A1 vs C2
     if(bData['0-1']) { bData['0-1'].t1 = getT(1,0); bData['0-1'].t2 = getT(3,1); } // B1 vs D2
     if(bData['0-2']) { bData['0-2'].t1 = getT(2,0); bData['0-2'].t2 = getT(0,1); } // C1 vs A2
