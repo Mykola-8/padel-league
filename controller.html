@@ -610,7 +610,7 @@ window.deleteTheme = function() { const name = document.getElementById('theme-se
 function updateTourDropdown() { const select = document.getElementById('tour-save-select'); select.innerHTML = '<option value="">-- Оберіть збережений турнір --</option>'; if(state.savedTournaments) { Object.keys(state.savedTournaments).forEach(n => { select.innerHTML += `<option value="${n}">${n}</option>`; }); } }
 window.saveTournament = function() { const name = document.getElementById('tour-save-name').value.trim(); if(!name) return alert('Введіть назву турніру для збереження!'); if(!state.savedTournaments) state.savedTournaments = {}; const snap = collectState(); delete snap.themes; delete snap.savedTournaments; state.savedTournaments[name] = snap; document.getElementById('tour-save-name').value = ''; updateTourDropdown(); document.getElementById('tour-save-select').value = name; pushState(); alert('Турнір "' + name + '" успішно збережено!'); };
 window.loadTournament = function() { const name = document.getElementById('tour-save-select').value; if(!name || !state.savedTournaments || !state.savedTournaments[name]) return alert('Оберіть тему зі списку'); if(!confirm('Завантажити турнір? Поточні незбережені дані будуть втрачені.')) return; const savedTours = state.savedTournaments; const savedThemes = state.themes; state = JSON.parse(JSON.stringify(state.savedTournaments[name])); state.savedTournaments = savedTours; state.themes = savedThemes; initUI(); autoSave(); };
-window.deleteTournament = function() { const name = document.getElementById('tour-save-select').value; if(!name || !state.savedTournaments || !state.savedTournaments[name]) return; if(confirm('Видалити турнір?')) { delete state.savedTournaments[name]; updateTourDropdown(); pushState(); } };
+window.deleteTournament = function() { const name = document.getElementById('tour-save-select').value; if(!name || !state.savedTournaments || !state.savedTournaments[name]) return; if(confirm('Видалити тему?')) { delete state.savedTournaments[name]; updateTourDropdown(); pushState(); } };
  
 window.resetTournament = function() { 
   if(!confirm('🚨 УВАГА: Це повністю очистить усі назви команд, рейтинг, групи, розклад та плей-оф (верхню й нижню сітки). Бажаєте продовжити?')) return; 
@@ -852,7 +852,7 @@ function renderGroupEditor() {
           matrixRows += `<div style="background:rgba(0,0,0,0.3); border-radius:6px; height:32px; display:flex; align-items:center; justify-content:center; color:rgba(255,255,255,0.2); font-size:10px;">X</div>`;
         } else {
           const score = (team.scores && team.scores[tj]) ? team.scores[tj] : '';
-          matrixRows += `<input type="text" data-matrix-gi="${gi}" data-matrix-ti="${ti}" data-matrix-tj="${tj}" value="${score}" oninput="onMatrixInput(${gi},${ti},${tj},this.value)" style="width:100%; text-align:center; padding:6px; font-size:13px; background:rgba(255,255,255,.06); color:#fff; border:1px solid var(--border); border-radius:6px;" placeholder="-:-">`;
+          matrixRows += `<input type="text" data-matrix-gi="${gi}" data-matrix-ti="${ti}" data-matrix-tj="${tj}" value="${score}" oninput="onMatrixInput(${gi},${ti},${tj},this)" style="width:100%; text-align:center; padding:6px; font-size:13px; background:rgba(255,255,255,.06); color:#fff; border:1px solid var(--border); border-radius:6px;" placeholder="-:-">`;
         }
       }
       matrixRows += `</div>`;
@@ -888,14 +888,24 @@ function collectGroups() {
   return Object.values(map); 
 }
  
-window.onMatrixInput = function(gi, ti, tj, value) {
+window.onMatrixInput = function(gi, ti, tj, inputEl) {
+  let val = inputEl.value;
+  
+  // Автоматичне ставлення двокрапки після першої введеної цифри (якщо немає двокрапки і введено рівно 1 цифру)
+  if (/^\d$/.test(val)) {
+    val = val + ':';
+    inputEl.value = val;
+    // Переносимо курсор в самий кінець після двокрапки
+    inputEl.setSelectionRange(val.length, val.length);
+  }
+
   const mirror = document.querySelector(`input[data-matrix-gi="${gi}"][data-matrix-ti="${tj}"][data-matrix-tj="${ti}"]`);
   if (mirror) {
-    const parts = value.trim().split(':');
+    const parts = val.trim().split(':');
     if (parts.length === 2 && parts[0] !== '' && parts[1] !== '') {
       const mirrored = parts[1].trim() + ':' + parts[0].trim();
       if (mirror.value !== mirrored) mirror.value = mirrored;
-    } else if (value.trim() === '') {
+    } else if (val.trim() === '') {
       mirror.value = '';
     }
   }
