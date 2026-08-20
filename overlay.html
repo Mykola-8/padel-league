@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🎾 Padel Overlay</title>
+<title>Padel Overlay</title>
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700&family=Montserrat:wght@400;700&family=Oswald:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root {
-  --accent:#00e5ff; --bg:rgba(4,8,15,0.88);
-  --card:rgba(10,22,40,0.85); --border:rgba(0,229,255,0.18);
+  --accent:#00e5ff; --bg:rgba(4,8,15,0.92);
+  --card:rgba(10,22,40,0.88); --border:rgba(0,229,255,0.22);
   --text:#fff; --muted:#5a7a94; --gold:#ffd700;
   --green:#00c46a; --red:#ff4455;
 }
@@ -23,39 +23,61 @@ body{font-family:'Barlow Condensed',sans-serif;background:transparent;color:var(
 
 .tournament-banner {
   position: absolute; top: 30px; left: 50%; transform: translateX(-50%);
-  background: linear-gradient(90deg, rgba(0,229,255,0.1), rgba(0,229,255,0.25), rgba(0,229,255,0.1));
-  border: 1px solid var(--accent); border-radius: 8px; padding: 10px 40px;
-  font-family: 'Bebas Neue', sans-serif; font-size: 28px; letter-spacing: 3px; color: var(--accent);
-  box-shadow: 0 0 20px rgba(0,229,255,0.2); display: none; z-index: 10;
+  background: linear-gradient(90deg, rgba(0,229,255,0.08), rgba(0,229,255,0.2), rgba(0,229,255,0.08));
+  border: 1px solid var(--accent); border-radius: 6px; padding: 8px 36px;
+  font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 3px; color: var(--accent);
+  box-shadow: 0 0 15px rgba(0,229,255,0.15); display: none; z-index: 10; text-transform: uppercase;
 }
 
 .screen-container { width: 100%; height: 100%; display: flex; flex-direction: column; }
-.sec-header { font-family: 'Bebas Neue', sans-serif; font-size: 36px; letter-spacing: 2px; color: var(--accent); margin-bottom: 20px; text-transform: uppercase; text-shadow: 0 0 10px rgba(0,229,255,0.4); }
+.sec-header { font-family: 'Bebas Neue', sans-serif; font-size: 34px; letter-spacing: 2px; color: var(--accent); margin-bottom: 20px; text-transform: uppercase; text-shadow: 0 0 10px rgba(0,229,255,0.3); }
 
-/* Таблиці */
-.table-box { background: var(--bg); border: 1px solid var(--border); border-radius: 12px; overflow: hidden; backdrop-filter: blur(10px); width: 100%; }
+/* Таблиці загальні */
+.table-box { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; backdrop-filter: blur(12px); width: 100%; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
 .tbl-head { display: grid; background: var(--card); border-bottom: 1px solid var(--border); font-size: 14px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
-.tbl-row { display: grid; border-bottom: 1px solid rgba(255,255,255,0.05); align-items: center; transition: background 0.2s; }
+.tbl-row { display: grid; border-bottom: 1px solid rgba(255,255,255,0.04); align-items: center; transition: background 0.2s; }
 .tbl-row:last-child { border-bottom: none; }
-.tbl-row:hover { background: rgba(0,229,255,0.04); }
 
-/* Сітка плей-оф */
-.bracket-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; width: 100%; height: 100%; align-content: center; }
-.bracket-round { display: flex; flex-direction: column; justify-content: space-around; gap: 16px; }
-.bracket-match { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px; backdrop-filter: blur(10px); position: relative; }
-.bracket-team { display: flex; justify-content: space-between; align-items: center; padding: 8px 10px; font-size: 16px; font-weight: 600; border-radius: 6px; background: rgba(255,255,255,0.03); margin-bottom: 4px; }
-.bracket-team:last-child { margin-bottom: 0; }
-.bracket-team.winner { color: var(--accent); background: rgba(0,229,255,0.1); border-left: 3px solid var(--accent); }
-.bracket-score { font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: var(--muted); min-width: 30px; text-align: right; }
+/* Офіційна турнірна сітка плей-оф */
+.bracket-layout { display: flex; flex-direction: column; gap: 20px; width: 100%; height: 100%; }
+.bracket-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; width: 100%; align-items: center; }
+.bracket-round { display: flex; flex-direction: column; justify-content: space-around; gap: 14px; height: 100%; }
+
+.round-title-box {
+  background: var(--card); border: 1px solid var(--border); border-radius: 6px;
+  padding: 6px 12px; font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 1.5px;
+  color: var(--accent); text-align: center; margin-bottom: 4px; text-transform: uppercase;
+  backdrop-filter: blur(8px); box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+}
+
+.bracket-match { 
+  background: var(--bg); border: 1px solid var(--border); border-radius: 8px; 
+  padding: 8px 10px; backdrop-filter: blur(12px); position: relative; 
+  box-shadow: 0 4px 16px rgba(0,0,0,0.35); display: flex; flex-direction: column; gap: 4px; 
+}
+.bracket-team { 
+  display: flex; justify-content: space-between; align-items: center; 
+  padding: 6px 8px; font-size: 15px; font-weight: 600; border-radius: 4px; 
+  background: rgba(255,255,255,0.02); height: 32px; overflow: hidden;
+}
+.bracket-team.winner { color: var(--accent); background: rgba(0,229,255,0.08); border-left: 3px solid var(--accent); }
+.bracket-score { font-family: 'Bebas Neue', sans-serif; font-size: 17px; color: var(--muted); min-width: 28px; text-align: right; }
 .bracket-team.winner .bracket-score { color: var(--accent); }
+
+/* Додатковий блок третього місця */
+.third-place-box {
+  margin-top: 15px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+  padding: 10px 14px; width: 340px; backdrop-filter: blur(12px); box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+}
+.third-place-title { font-family: 'Bebas Neue', sans-serif; font-size: 16px; color: var(--gold); letter-spacing: 1px; margin-bottom: 6px; text-transform: uppercase; }
 
 /* Шахова матриця груп */
 .chess-grid-wrap { display: flex; flex-direction: column; gap: 16px; width: 100%; }
-.chess-table { width: 100%; border-collapse: collapse; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; }
+.chess-table { width: 100%; border-collapse: collapse; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
 .chess-table th, .chess-table td { border: 1px solid var(--border); padding: 10px; text-align: center; font-size: 15px; }
 .chess-table th { background: var(--card); color: var(--accent); font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 1px; }
 .chess-table td.team-name-cell { text-align: left; font-weight: bold; padding-left: 15px; }
-.chess-table td.x-cell { background: rgba(0,0,0,0.3); color: rgba(255,255,255,0.2); }
+.chess-table td.x-cell { background: rgba(0,0,0,0.3); color: rgba(255,255,255,0.15); }
 
 .hidden-overlay { display: none !important; }
 </style>
@@ -65,9 +87,7 @@ body{font-family:'Barlow Condensed',sans-serif;background:transparent;color:var(
 <div class="tournament-banner" id="tournament-banner"></div>
 
 <div class="overlay-wrapper" id="overlay-wrapper">
-  <div class="screen-container" id="screen-container">
-    <!-- Динамічний контент -->
-  </div>
+  <div class="screen-container" id="screen-container"></div>
 </div>
 
 <script type="module">
@@ -90,7 +110,7 @@ const db = getDatabase(app);
 const stateRef = ref(db, 'padel/state');
 
 const urlParams = new URLSearchParams(window.location.search);
-const courtParam = urlParams.get('court'); // напр. ?court=1
+const courtParam = urlParams.get('court');
 
 onValue(stateRef, (snapshot) => {
   const state = snapshot.val();
@@ -102,7 +122,6 @@ function renderOverlay(state, court) {
   const banner = document.getElementById('tournament-banner');
   const container = document.getElementById('screen-container');
 
-  // Визначення видимості
   let isVis = true;
   if (court) {
     isVis = (state.courtVisibility && state.courtVisibility[court] !== undefined) ? state.courtVisibility[court] : true;
@@ -117,7 +136,6 @@ function renderOverlay(state, court) {
   }
   wrapper.classList.remove('hidden-overlay');
 
-  // Банер турніру
   if (state.tourVisible && state.tourText) {
     banner.style.display = 'block';
     banner.textContent = state.tourText;
@@ -125,7 +143,6 @@ function renderOverlay(state, court) {
     banner.style.display = 'none';
   }
 
-  // Визначення активного вигляду та масштабу
   let view = 'rankings';
   if (court) {
     view = (state.courtViews && state.courtViews[court]) ? state.courtViews[court] : 'rankings';
@@ -142,7 +159,6 @@ function renderOverlay(state, court) {
   const colors = state.colors || {};
   const screenColor = colors[view] || { team: '#fff', bg: '#050c1c', head: '#081830' };
 
-  // Рендеринг за типами екранів
   if (view === 'rankings') {
     renderRankingsView(state, container, sizes, screenColor);
   } else if (view === 'groups') {
@@ -228,7 +244,6 @@ function renderGroupsView(state, container, sizes, colors, court) {
       });
       html += `</table></div><br>`;
     } else {
-      // Класична таблиця груп із оновленими назвами шапки: Ігри, Виграші, Програш
       html += `<div style="font-family:'Bebas Neue',sans-serif; font-size:24px; color:var(--accent); margin-bottom:10px;">Група ${g.letter}</div>`;
       html += `<div class="table-box" style="background:${colors.bg}; margin-bottom:20px; font-size:${sizes.fontSize}px; font-family:${sizes.teamFont}">`;
       html += `<div class="tbl-head" style="grid-template-columns: 50px 1fr 70px 90px 90px 110px 80px; background:${colors.head}; padding:${sizes.tblPadY}px 15px;">
@@ -269,7 +284,7 @@ function renderScheduleView(state, container, sizes, colors) {
 
   rows.forEach(r => {
     if (r.isBreak) {
-      html += `<div class="tbl-row" style="grid-template-columns: 80px 1fr; padding:${sizes.tblPadY}px 15px; background:rgba(255,215,0,0.05);">
+      html += `<div class="tbl-row" style="grid-template-columns: 80px 1fr; padding:${sizes.tblPadY}px 15px; background:rgba(255,215,0,0.04);">
         <div style="text-align:center; font-weight:bold; color:var(--gold);">${r.time}</div>
         <div style="text-align:center; font-weight:bold; color:var(--gold); letter-spacing:2px;">${r.cells[0] || 'ПЕРЕРВА'}</div>
       </div>`;
@@ -310,15 +325,17 @@ function renderPlayoffView(state, container, sizes, colors, court, fullState) {
                     roundsCount === 2 ? ['Півфінал', 'Фінал'] : ['Фінал'];
 
   if (isLower && fullState.groups && fullState.groups.length === 4) {
-    roundLabels = ['1/8 (4 та 5 місця)', '1/4 (з 3 місцями)', 'Півфінал', 'Фінал'];
+    roundLabels = ['1/8 (4 та 5 місця)', '1/4 (з 3 місцями)', 'Півфінал', 'Фінал нижньої сітки'];
   }
 
   let html = `<div class="sec-header">${title}</div>`;
+  html += `<div class="bracket-layout">`;
   html += `<div class="bracket-grid" style="grid-template-columns: repeat(${roundsCount}, 1fr); font-size:${sizes.fontSize}px; font-family:${sizes.teamFont}">`;
 
   for (let ri = 0; ri < roundsCount; ri++) {
     const count = fmt / Math.pow(2, ri + 1);
-    html += `<div class="bracket-round"><div style="font-family:'Bebas Neue',sans-serif; font-size:20px; color:var(--accent); text-align:center; margin-bottom:8px;">${roundLabels[ri] || ('Раунд ' + (ri+1))}</div>`;
+    html += `<div class="bracket-round">`;
+    html += `<div class="round-title-box">${roundLabels[ri] || ('Раунд ' + (ri+1))}</div>`;
 
     for (let mi = 0; mi < count; mi++) {
       const key = `${ri}-${mi}`;
@@ -340,13 +357,14 @@ function renderPlayoffView(state, container, sizes, colors, court, fullState) {
     const tp = state.thirdPlaceMatch;
     const t1Win = tp.winner === 0 ? 'winner' : '';
     const t2Win = tp.winner === 1 ? 'winner' : '';
-    html += `<div style="margin-top:20px; background:${colors.bg}; border:1px solid var(--border); border-radius:10px; padding:12px; width:400px;">
-      <div style="font-family:'Bebas Neue',sans-serif; color:var(--accent); margin-bottom:6px;">Гра за 3-є місце</div>
+    html += `<div class="third-place-box" style="background:${colors.bg}">
+      <div class="third-place-title">Матч за третє місце</div>
       <div class="bracket-team ${t1Win}"><span style="color:${colors.team}">${tp.t1 || '—'}</span><span class="bracket-score">${tp.s1}</span></div>
       <div class="bracket-team ${t2Win}"><span style="color:${colors.team}">${tp.t2 || '—'}</span><span class="bracket-score">${tp.s2}</span></div>
     </div>`;
   }
 
+  html += `</div>`;
   container.innerHTML = html;
 }
 </script>
