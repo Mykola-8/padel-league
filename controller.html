@@ -538,7 +538,10 @@ function collectState() {
   state.rankings   = collectRankings();
   state.schedHeaders = collectSchedHeaders();
   state.schedRows  = collectSchedRows();
-  state.bracketFormat = parseInt(document.getElementById('p-format').value);
+  
+  const fmtVal = parseInt(document.getElementById('p-format').value);
+  state.bracketFormat = isNaN(fmtVal) ? 8 : fmtVal;
+
   state.bracketData   = collectBracket();
   state.thirdPlaceMatch = collectThirdPlace();
   state.champion   = document.getElementById('champion-inp').value;
@@ -859,7 +862,7 @@ function renderGroupEditor() {
     });
     matrixRows += `</div>`;
  
-    sec.innerHTML=`<div class="grp-section-title"><span style="font-size:28px;color:var(--accent)">${letter}</span>Група ${letter}</div><div style="display:grid;grid-template-columns:40px 1fr 40px 40px 40px 90px 50px;gap:5px;margin-bottom:4px;"><span style="font-size:10px;color:var(--muted);text-align:center">Місце</span><span style="font-size:10px;color:var(--muted)">Команда</span><span style="font-size:10px;color:var(--muted);text-align:center" title="Ігри">Ігри</span><span style="font-size:10px;color:var(--muted);text-align:center" title="Виграші">Виграші</span><span style="font-size:10px;color:var(--muted);text-align:center" title="Програші">Програш</span><span style="font-size:10px;color:var(--muted);text-align:center" title="М'ячі та різниця">Різн (МГ)</span><span style="font-size:10px;color:var(--muted);text-align:center" title="Очки">Очки</span></div>${rows}${matrixRows}`; 
+    sec.innerHTML=`<div class="grp-section-title"><span style="font-size:28px;color:var(--accent)">${letter}</span>Група ${letter}</div><div style="display:grid;grid-template-columns:40px 1fr 40px 40px 40px 90px 50px;gap:5px;margin-bottom:4px;"><span style="font-size:10px;color:var(--muted);text-align:center">Місце</span><span style="font-size:10px;color:var(--muted)">Команда</span><span style="font-size:10px;color:var(--muted);text-align:center" title="Ігри">Ігри</span><span style="font-size:10px;color:var(--muted);text-align:center" title="Виграші">Виграші</span><span style="font-size:10px;color:var(--muted);text-align:center" title="Програш">Програш</span><span style="font-size:10px;color:var(--muted);text-align:center" title="М'ячі та різниця">Різн (МГ)</span><span style="font-size:10px;color:var(--muted);text-align:center" title="Очки">Очки</span></div>${rows}${matrixRows}`; 
     wrap.appendChild(sec); 
   });
   
@@ -1009,7 +1012,7 @@ function getSortedGroupsForPlayoff() {
 }
  
 function autoSyncPlayoff() {
-  const fmt = parseInt(document.getElementById('p-format').value);
+  const fmt = parseInt(document.getElementById('p-format').value) || 8;
   const sortedGroups = getSortedGroupsForPlayoff();
   const getT = (gIdx, pos) => {
     if (!sortedGroups[gIdx] || !sortedGroups[gIdx].top[pos] || !sortedGroups[gIdx].top[pos].name) return `Група ${'ABCDEFGHIJ'[gIdx]||''} ${pos+1}`;
@@ -1060,23 +1063,14 @@ function autoSyncPlayoffLower() {
     return sortedGroups[gIdx].top[pos].name;
   };
 
-  // Перевірка: чи 4 групи по 5 команд (або загалом 4 групи)
   if (sortedGroups.length === 4) {
-    // Нижня сітка починається з 1/8 (4 матчі у 0-му раунді)
     const bData = (state.bracketDataLower && Object.keys(state.bracketDataLower).length) ? state.bracketDataLower : emptyBracketData(16);
     
-    // 0-й раунд (1/8): 4 матчі
-    // Матч 0-0: A4 vs D5
     if(bData['0-0']) { bData['0-0'].t1 = getT(0, 3); bData['0-0'].t2 = getT(3, 4); }
-    // Матч 0-1: B4 vs C5
     if(bData['0-1']) { bData['0-1'].t1 = getT(1, 3); bData['0-1'].t2 = getT(2, 4); }
-    // Матч 0-2: C4 vs B5
     if(bData['0-2']) { bData['0-2'].t1 = getT(2, 3); bData['0-2'].t2 = getT(1, 4); }
-    // Матч 0-3: D4 vs A5
     if(bData['0-3']) { bData['0-3'].t1 = getT(3, 3); bData['0-3'].t2 = getT(0, 4); }
 
-    // 1-й раунд (1/4): сюди автоматично переходять 3-ті місця (A3, B3, C3, D3)
-    // Матч 1-0: Переможець (0-0) проти A3 або Quarter Final Bye
     if(bData['1-0']) { bData['1-0'].t2 = getT(0, 2); bData['1-0'].t1 = 'Quarter Final Bye'; }
     if(bData['1-1']) { bData['1-1'].t2 = getT(1, 2); bData['1-1'].t1 = 'Quarter Final Bye'; }
     if(bData['1-2']) { bData['1-2'].t2 = getT(2, 2); bData['1-2'].t1 = 'Quarter Final Bye'; }
@@ -1084,8 +1078,8 @@ function autoSyncPlayoffLower() {
 
     state.bracketDataLower = bData;
   } else {
-    // Стандартна логіка для інших форматів
-    const fmt = parseInt(document.getElementById('p-format').value);
+    const fmtVal = parseInt(document.getElementById('p-format').value);
+    const fmt = isNaN(fmtVal) ? 8 : fmtVal;
     const bData = (state.bracketDataLower && Object.keys(state.bracketDataLower).length) ? state.bracketDataLower : emptyBracketData(fmt);
     if (fmt === 8) {
       if(bData['0-0']) { bData['0-0'].t1=getT(0,2); bData['0-0'].t2=getT(1,3); }
@@ -1101,7 +1095,8 @@ window.seedPlayoffLowerFromGroups = function() { if (!confirm('Ця дія пе�
 function emptyBracketData(fmt) { const data={}; for(let ri=0;ri<Math.log2(fmt);ri++){ const count=fmt/Math.pow(2,ri+1); for(let mi=0;mi<count;mi++){ data[`${ri}-${mi}`]={t1:'',t2:'',s1:'-',s2:'-',winner:-1}; } } return data; }
 
 function renderBracketEditor() { 
-  const fmt=parseInt(document.getElementById('p-format').value); 
+  const fmtVal = parseInt(document.getElementById('p-format').value);
+  const fmt = isNaN(fmtVal) ? 8 : fmtVal; 
   const data=state.bracketData&&Object.keys(state.bracketData).length?state.bracketData:emptyBracketData(fmt); 
   state.bracketData=data; 
   const wrap=document.getElementById('bracket-editor'); wrap.innerHTML=''; 
@@ -1122,7 +1117,9 @@ function renderBracketEditor() {
 }
 
 function collectBracket() { 
-  const fmt=parseInt(document.getElementById('p-format').value),data={}; 
+  const fmtVal = parseInt(document.getElementById('p-format').value);
+  const fmt = isNaN(fmtVal) ? 8 : fmtVal;
+  const data={}; 
   for(let ri=0;ri<Math.log2(fmt);ri++){ 
     const count=fmt/Math.pow(2,ri+1); 
     for(let mi=0;mi<count;mi++){ 
@@ -1155,7 +1152,8 @@ window.setWinner = function(ri,mi,teamIdx) {
   
   const winnerName = document.getElementById(`mt${teamIdx+1}-${ri}-${mi}`)?.value || data[key][teamIdx === 0 ? 't1' : 't2'];
   const loserName = document.getElementById(`mt${teamIdx===0?2:1}-${ri}-${mi}`)?.value || data[key][teamIdx === 0 ? 't2' : 't1'];
-  const numRounds = Math.log2(parseInt(document.getElementById('p-format').value));
+  const fmtVal = parseInt(document.getElementById('p-format').value);
+  const numRounds = Math.log2(isNaN(fmtVal) ? 8 : fmtVal);
   
   if (ri < numRounds - 1) {
     const nk=`${ri+1}-${Math.floor(mi/2)}`; 
@@ -1174,7 +1172,8 @@ window.setWinner = function(ri,mi,teamIdx) {
 };
 
 window.rebuildBracket = function() { 
-  const fmt=parseInt(document.getElementById('p-format').value); 
+  const fmtVal = parseInt(document.getElementById('p-format').value);
+  const fmt = isNaN(fmtVal) ? 8 : fmtVal; 
   state.bracketData=emptyBracketData(fmt); 
   state.thirdPlaceMatch = {t1:'',t2:'',s1:'-',s2:'-',winner:-1};
   renderBracketEditor(); 
@@ -1221,7 +1220,8 @@ window.setThirdWinner = function(teamIdx) {
 function renderBracketEditorLower() { 
   const sortedGroups = getSortedGroupsForPlayoff();
   const isFourGroups = sortedGroups.length === 4;
-  const lowerFmt = isFourGroups ? 16 : parseInt(document.getElementById('p-format').value);
+  const fmtVal = parseInt(document.getElementById('p-format').value);
+  const lowerFmt = isFourGroups ? 16 : (isNaN(fmtVal) ? 8 : fmtVal);
   const data = state.bracketDataLower && Object.keys(state.bracketDataLower).length ? state.bracketDataLower : emptyBracketData(lowerFmt); 
   state.bracketDataLower = data; 
   const wrap = document.getElementById('bracket-editor-lower'); if(!wrap) return; wrap.innerHTML=''; 
@@ -1253,7 +1253,8 @@ window.onLowerTeamChange = function(ri, mi, teamPos, val) {
 
 function collectBracketLower() { 
   const sortedGroups = getSortedGroupsForPlayoff();
-  const lowerFmt = sortedGroups.length === 4 ? 16 : parseInt(document.getElementById('p-format').value);
+  const fmtVal = parseInt(document.getElementById('p-format').value);
+  const lowerFmt = sortedGroups.length === 4 ? 16 : (isNaN(fmtVal) ? 8 : fmtVal);
   const data={}; 
   for(let ri=0; ri<Math.log2(lowerFmt); ri++){ 
     const count=lowerFmt/Math.pow(2,ri+1); 
@@ -1273,7 +1274,8 @@ function collectBracketLower() {
 
 window.setWinnerLower = function(ri,mi,teamIdx) { 
   const sortedGroups = getSortedGroupsForPlayoff();
-  const lowerFmt = sortedGroups.length === 4 ? 16 : parseInt(document.getElementById('p-format').value);
+  const fmtVal = parseInt(document.getElementById('p-format').value);
+  const lowerFmt = sortedGroups.length === 4 ? 16 : (isNaN(fmtVal) ? 8 : fmtVal);
   const data=state.bracketDataLower||{},key=`${ri}-${mi}`; 
   if(!data[key]) return; 
   data[key].winner=teamIdx; 
