@@ -1021,10 +1021,10 @@ function autoSyncPlayoff() {
   const bData = state.bracketData || {};
   
   if (fmt === 8 && sortedGroups.length === 4) {
-    if(bData['0-0']) { bData['0-0'].t1 = getT(0,0); bData['0-0'].t2 = getT(2,1); } // A1 vs C2
-    if(bData['0-1']) { bData['0-1'].t1 = getT(1,0); bData['0-1'].t2 = getT(3,1); } // B1 vs D2
-    if(bData['0-2']) { bData['0-2'].t1 = getT(2,0); bData['0-2'].t2 = getT(0,1); } // C1 vs A2
-    if(bData['0-3']) { bData['0-3'].t1 = getT(3,0); bData['0-3'].t2 = getT(1,1); } // D1 vs B2
+    if(bData['0-0']) { bData['0-0'].t1 = getT(0,0); bData['0-0'].t2 = getT(2,1); }
+    if(bData['0-1']) { bData['0-1'].t1 = getT(1,0); bData['0-1'].t2 = getT(3,1); }
+    if(bData['0-2']) { bData['0-2'].t1 = getT(2,0); bData['0-2'].t2 = getT(0,1); }
+    if(bData['0-3']) { bData['0-3'].t1 = getT(3,0); bData['0-3'].t2 = getT(1,1); }
   } else {
     if (fmt === 32) {
       let tIdx = 0;
