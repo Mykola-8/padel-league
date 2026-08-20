@@ -114,7 +114,13 @@ const courtParam = urlParams.get('court');
 
 onValue(stateRef, (snapshot) => {
   const state = snapshot.val();
-  if (state) renderOverlay(state, courtParam);
+  if (state) {
+    try {
+      renderOverlay(state, courtParam);
+    } catch (err) {
+      console.error("Render error:", err);
+    }
+  }
 });
 
 function renderOverlay(state, court) {
@@ -214,18 +220,18 @@ function renderGroupsView(state, container, sizes, colors, court) {
       html += `<div class="chess-grid-wrap" style="font-size:${sizes.fontSize}px; font-family:${sizes.teamFont}">`;
       html += `<table class="chess-table" style="background:${colors.bg}"><tr><th>Група ${g.letter}</th>`;
       
-      g.teams.forEach((t, tj) => {
+      (g.teams || []).forEach((t, tj) => {
         const colName = namesOnly ? (t.name || `К${tj+1}`) : String.fromCharCode(65 + tj);
         html += `<th>${colName}</th>`;
       });
       if (!namesOnly) html += `<th>І</th><th>В</th><th>П</th><th>Очки</th>`;
       html += `</tr>`;
 
-      g.teams.forEach((t, ti) => {
+      (g.teams || []).forEach((t, ti) => {
         const rowName = namesOnly ? (t.name || `К${ti+1}`) : (t.name || `Команда ${ti+1}`);
         html += `<tr><td class="team-name-cell" style="color:${colors.team}; font-weight:bold;">${rowName}</td>`;
         
-        g.teams.forEach((tjTeam, tj) => {
+        (g.teams || []).forEach((tjTeam, tj) => {
           if (ti === tj) {
             html += `<td class="x-cell">X</td>`;
           } else {
@@ -250,7 +256,7 @@ function renderGroupsView(state, container, sizes, colors, court) {
         <div style="text-align:center">#</div><div>Команда</div><div style="text-align:center">Ігри</div><div style="text-align:center">Виграші</div><div style="text-align:center">Програш</div><div style="text-align:center">Різн (МГ)</div><div style="text-align:right">Очки</div>
       </div>`;
 
-      g.teams.forEach((t, ti) => {
+      (g.teams || []).forEach((t, ti) => {
         html += `<div class="tbl-row" style="grid-template-columns: 50px 1fr 70px 90px 90px 110px 80px; padding:${sizes.tblPadY}px 15px; color:${colors.team}">
           <div style="text-align:center; font-weight:bold; color:var(--accent);">${ti + 1}</div>
           <div style="font-weight:600;">${t.name || '—'}</div>
@@ -286,7 +292,7 @@ function renderScheduleView(state, container, sizes, colors) {
     if (r.isBreak) {
       html += `<div class="tbl-row" style="grid-template-columns: 80px 1fr; padding:${sizes.tblPadY}px 15px; background:rgba(255,215,0,0.04);">
         <div style="text-align:center; font-weight:bold; color:var(--gold);">${r.time}</div>
-        <div style="text-align:center; font-weight:bold; color:var(--gold); letter-spacing:2px;">${r.cells[0] || 'ПЕРЕРВА'}</div>
+        <div style="text-align:center; font-weight:bold; color:var(--gold); letter-spacing:2px;">${(r.cells && r.cells[0]) || 'ПЕРЕРВА'}</div>
       </div>`;
     } else {
       let cellsHtml = '';
@@ -316,7 +322,7 @@ function renderPlayoffView(state, container, sizes, colors, court, fullState) {
   const title = isLower ? 'Плей-оф: Нижня сітка' : 'Плей-оф: Верхня сітка';
   
   let bracketData = isLower ? (state.bracketDataLower || {}) : (state.bracketData || {});
-  const fmt = isLower ? 16 : (state.bracketFormat || 8);
+  const fmt = isLower ? 16 : (parseInt(state.bracketFormat) || 8);
 
   const roundsCount = Math.log2(fmt);
   let roundLabels = roundsCount === 5 ? ['1/16', '1/8', '1/4', 'Півфінал', 'Фінал'] :
