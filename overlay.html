@@ -2,98 +2,197 @@
 <html lang="uk">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Padel Overlay</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700&family=Montserrat:wght@400;700&family=Oswald:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700&family=Montserrat:wght@500;700&family=Oswald:wght@400;600&display=swap" rel="stylesheet">
 <style>
 :root {
-  --accent:#00e5ff; --bg:rgba(4,8,15,0.92);
-  --card:rgba(10,22,40,0.88); --border:rgba(0,229,255,0.22);
-  --text:#fff; --muted:#5a7a94; --gold:#ffd700;
-  --green:#00c46a; --red:#ff4455;
+  --accent: #00e5ff; --accent2: #ff6b35;
+  --card-bg: rgba(5,12,28,0.88); --border: rgba(0,229,255,0.25);
+  --text: #ffffff; --muted: #6a8fa8; --gold: #ffd700;
+  --font-size: 15px; --scale: 1;
+  --team-font: 'Barlow Condensed', sans-serif;
+  
+  --tbl-width: 95%;
+  --tbl-pad-y: 9px;
+  --playoff-h: 38px;
 }
-*{box-sizing:border-box;margin:0;padding:0;}
-body{font-family:'Barlow Condensed',sans-serif;background:transparent;color:var(--text);overflow:hidden;width:1920px;height:1080px;position:relative;}
-
-.overlay-wrapper {
-  position: absolute; top: 0; left: 0; width: 1920px; height: 1080px;
-  padding: 40px; display: flex; flex-direction: column; justify-content: flex-start;
-  transform-origin: top left; transition: transform 0.2s ease;
+* { box-sizing:border-box; margin:0; padding:0; }
+html, body { width:100%; height:100%; background:transparent; overflow:hidden; font-family:'Barlow Condensed',sans-serif; color:var(--text); }
+ 
+#overlay-root { 
+  position:fixed; inset:0; transform-origin:center center; 
+  transform:scale(var(--scale)); pointer-events:none;
+  transition: opacity 0.5s ease-in-out; 
+  opacity: 1;
 }
-
-.tournament-banner {
-  position: absolute; top: 30px; left: 50%; transform: translateX(-50%);
-  background: linear-gradient(90deg, rgba(0,229,255,0.08), rgba(0,229,255,0.2), rgba(0,229,255,0.08));
-  border: 1px solid var(--accent); border-radius: 6px; padding: 8px 36px;
-  font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 3px; color: var(--accent);
-  box-shadow: 0 0 15px rgba(0,229,255,0.15); display: none; z-index: 10; text-transform: uppercase;
+ 
+.view { display:none !important; width:100%; height:100%; align-items:center; justify-content:center; flex-direction:column; }
+.view.active { display:flex !important; }
+#v-groups.active { display:grid !important; align-content:center; justify-content:center; } 
+#v-playoff.active { display:flex !important; flex-direction: column !important; align-items: center; justify-content: center; }
+ 
+.team-name-text { 
+  font-family: var(--team-font); font-weight: 600; letter-spacing: 0.5px; 
+  text-transform: uppercase; word-break: break-word; white-space: normal; line-height: 1.15;
 }
-
-.screen-container { width: 100%; height: 100%; display: flex; flex-direction: column; }
-.sec-header { font-family: 'Bebas Neue', sans-serif; font-size: 34px; letter-spacing: 2px; color: var(--accent); margin-bottom: 20px; text-transform: uppercase; text-shadow: 0 0 10px rgba(0,229,255,0.3); }
-
-/* Таблиці загальні */
-.table-box { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; backdrop-filter: blur(12px); width: 100%; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
-.tbl-head { display: grid; background: var(--card); border-bottom: 1px solid var(--border); font-size: 14px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
-.tbl-row { display: grid; border-bottom: 1px solid rgba(255,255,255,0.04); align-items: center; transition: background 0.2s; }
-.tbl-row:last-child { border-bottom: none; }
-
-/* Офіційна турнірна сітка плей-оф */
-.bracket-layout { display: flex; flex-direction: column; gap: 20px; width: 100%; height: 100%; }
-.bracket-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; width: 100%; align-items: center; }
-.bracket-round { display: flex; flex-direction: column; justify-content: space-around; gap: 14px; height: 100%; }
-
-.round-title-box {
-  background: var(--card); border: 1px solid var(--border); border-radius: 6px;
-  padding: 6px 12px; font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 1.5px;
-  color: var(--accent); text-align: center; margin-bottom: 4px; text-transform: uppercase;
-  backdrop-filter: blur(8px); box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+ 
+/* TOUR BANNER */
+.tour-banner-wrap {
+  position: absolute; top: 25px; left: 0; right: 0;
+  display: flex; justify-content: center; z-index: 50;
 }
-
-.bracket-match { 
-  background: var(--bg); border: 1px solid var(--border); border-radius: 8px; 
-  padding: 8px 10px; backdrop-filter: blur(12px); position: relative; 
-  box-shadow: 0 4px 16px rgba(0,0,0,0.35); display: flex; flex-direction: column; gap: 4px; 
+.tour-banner {
+  background: var(--rank-head, rgba(8,24,48,0.95)); border: 2px solid var(--accent);
+  color: var(--gold); font-family: 'Bebas Neue', sans-serif;
+  font-size: 34px; padding: 8px 30px; border-radius: 8px;
+  letter-spacing: 3px; text-transform: uppercase;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.6);
+  animation: slideIn .4s cubic-bezier(.22,.68,0,1.2);
 }
-.bracket-team { 
-  display: flex; justify-content: space-between; align-items: center; 
-  padding: 6px 8px; font-size: 15px; font-weight: 600; border-radius: 4px; 
-  background: rgba(255,255,255,0.02); height: 32px; overflow: hidden;
-}
-.bracket-team.winner { color: var(--accent); background: rgba(0,229,255,0.08); border-left: 3px solid var(--accent); }
-.bracket-score { font-family: 'Bebas Neue', sans-serif; font-size: 17px; color: var(--muted); min-width: 28px; text-align: right; }
-.bracket-team.winner .bracket-score { color: var(--accent); }
-
-/* Додатковий блок третього місця */
-.third-place-box {
-  margin-top: 15px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
-  padding: 10px 14px; width: 340px; backdrop-filter: blur(12px); box-shadow: 0 4px 16px rgba(0,0,0,0.35);
-}
-.third-place-title { font-family: 'Bebas Neue', sans-serif; font-size: 16px; color: var(--gold); letter-spacing: 1px; margin-bottom: 6px; text-transform: uppercase; }
-
-/* Шахова матриця груп */
-.chess-grid-wrap { display: flex; flex-direction: column; gap: 16px; width: 100%; }
-.chess-table { width: 100%; border-collapse: collapse; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
-.chess-table th, .chess-table td { border: 1px solid var(--border); padding: 10px; text-align: center; font-size: 15px; }
-.chess-table th { background: var(--card); color: var(--accent); font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 1px; }
-.chess-table td.team-name-cell { text-align: left; font-weight: bold; padding-left: 15px; }
-.chess-table td.x-cell { background: rgba(0,0,0,0.3); color: rgba(255,255,255,0.15); }
-
-.hidden-overlay { display: none !important; }
+ 
+/* RANKINGS */
+#v-rankings { padding:20px; }
+#v-rankings .team-name-text { color: var(--rank-team, #ffffff); }
+.rank-card { background:var(--rank-bg, var(--card-bg)); border:1px solid var(--border); border-radius:10px; overflow:hidden; min-width:520px; width: var(--tbl-width); max-width: 100vw; box-shadow:0 8px 40px rgba(0,0,0,0.7); animation:slideIn .4s cubic-bezier(.22,.68,0,1.2); }
+.rank-header { background:var(--rank-head, rgba(8,24,48,0.9)); padding:10px 18px; display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--accent); }
+.rank-header-title { font-family:'Bebas Neue',sans-serif; font-size:20px; letter-spacing:3px; }
+.rank-header-sub { font-size:11px; color:var(--muted); letter-spacing:1px; }
+.rank-table { width:100%; border-collapse:collapse; font-size:var(--font-size); }
+.rank-table th { background:var(--rank-head, rgba(0,0,0,0.5)); padding:7px 14px; font-size:10px; color:var(--muted); letter-spacing:1px; text-transform:uppercase; }
+.rank-table td { padding: var(--tbl-pad-y) 14px; border-bottom:1px solid rgba(255,255,255,0.05); }
+.rank-table tr:last-child td { border-bottom:none; }
+.seed-col { font-family:'Bebas Neue',sans-serif; font-size:22px; color:var(--accent); width:50px; }
+.pts-col { font-family:'Bebas Neue',sans-serif; font-size:18px; color:var(--accent2); text-align:right; }
+.grp-badge { display:inline-block; padding:2px 9px; border-radius:20px; font-size:11px; font-weight:700; letter-spacing:1px; background:rgba(0,229,255,0.12); color:var(--accent); border:1px solid rgba(0,229,255,0.3); }
+.rank-split-wrap { display:flex; gap:24px; align-items:flex-start; justify-content:center; width:var(--tbl-width); max-width:100vw; }
+.rank-card-split { min-width:0; width:auto; max-width:100%; flex:1 1 0; }
+.rank-split-wrap.animate-mode { justify-content:center; }
+.rank-split-wrap.animate-mode .rank-card-split { display:none; opacity:0; flex:1 1 100%; width:100%; transition:opacity .5s ease; }
+.rank-split-wrap.animate-mode .rank-card-split.anim-active { display:block; opacity:1; }
+ 
+/* GROUPS */
+#v-groups { padding: 90px 60px 50px 60px; width: var(--tbl-width); margin: 0 auto; height:100%; box-sizing: border-box; }
+#v-groups .team-name-text { color: var(--group-team, #ffffff); }
+.group-card { background:var(--group-bg, var(--card-bg)); border:1px solid var(--border); border-radius:8px; overflow:hidden; min-width:0; max-width: 100%; animation:slideIn .4s cubic-bezier(.22,.68,0,1.2); box-shadow:0 8px 40px rgba(0,0,0,0.7); font-size:var(--font-size); transition: all 0.3s ease; }
+.group-card-head { background:var(--group-head, rgba(8,24,48,0.9)); padding:8px 14px; display:flex; align-items:center; gap:10px; border-bottom:2px solid var(--accent); }
+.group-letter { font-family:'Bebas Neue',sans-serif; font-size:34px; line-height:1; color:var(--accent); }
+.group-title { font-size:13px; font-weight:700; }
+.group-sub { font-size:10px; color:var(--muted); }
+.g-table { width:100%; border-collapse:collapse; }
+.g-table th { background:var(--group-head, rgba(0,0,0,0.4)); padding:6px 10px; font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; text-align:center; }
+.g-table td { padding: var(--tbl-pad-y) 10px; border-bottom:1px solid rgba(255,255,255,0.05); text-align:center; }
+.g-table tr:last-child td { border-bottom:none; }
+.advance-star { color:var(--gold); }
+.pos-n { color:var(--muted); font-size:11px; margin-right:5px; }
+.name-col { text-align:left; max-width:180px; }
+.group-card.compact-teams .g-table td { padding: calc(var(--tbl-pad-y)/1.5) 8px; font-size:0.88em; }
+.group-card.compact-teams .g-table th { padding:4px 8px; font-size:9px; }
+.group-card.compact-teams .group-letter { font-size:26px; }
+.group-card.compact-teams .group-card-head { padding:6px 12px; }
+#v-groups.compact .group-card-head { padding:4px 10px; }
+#v-groups.compact .group-letter { font-size:24px; }
+#v-groups.compact .g-table td, #v-groups.compact .g-table th { padding: calc(var(--tbl-pad-y)/1.5) 8px; font-size:0.9em; }
+.chess-x { background: rgba(0,0,0,0.4) !important; border-radius: 4px; }
+.chess-val { font-family: 'Bebas Neue', sans-serif; font-size: 1.1em; color: var(--accent); letter-spacing: 0.5px; }
+ 
+/* SCHEDULE */
+#v-schedule { padding:24px; }
+#v-schedule td:not(.time-c) { color: var(--sched-team, #ffffff); }
+.sched-wrap { background:var(--sched-bg, var(--card-bg)); border:1px solid var(--border); border-radius:10px; overflow:hidden; min-width:700px; width: var(--tbl-width); max-width: 100vw; box-shadow:0 8px 40px rgba(0,0,0,0.7); animation:slideIn .4s cubic-bezier(.22,.68,0,1.2); font-size:var(--font-size); }
+.s-table { width:100%; border-collapse:collapse; }
+.s-table th { background:var(--sched-head, rgba(0,0,0,0.6)); padding:10px 14px; color:var(--accent); font-size:11px; text-transform:uppercase; letter-spacing:1px; }
+.s-table td { padding: var(--tbl-pad-y) 14px; border-bottom:1px solid rgba(255,255,255,0.06); word-break: break-word; }
+.s-table tr:last-child td { border-bottom:none; }
+.time-c { color:var(--accent); font-family:'Bebas Neue',sans-serif; font-size:22px; width:90px; }
+.break-r td { background:rgba(0,229,255,0.07); color:var(--accent) !important; font-style:italic; text-align:center; font-size:13px; }
+ 
+/* PLAYOFF */
+#v-playoff { padding: 30px 40px; }
+#v-playoff .team-name-text { color: var(--play-team, #ffffff); }
+.playoff-wrap { background: var(--play-bg, var(--card-bg)); border: 1px solid var(--border); border-radius: 12px; padding: 24px 30px; width: var(--tbl-width); max-width: 100vw; box-shadow: 0 8px 40px rgba(0,0,0,0.7); animation: slideIn .4s cubic-bezier(.22,.68,0,1.2); display: flex; flex-direction: column; }
+.playoff-top { display: flex; justify-content: center; align-items: center; border-bottom: 2px solid var(--accent); padding-bottom: 12px; margin-bottom: 20px; }
+.playoff-title { font-family: 'Bebas Neue', sans-serif; font-size: 32px; color: #ffffff; letter-spacing: 3px; text-transform: uppercase; margin: 0; text-align: center; }
+.bracket-headers { display: flex; gap: 35px; width: 100%; justify-content: center; margin-bottom: 15px; }
+.b-header { flex: 1; min-width: 230px; text-align: center; font-family: 'Bebas Neue', sans-serif; font-size: 18px; color: var(--accent); letter-spacing: 2px; background: var(--play-head, rgba(0,0,0,0.5)); padding: 8px 0; border-radius: 6px; text-transform: uppercase; border: 1px solid rgba(255,255,255,0.05); }
+.bracket-outer { display: flex; gap: 35px; align-items: stretch; justify-content: center; width: 100%; flex: 1; min-height: 400px; }
+.b-round { display: flex; flex-direction: column; justify-content: space-around; min-width: 230px; flex: 1; height: 100%; }
+.b-match { background: rgba(0, 0, 0, 0.4); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 0px; overflow: hidden; margin: 6px auto; width: 100%; max-width: 100%; box-shadow: 0 4px 20px rgba(0,0,0,0.5); transition: transform 0.2s; }
+.b-team { padding: 0 0 0 12px; height: var(--playoff-h); display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.08); }
+.b-team:last-child { border-bottom: none; }
+.b-team.winner { color: #fff; font-weight: 700; }
+.b-team.loser { color: var(--muted); }
+.b-score { display: flex; align-items: center; justify-content: center; min-width: 42px; height: 100%; background: #0091ea; color: #ffffff; font-family: 'Bebas Neue', sans-serif; font-size: 20px; font-weight: bold; }
+.b-match.final-match { border: 2px solid #ffd700; box-shadow: 0 0 25px rgba(255, 215, 0, 0.3); }
+.final-match-header { background: rgba(0, 0, 0, 0.5); color: #ffd700; font-family: 'Barlow Condensed', sans-serif; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-align: center; padding: 4px 0; border-bottom: 1px solid rgba(255, 215, 0, 0.2); text-transform: uppercase; }
+.champ-card { background: linear-gradient(135deg, rgba(255, 215, 0, 0.15), rgba(255, 140, 0, 0.1)); border: 2px solid #ffd700; padding: 12px; text-align: center; margin-top: 10px; }
+.champ-trophy { font-size: 28px; }
+.champ-lbl { font-family: 'Bebas Neue', sans-serif; font-size: 14px; letter-spacing: 2px; color: #ffd700; margin: 2px 0; }
+.champ-name { font-size: 15px; font-weight: 700; color: #fff; }
+ 
+/* LOADING */
+#loading { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; background:rgba(4,8,15,0.95); z-index:999; flex-direction:column; gap:14px; transition:opacity .5s; }
+.loader { width:40px; height:40px; border:3px solid rgba(0,229,255,0.2); border-top-color:var(--accent); border-radius:50%; animation:spin .8s linear infinite; }
+#loading-msg { font-family:'Bebas Neue',sans-serif; font-size:16px; letter-spacing:3px; color:var(--accent); }
+@keyframes spin { to { transform:rotate(360deg); } }
+@keyframes slideIn { from{opacity:0;transform:translateY(-14px)} to{opacity:1;transform:translateY(0)} }
 </style>
 </head>
 <body>
-
-<div class="tournament-banner" id="tournament-banner"></div>
-
-<div class="overlay-wrapper" id="overlay-wrapper">
-  <div class="screen-container" id="screen-container"></div>
+ 
+<div id="loading">
+  <div class="loader"></div>
+  <div id="loading-msg">ПІДКЛЮЧЕННЯ...</div>
 </div>
-
+ 
+<div id="overlay-root">
+  <div class="tour-banner-wrap" id="tour-banner-wrap" style="display:none;">
+    <div class="tour-banner" id="tour-banner-text">PADEL TOURNAMENT</div>
+  </div>
+ 
+  <div class="view active" id="v-rankings">
+    <div class="rank-card" id="rank-card-single">
+      <div class="rank-header">
+        <div class="rank-header-title" id="rank-title">ГРАВЦІ 🇺🇦</div>
+        <div class="rank-header-sub">Padel Tournament</div>
+      </div>
+      <table class="rank-table">
+        <thead><tr><th>SEED</th><th>КОМАНДА / ГРАВЦІ</th><th>ГРУПА</th><th style="text-align:right">РЕЙТИНГ</th></tr></thead>
+        <tbody id="rank-body"></tbody>
+      </table>
+    </div>
+    <div class="rank-split-wrap" id="rank-split-wrap" style="display:none;">
+      <div class="rank-card rank-card-split" id="rank-card-a">
+        <div class="rank-header"><div class="rank-header-title" id="rank-title-a"></div></div>
+        <table class="rank-table"><thead><tr><th>SEED</th><th>КОМАНДА / ГРАВЦІ</th><th style="text-align:right">РЕЙТИНГ</th></tr></thead><tbody id="rank-body-a"></tbody></table>
+      </div>
+      <div class="rank-card rank-card-split" id="rank-card-b">
+        <div class="rank-header"><div class="rank-header-title" id="rank-title-b"></div></div>
+        <table class="rank-table"><thead><tr><th>SEED</th><th>КОМАНДА / ГРАВЦІ</th><th style="text-align:right">РЕЙТИНГ</th></tr></thead><tbody id="rank-body-b"></tbody></table>
+      </div>
+    </div>
+  </div>
+  <div class="view" id="v-groups"></div>
+  <div class="view" id="v-schedule">
+    <div class="sched-wrap">
+      <table class="s-table">
+        <thead><tr id="sched-head"></tr></thead>
+        <tbody id="sched-body"></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="view" id="v-playoff">
+    <div class="playoff-wrap">
+      <div class="playoff-top"><div class="playoff-title" id="playoff-title">TOURNAMENT PLAYOFF</div></div>
+      <div class="bracket-headers" id="bracket-headers"></div>
+      <div class="bracket-outer" id="bracket-outer"></div>
+    </div>
+  </div>
+</div>
+ 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { initializeApp }  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js";
-
+ 
 const firebaseConfig = {
   apiKey: "AIzaSyCVB0z7m3nOdrjId9FQPmxqxDb8Y1fH7lw",
   authDomain: "overley-f58f8.firebaseapp.com",
@@ -104,268 +203,323 @@ const firebaseConfig = {
   appId: "1:414314418439:web:9653a4c38c1206dfbb75a2",
   measurementId: "G-R06MDEYGQ1"
 };
-
+ 
 const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
-const stateRef = ref(db, 'padel/state');
-
-const urlParams = new URLSearchParams(window.location.search);
-const courtParam = urlParams.get('court');
-
-onValue(stateRef, (snapshot) => {
-  const state = snapshot.val();
-  if (state) renderOverlay(state, courtParam);
+const db  = getDatabase(app);
+ 
+function hideLoading() {
+  const el = document.getElementById('loading');
+  if(el) { el.style.opacity = '0'; setTimeout(() => el.style.display = 'none', 500); }
+}
+ 
+const timeout = setTimeout(() => { hideLoading(); applyState(defaultState()); }, 5000);
+ 
+onValue(ref(db, 'padel/state'), (snap) => {
+  clearTimeout(timeout);
+  let state = snap.val();
+  hideLoading();
+  try { if (state) applyState(state); else applyState(defaultState()); } catch(e) { console.error(e); }
 });
-
-function renderOverlay(state, court) {
-  const wrapper = document.getElementById('overlay-wrapper');
-  const banner = document.getElementById('tournament-banner');
-  const container = document.getElementById('screen-container');
-
-  let isVis = true;
-  if (court) {
-    isVis = (state.courtVisibility && state.courtVisibility[court] !== undefined) ? state.courtVisibility[court] : true;
-  } else {
-    isVis = state.isVisible !== false;
+ 
+function defaultState() { return { isVisible: true, view: 'rankings', accent: '#00e5ff', bgOpacity: 0.88, sizes: { rankings:{scale:1,tblWidth:95,tblPadY:9,fontSize:15,teamFont:"'Barlow Condensed', sans-serif"}, groups:{scale:1,tblWidth:95,tblPadY:9,fontSize:15,teamFont:"'Barlow Condensed', sans-serif"}, schedule:{scale:1,tblWidth:95,tblPadY:9,fontSize:15,teamFont:"'Barlow Condensed', sans-serif"}, playoff:{scale:1,tblWidth:95,tblPadY:9,fontSize:15,teamFont:"'Barlow Condensed', sans-serif"} } }; }
+ 
+function hexToRgba(hex, opacity) {
+  if(!hex) return 'transparent'; if(hex.startsWith('rgba')) return hex;
+  let r = parseInt(hex.substring(1,3), 16) || 0; let g = parseInt(hex.substring(3,5), 16) || 0; let b = parseInt(hex.substring(5,7), 16) || 0;
+  return `rgba(${r},${g},${b},${opacity})`;
+}
+ 
+function applyState(s) {
+  // ПЕРЕВІРКА ПАРАМЕТРУ ?court=X ДЛЯ РОЗДІЛЕННЯ ЕКРАНІВ
+  const urlParams = new URLSearchParams(window.location.search);
+  const courtParam = urlParams.get('court');
+  const courtIdx = courtParam ? parseInt(courtParam) - 1 : null;
+ 
+  // 1. ВИДИМІСТЬ (Глобальна або для конкретного корту)
+  let isVis = s.isVisible !== false;
+  if (courtParam && s.courtVisibility && s.courtVisibility[courtParam] !== undefined) {
+      isVis = s.courtVisibility[courtParam] !== false;
   }
+  const rootEl = document.getElementById('overlay-root');
+  if (!isVis) { rootEl.style.opacity = '0'; } else { rootEl.style.opacity = '1'; }
+ 
+  // 2. АКТИВНИЙ ЕКРАН (Глобальний або для конкретного корту)
+  let safeView = s.view || 'rankings';
+  if (courtParam && s.courtViews && s.courtViews[courtParam]) {
+      safeView = s.courtViews[courtParam];
+  }
+  
+  // 3. АВТОМАТИЧНА ФІЛЬТРАЦІЯ ДАНИХ (Якщо це окремий корт)
+  if (courtIdx !== null) {
+      // Визначаємо visibleGroup: спочатку з courtVisibleGroup (вибраного в контролері),
+      // якщо не задано — за замовчуванням рівний індексу корту
+      const vgFromCtrl = (s.courtVisibleGroup && s.courtVisibleGroup[courtParam] !== undefined)
+          ? s.courtVisibleGroup[courtParam]
+          : courtIdx.toString();
+      s.visibleGroup = vgFromCtrl;
+ 
+      if (vgFromCtrl !== 'all') {
+          const groupIdx = parseInt(vgFromCtrl);
+          const targetGroup = 'ABCDEFGHIJ'[groupIdx] || 'A';
+          if (s.rankings) { s.rankings = s.rankings.filter(r => r.group === targetGroup); }
+      }
+      // Фільтрація розкладу — тільки стовпець цього корту
+      if (s.schedHeaders && s.schedRows) {
+          const targetCol = courtIdx;
+          const headerText = s.schedHeaders[courtIdx + 1] || `Корт ${courtParam}`;
+          s.schedHeaders = [s.schedHeaders[0], headerText];
+          s.schedRows = s.schedRows.map(r => {
+              if (r.isBreak) return r;
+              return { time: r.time, cells: [r.cells[targetCol] || '-'], isBreak: false };
+          });
+      }
+  }
+ 
+  // --- ВІЗУАЛЬНІ НАЛАШТУВАННЯ (окремо для кожного табло) ---
+  const root = document.documentElement.style;
+  const sizeDefaults = { scale:1, tblWidth:95, tblPadY:9, fontSize:15, teamFont:"'Barlow Condensed', sans-serif" };
+  const legacySize = { scale:s.scale, tblWidth:s.tblWidth, tblPadY:s.tblPadY, fontSize:s.fontSize, teamFont:s.teamFont };
+  const hasLegacy = Object.values(legacySize).some(v => v !== undefined);
+  const sizeProfile = (s.sizes && s.sizes[safeView]) ? s.sizes[safeView] : (hasLegacy ? Object.assign({}, sizeDefaults, Object.fromEntries(Object.entries(legacySize).filter(([k,v])=>v!==undefined))) : sizeDefaults);
+  root.setProperty('--scale', sizeProfile.scale != null ? sizeProfile.scale : 1);
+  root.setProperty('--font-size', (sizeProfile.fontSize != null ? sizeProfile.fontSize : 15)+'px');
+  root.setProperty('--accent', s.accent || '#00e5ff');
+  root.setProperty('--team-font', sizeProfile.teamFont || sizeDefaults.teamFont);
+  root.setProperty('--tbl-width', (sizeProfile.tblWidth != null ? sizeProfile.tblWidth : 95) + '%');
+  root.setProperty('--tbl-pad-y', (sizeProfile.tblPadY != null ? sizeProfile.tblPadY : 9) + 'px');
+  root.setProperty('--playoff-h', (20 + (sizeProfile.tblPadY != null ? sizeProfile.tblPadY : 9) * 2) + 'px');
+  
+  const bannerWrap = document.getElementById('tour-banner-wrap');
+  const bannerText = document.getElementById('tour-banner-text');
+  if (s.tourVisible && s.tourText) { bannerWrap.style.display = 'flex'; bannerText.textContent = s.tourText; } 
+  else { bannerWrap.style.display = 'none'; }
+ 
+  const op = s.bgOpacity || 0.88;
+  const defColors = { rankings:{team:'#fff',bg:'#050c1c',head:'#081830'}, groups:{team:'#fff',bg:'#050c1c',head:'#081830'}, schedule:{team:'#fff',bg:'#050c1c',head:'#000'}, playoff:{team:'#fff',bg:'#161a22',head:'#000'} };
+  const c = s.colors || defColors;
+ 
+  root.setProperty('--rank-team', c.rankings.team); root.setProperty('--rank-bg', hexToRgba(c.rankings.bg, op)); root.setProperty('--rank-head', hexToRgba(c.rankings.head, Math.min(1, op + 0.1)));
+  root.setProperty('--group-team', c.groups.team);  root.setProperty('--group-bg', hexToRgba(c.groups.bg, op));  root.setProperty('--group-head', hexToRgba(c.groups.head, Math.min(1, op + 0.1)));
+  root.setProperty('--sched-team', c.schedule.team); root.setProperty('--sched-bg', hexToRgba(c.schedule.bg, op)); root.setProperty('--sched-head', hexToRgba(c.schedule.head, Math.min(1, op + 0.1)));
+  root.setProperty('--play-team', c.playoff.team);  root.setProperty('--play-bg', hexToRgba(c.playoff.bg, op));  root.setProperty('--play-head', hexToRgba(c.playoff.head, Math.min(1, op + 0.1)));
+ 
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  const vEl = document.getElementById('v-' + safeView);
+  if (vEl) vEl.classList.add('active');
+ 
+  renderRankings(s); renderGroups(s); renderSchedule(s); renderPlayoff(s);
+}
+ 
+const RANK_SPLIT_THRESHOLD = 10;
+let rankAnimTimer = null;
+function stopRankAnimation() { if (rankAnimTimer) { clearInterval(rankAnimTimer); rankAnimTimer = null; } }
+function startRankAnimation() {
+  const cardA = document.getElementById('rank-card-a'), cardB = document.getElementById('rank-card-b');
+  if (!cardA || !cardB) return;
+  if (rankAnimTimer) return; // вже триває
+  let showingA = true;
+  cardA.classList.add('anim-active'); cardB.classList.remove('anim-active');
+  rankAnimTimer = setInterval(() => {
+    showingA = !showingA;
+    cardA.classList.toggle('anim-active', showingA);
+    cardB.classList.toggle('anim-active', !showingA);
+  }, 15000);
+}
 
-  if (!isVis) {
-    wrapper.classList.add('hidden-overlay');
-    banner.style.display = 'none';
+function renderRankings(s) {
+  const titleEl = document.getElementById('rank-title'); if(titleEl) titleEl.textContent = s.rankTitle || 'ГРАВЦІ 🇺🇦';
+  const rankings = s.rankings || [];
+  const singleCard = document.getElementById('rank-card-single');
+  const splitWrap = document.getElementById('rank-split-wrap');
+
+  if (rankings.length <= RANK_SPLIT_THRESHOLD) {
+    if (singleCard) singleCard.style.display = '';
+    if (splitWrap) splitWrap.style.display = 'none';
+    stopRankAnimation();
+    const tbody = document.getElementById('rank-body'); if(!tbody) return; tbody.innerHTML = '';
+    rankings.forEach(r => { const tr = document.createElement('tr'); tr.innerHTML = `<td class="seed-col">${r.seed || ''}</td><td class="team-name-text">${r.players || ''}</td><td><span class="grp-badge">${r.group || ''}</span></td><td class="pts-col">${r.pts || 0}</td>`; tbody.appendChild(tr); });
     return;
   }
-  wrapper.classList.remove('hidden-overlay');
 
-  if (state.tourVisible && state.tourText) {
-    banner.style.display = 'block';
-    banner.textContent = state.tourText;
+  // Команд більше 10 — розділяємо на два табла (без колонки "Група")
+  if (singleCard) singleCard.style.display = 'none';
+  if (splitWrap) splitWrap.style.display = 'flex';
+
+  const half = Math.ceil(rankings.length / 2);
+  const partA = rankings.slice(0, half);
+  const partB = rankings.slice(half);
+  const baseTitle = s.rankTitle || 'ГРАВЦІ 🇺🇦';
+  const titleA = document.getElementById('rank-title-a'); if (titleA) titleA.textContent = `${baseTitle} (1–${half})`;
+  const titleB = document.getElementById('rank-title-b'); if (titleB) titleB.textContent = `${baseTitle} (${half+1}–${rankings.length})`;
+
+  const fillBody = (suffix, list) => {
+    const tbody = document.getElementById('rank-body-' + suffix); if(!tbody) return; tbody.innerHTML = '';
+    list.forEach(r => { const tr = document.createElement('tr'); tr.innerHTML = `<td class="seed-col">${r.seed || ''}</td><td class="team-name-text">${r.players || ''}</td><td class="pts-col">${r.pts || 0}</td>`; tbody.appendChild(tr); });
+  };
+  fillBody('a', partA); fillBody('b', partB);
+
+  const mode = s.rankSplitMode || 'side';
+  if (mode === 'animate') {
+    splitWrap.classList.add('animate-mode');
+    startRankAnimation();
   } else {
-    banner.style.display = 'none';
-  }
-
-  let view = 'rankings';
-  if (court) {
-    view = (state.courtViews && state.courtViews[court]) ? state.courtViews[court] : 'rankings';
-  } else {
-    view = state.view || 'rankings';
-  }
-
-  const sizes = (state.sizes && state.sizes[view]) ? state.sizes[view] : { scale: 1, tblWidth: 95, tblPadY: 9, fontSize: 15, teamFont: "'Barlow Condensed', sans-serif" };
-  
-  wrapper.style.transform = `scale(${sizes.scale || 1})`;
-  container.style.width = `${sizes.tblWidth || 95}%`;
-  container.style.margin = '0 auto';
-
-  const colors = state.colors || {};
-  const screenColor = colors[view] || { team: '#fff', bg: '#050c1c', head: '#081830' };
-
-  if (view === 'rankings') {
-    renderRankingsView(state, container, sizes, screenColor);
-  } else if (view === 'groups') {
-    renderGroupsView(state, container, sizes, screenColor, court);
-  } else if (view === 'schedule') {
-    renderScheduleView(state, container, sizes, screenColor);
-  } else if (view === 'playoff') {
-    renderPlayoffView(state, container, sizes, screenColor, court, state);
+    splitWrap.classList.remove('animate-mode');
+    stopRankAnimation();
+    document.getElementById('rank-card-a')?.classList.remove('anim-active');
+    document.getElementById('rank-card-b')?.classList.remove('anim-active');
   }
 }
-
-function renderRankingsView(state, container, sizes, colors) {
-  const title = state.rankTitle || 'РЕЙТИНГ КОМАНД';
-  const rankings = state.rankings || [];
-  
-  let html = `<div class="sec-header">${title}</div>`;
-  html += `<div class="table-box" style="background:${colors.bg}; font-size:${sizes.fontSize}px; font-family:${sizes.teamFont}">`;
-  html += `<div class="tbl-head" style="grid-template-columns: 60px 1fr 100px 100px; background:${colors.head}; padding:${sizes.tblPadY}px 20px;">
-    <div style="text-align:center">#</div><div>Команда / Гравці</div><div style="text-align:center">Група</div><div style="text-align:right">Очки</div>
-  </div>`;
-
-  rankings.forEach((r, i) => {
-    html += `<div class="tbl-row" style="grid-template-columns: 60px 1fr 100px 100px; padding:${sizes.tblPadY}px 20px; color:${colors.team}">
-      <div style="text-align:center; font-weight:bold; color:var(--accent);">${r.seed || (i+1)}</div>
-      <div style="font-weight:600;">${r.players || '—'}</div>
-      <div style="text-align:center; font-weight:bold;">${r.group || '—'}</div>
-      <div style="text-align:right; font-weight:bold; color:var(--accent);">${r.pts || 0}</div>
-    </div>`;
+ 
+// Сортування команд: очки → різниця геймів → особиста зустріч → перемоги
+function sortTeamsLive(teams) {
+  const indexed = teams.map((t, ti) => ({ ...t, _ti: ti }));
+  return indexed.sort((a, b) => {
+    // 1. Очки
+    if ((b.pts||0) !== (a.pts||0)) return (b.pts||0) - (a.pts||0);
+    // 2. Різниця геймів
+    const parseDiff = t => {
+      const raw = (t.gd||'0:0').replace(/\s*\(.*\)/,'').split(':').map(Number);
+      return (raw[0]||0) - (raw[1]||0);
+    };
+    const da = parseDiff(a), db = parseDiff(b);
+    if (db !== da) return db - da;
+    // 3. Особиста зустріч
+    const scA = a.scores && a.scores[b._ti] ? a.scores[b._ti] : '';
+    if (scA && scA.includes(':')) {
+      const p = scA.split(':'); const pa = parseInt(p[0]), pb = parseInt(p[1]);
+      if (!isNaN(pa) && !isNaN(pb)) {
+        if (pa > pb) return -1;
+        if (pa < pb) return 1;
+      }
+    }
+    // 4. Перемоги
+    return (b.w||0) - (a.w||0);
   });
-  html += `</div>`;
-  container.innerHTML = html;
 }
-
-function renderGroupsView(state, container, sizes, colors, court) {
-  let visGroup = 'all';
-  if (court) {
-    visGroup = (state.courtVisibleGroup && state.courtVisibleGroup[court] !== undefined) ? state.courtVisibleGroup[court] : String(parseInt(court) - 1);
-  } else {
-    visGroup = state.visibleGroup || 'all';
-  }
-
-  const groups = state.groups || [];
-  const layout = state.groupLayout || 'classic';
-  const namesOnly = state.groupChessNamesOnly || false;
-
-  let html = `<div class="sec-header">Груповий етап</div>`;
-
-  groups.forEach((g, gi) => {
-    if (visGroup !== 'all' && String(gi) !== String(visGroup)) return;
-
-    if (layout === 'chess') {
-      html += `<div style="font-family:'Bebas Neue',sans-serif; font-size:24px; color:var(--accent); margin-bottom:10px;">Група ${g.letter}</div>`;
-      html += `<div class="chess-grid-wrap" style="font-size:${sizes.fontSize}px; font-family:${sizes.teamFont}">`;
-      html += `<table class="chess-table" style="background:${colors.bg}"><tr><th>Група ${g.letter}</th>`;
-      
-      g.teams.forEach((t, tj) => {
-        const colName = namesOnly ? (t.name || `К${tj+1}`) : String.fromCharCode(65 + tj);
-        html += `<th>${colName}</th>`;
-      });
-      if (!namesOnly) html += `<th>І</th><th>В</th><th>П</th><th>Очки</th>`;
-      html += `</tr>`;
-
-      g.teams.forEach((t, ti) => {
-        const rowName = namesOnly ? (t.name || `К${ti+1}`) : (t.name || `Команда ${ti+1}`);
-        html += `<tr><td class="team-name-cell" style="color:${colors.team}; font-weight:bold;">${rowName}</td>`;
-        
-        g.teams.forEach((tjTeam, tj) => {
-          if (ti === tj) {
-            html += `<td class="x-cell">X</td>`;
+ 
+function renderGroups(s) {
+  const view = document.getElementById('v-groups'); if(!view) return; view.innerHTML = '';
+  const gc = s.groupCount || 4; const tc = s.teamCount || 4; 
+  const vis = s.visibleGroup || 'all';
+  const isChess = (s.groupLayout === 'chess');
+ 
+  let cols = 2;
+  if (vis === 'all') { if(gc === 3) cols = 3; else if(gc === 4) cols = 2; else if(gc === 6) cols = 2; else if(gc >= 8) cols = 4; } 
+  else { cols = 1; }
+  
+  view.style.gridTemplateColumns = `repeat(${cols}, 1fr)`; 
+  view.style.gap = gc >= 6 ? '25px' : '45px';
+  if (gc >= 6 && vis === 'all') view.classList.add('compact'); else view.classList.remove('compact');
+ 
+  const safeGroups = s.groups || [];
+  safeGroups.forEach((grp, gi) => {
+    if(!grp) return;
+    if (vis !== 'all' && parseInt(vis) !== gi) return;
+    const letter = 'ABCDEFGHIJ'[gi] || String.fromCharCode(65+gi);
+    const card = document.createElement('div'); card.className = 'group-card' + (tc >= 5 ? ' compact-teams' : '');
+    if (vis !== 'all') { card.style.minWidth = '600px'; card.style.maxWidth = '90vw'; }
+ 
+    // Сортуємо команди перед рендером
+    const sortedTeams = sortTeamsLive(grp.teams || []);
+ 
+    let rows = '';
+    sortedTeams.forEach((team, pos) => {
+      if(!team) return;
+      if (isChess) {
+        let scoreCells = '';
+        for(let tj=0; tj<tc; tj++) {
+          if (team._ti === tj) {
+            scoreCells += `<td class="chess-x"></td>`;
           } else {
-            const sc = (t.scores && t.scores[tj]) ? t.scores[tj] : '';
-            html += `<td style="color:${colors.team}">${sc || '-'}</td>`;
+            const txt = (team.scores && team.scores[tj]) ? team.scores[tj] : '';
+            scoreCells += `<td class="chess-val">${txt}</td>`;
           }
-        });
-
-        if (!namesOnly) {
-          html += `<td style="color:${colors.team}">${t.p || 0}</td>`;
-          html += `<td style="color:${colors.team}">${t.w || 0}</td>`;
-          html += `<td style="color:${colors.team}">${t.l || 0}</td>`;
-          html += `<td style="font-weight:bold; color:var(--accent);">${t.pts || 0}</td>`;
         }
-        html += `</tr>`;
-      });
-      html += `</table></div><br>`;
+        rows += `<tr>
+          <td class="team-name-text name-col"><span class="pos-n">${pos+1}</span>${team.name || ''}</td>
+          ${scoreCells}
+          <td>${team.w||0}</td>
+          <td>${team.l||0}</td>
+          <td style="color:var(--accent2); font-weight:bold; font-size:1.1em;">${team.pts||0}</td>
+          <td>${pos<2?'<span class="advance-star">★</span>':''}</td>
+        </tr>`;
+      } else {
+        rows += `<tr><td class="team-name-text name-col"><span class="pos-n">${pos+1}</span>${team.name || ''}</td><td>${team.p||0}</td><td>${team.w||0}</td><td>${team.l||0}</td><td>${team.gd||'0:0'}</td><td style="color:var(--accent2); font-weight:bold; font-size:1.1em;">${team.pts||0}</td><td>${pos<2?'<span class="advance-star">★</span>':''}</td></tr>`;
+      }
+    });
+ 
+    let theadHTML = '';
+    if (isChess) {
+      let headCols = '';
+      for(let tj=0; tj<tc; tj++) headCols += `<th>${tj+1}</th>`;
+      theadHTML = `<tr><th>Команда</th>${headCols}<th>В</th><th>П</th><th>Очки</th><th></th></tr>`;
     } else {
-      html += `<div style="font-family:'Bebas Neue',sans-serif; font-size:24px; color:var(--accent); margin-bottom:10px;">Група ${g.letter}</div>`;
-      html += `<div class="table-box" style="background:${colors.bg}; margin-bottom:20px; font-size:${sizes.fontSize}px; font-family:${sizes.teamFont}">`;
-      html += `<div class="tbl-head" style="grid-template-columns: 50px 1fr 70px 90px 90px 110px 80px; background:${colors.head}; padding:${sizes.tblPadY}px 15px;">
-        <div style="text-align:center">#</div><div>Команда</div><div style="text-align:center">Ігри</div><div style="text-align:center">Виграші</div><div style="text-align:center">Програш</div><div style="text-align:center">Різн (МГ)</div><div style="text-align:right">Очки</div>
-      </div>`;
-
-      g.teams.forEach((t, ti) => {
-        html += `<div class="tbl-row" style="grid-template-columns: 50px 1fr 70px 90px 90px 110px 80px; padding:${sizes.tblPadY}px 15px; color:${colors.team}">
-          <div style="text-align:center; font-weight:bold; color:var(--accent);">${ti + 1}</div>
-          <div style="font-weight:600;">${t.name || '—'}</div>
-          <div style="text-align:center;">${t.p || 0}</div>
-          <div style="text-align:center; color:var(--green);">${t.w || 0}</div>
-          <div style="text-align:center; color:var(--red);">${t.l || 0}</div>
-          <div style="text-align:center;">${t.gd || '0:0'}</div>
-          <div style="text-align:right; font-weight:bold; color:var(--accent);">${t.pts || 0}</div>
-        </div>`;
-      });
-      html += `</div>`;
+      theadHTML = `<tr><th>Команда</th><th>І</th><th>В</th><th>П</th><th>МГ</th><th>Очки</th><th></th></tr>`;
     }
+ 
+    card.innerHTML = `<div class="group-card-head"><div class="group-letter">${letter}</div><div><div class="group-title">Група ${letter}</div><div class="group-sub">★ Top 2 → Плей-оф</div></div></div><table class="g-table"><thead>${theadHTML}</thead><tbody>${rows}</tbody></table>`;
+    view.appendChild(card);
   });
-
-  container.innerHTML = html;
 }
-
-function renderScheduleView(state, container, sizes, colors) {
-  const headers = state.schedHeaders || ['Час', 'Корт 1'];
-  const rows = state.schedRows || [];
-
-  let html = `<div class="sec-header">Розклад ігор</div>`;
-  html += `<div class="table-box" style="background:${colors.bg}; font-size:${sizes.fontSize}px; font-family:${sizes.teamFont}">`;
-  
-  const colTemplate = `80px repeat(${headers.length - 1}, 1fr)`;
-  html += `<div class="tbl-head" style="grid-template-columns: ${colTemplate}; background:${colors.head}; padding:${sizes.tblPadY}px 15px;">`;
-  headers.forEach((h, i) => {
-    html += `<div style="${i === 0 ? 'text-align:center' : 'text-align:center; font-weight:bold; color:var(--accent);'}">${h}</div>`;
+ 
+function renderSchedule(s) {
+  const thead = document.getElementById('sched-head'); if(!thead) return; thead.innerHTML = '';
+  const headers = s.schedHeaders || ['Час','Корт 1'];
+  headers.forEach(h => { const th = document.createElement('th'); th.textContent = h; thead.appendChild(th); });
+  const tbody = document.getElementById('sched-body'); if(!tbody) return; tbody.innerHTML = '';
+  const cols = headers.length;
+  (s.schedRows || []).forEach(row => {
+    if(!row) return; const tr = document.createElement('tr'); const cells = row.cells || []; 
+    if (row.isBreak) { tr.className = 'break-r'; tr.innerHTML = `<td class="time-c">${row.time || '--:--'}</td><td colspan="${cols-1}">${cells[0] || ''}</td>`; } 
+    else { let tds = ''; for(let i = 0; i < cols - 1; i++) tds += `<td>${cells[i] || ''}</td>`; tr.innerHTML = `<td class="time-c">${row.time || '--:--'}</td>` + tds; }
+    tbody.appendChild(tr);
   });
-  html += `</div>`;
-
-  rows.forEach(r => {
-    if (r.isBreak) {
-      html += `<div class="tbl-row" style="grid-template-columns: 80px 1fr; padding:${sizes.tblPadY}px 15px; background:rgba(255,215,0,0.04);">
-        <div style="text-align:center; font-weight:bold; color:var(--gold);">${r.time}</div>
-        <div style="text-align:center; font-weight:bold; color:var(--gold); letter-spacing:2px;">${r.cells[0] || 'ПЕРЕРВА'}</div>
-      </div>`;
-    } else {
-      let cellsHtml = '';
-      (r.cells || []).forEach(c => {
-        cellsHtml += `<div style="text-align:center; font-weight:600; color:${colors.team};">${c || '—'}</div>`;
-      });
-      html += `<div class="tbl-row" style="grid-template-columns: ${colTemplate}; padding:${sizes.tblPadY}px 15px;">
-        <div style="text-align:center; font-weight:bold; color:var(--accent);">${r.time}</div>
-        ${cellsHtml}
-      </div>`;
-    }
-  });
-
-  html += `</div>`;
-  container.innerHTML = html;
 }
-
-function renderPlayoffView(state, container, sizes, colors, court, fullState) {
-  let bView = 'upper';
-  if (court) {
-    bView = (state.courtBracketViews && state.courtBracketViews[court]) ? state.courtBracketViews[court] : 'upper';
-  } else {
-    bView = state.bracketView || 'upper';
+ 
+function renderPlayoff(s) {
+  const outer = document.getElementById('bracket-outer'); if(!outer) return; outer.innerHTML = '';
+  const headWrap = document.getElementById('bracket-headers'); if(headWrap) headWrap.innerHTML = '';
+  const fmt = s.bracketFormat || 4;
+ 
+  // Визначаємо, який блок плей-офу показувати: верхню чи нижню сітку (3-4 місця груп)
+  const urlParams2 = new URLSearchParams(window.location.search);
+  const courtParam2 = urlParams2.get('court');
+  let activeBracket = s.bracketView || 'upper';
+  if (courtParam2 && s.courtBracketViews && s.courtBracketViews[courtParam2]) {
+    activeBracket = s.courtBracketViews[courtParam2];
   }
-
-  const isLower = (bView === 'lower');
-  const title = isLower ? 'Плей-оф: Нижня сітка' : 'Плей-оф: Верхня сітка';
-  
-  let bracketData = isLower ? (state.bracketDataLower || {}) : (state.bracketData || {});
-  const fmt = isLower ? 16 : (state.bracketFormat || 8);
-
-  const roundsCount = Math.log2(fmt);
-  let roundLabels = roundsCount === 5 ? ['1/16', '1/8', '1/4', 'Півфінал', 'Фінал'] :
-                    roundsCount === 4 ? ['1/8', '1/4', 'Півфінал', 'Фінал'] :
-                    roundsCount === 3 ? ['1/4', 'Півфінал', 'Фінал'] :
-                    roundsCount === 2 ? ['Півфінал', 'Фінал'] : ['Фінал'];
-
-  if (isLower && fullState.groups && fullState.groups.length === 4) {
-    roundLabels = ['1/8 (4 та 5 місця)', '1/4 (з 3 місцями)', 'Півфінал', 'Фінал нижньої сітки'];
-  }
-
-  let html = `<div class="sec-header">${title}</div>`;
-  html += `<div class="bracket-layout">`;
-  html += `<div class="bracket-grid" style="grid-template-columns: repeat(${roundsCount}, 1fr); font-size:${sizes.fontSize}px; font-family:${sizes.teamFont}">`;
-
-  for (let ri = 0; ri < roundsCount; ri++) {
-    const count = fmt / Math.pow(2, ri + 1);
-    html += `<div class="bracket-round">`;
-    html += `<div class="round-title-box">${roundLabels[ri] || ('Раунд ' + (ri+1))}</div>`;
-
+  const isLower = activeBracket === 'lower';
+ 
+  const titleEl = document.getElementById('playoff-title'); if (titleEl) titleEl.textContent = isLower ? 'НИЖНЯ СІТКА' : 'TOURNAMENT PLAYOFF';
+  const data = isLower ? (s.bracketDataLower || {}) : (s.bracketData || {});
+  const champ = isLower ? s.championLower : s.champion;
+  const champLabel = isLower ? 'ПЕРЕМОЖЕЦЬ НИЖНЬОЇ СІТКИ' : 'ЧЕМПІОН';
+  const champIcon = isLower ? '🥈' : '🏆';
+  const labels = fmt===8 ? ['1/8 ФІНАЛУ','1/4 ФІНАЛУ','ПІВФІНАЛ','ФІНАЛ'] : fmt===4 ? ['1/4 ФІНАЛУ','ПІВФІНАЛ','ФІНАЛ'] : ['ПІВФІНАЛ','ФІНАЛ'];
+               
+  labels.forEach((label, ri) => {
+    const th = document.createElement('div'); th.className = 'b-header'; th.textContent = label; if (headWrap) headWrap.appendChild(th);
+    const rd = document.createElement('div'); rd.className = 'b-round';
+    const count = fmt / Math.pow(2, ri+1); const isFinalRound = (ri === labels.length - 1);
+    
     for (let mi = 0; mi < count; mi++) {
-      const key = `${ri}-${mi}`;
-      const m = bracketData[key] || { t1: '—', t2: '—', s1: '-', s2: '-', winner: -1 };
-
-      const t1Win = m.winner === 0 ? 'winner' : '';
-      const t2Win = m.winner === 1 ? 'winner' : '';
-
-      html += `<div class="bracket-match" style="background:${colors.bg}">
-        <div class="bracket-team ${t1Win}"><span style="color:${colors.team}">${m.t1 || '—'}</span><span class="bracket-score">${m.s1}</span></div>
-        <div class="bracket-team ${t2Win}"><span style="color:${colors.team}">${m.t2 || '—'}</span><span class="bracket-score">${m.s2}</span></div>
-      </div>`;
+      const m = data[`${ri}-${mi}`] || {t1:'—',t2:'—',s1:'-',s2:'-',winner:-1};
+      const mc = document.createElement('div'); 
+      if (isFinalRound) {
+        mc.className = 'b-match final-match';
+        mc.innerHTML = `<div class="final-match-header">FINAL MATCH</div><div class="b-team ${m.winner===0?'winner':m.winner===1?'loser':''}"><span class="team-name-text">${m.t1 || ''}</span><span class="b-score">${m.s1 || '0'}</span></div><div class="b-team ${m.winner===1?'winner':m.winner===0?'loser':''}"><span class="team-name-text">${m.t2 || ''}</span><span class="b-score">${m.s2 || '0'}</span></div>`;
+      } else {
+        mc.className = 'b-match';
+        mc.innerHTML = `<div class="b-team ${m.winner===0?'winner':m.winner===1?'loser':''}"><span class="team-name-text">${m.t1 || ''}</span><span class="b-score">${m.s1 || '0'}</span></div><div class="b-team ${m.winner===1?'winner':m.winner===0?'loser':''}"><span class="team-name-text">${m.t2 || ''}</span><span class="b-score">${m.s2 || '0'}</span></div>`;
+      }
+      rd.appendChild(mc);
     }
-    html += `</div>`;
-  }
-  html += `</div>`;
-
-  if (!isLower && state.thirdPlaceMatch && (state.thirdPlaceMatch.t1 || state.thirdPlaceMatch.t2)) {
-    const tp = state.thirdPlaceMatch;
-    const t1Win = tp.winner === 0 ? 'winner' : '';
-    const t2Win = tp.winner === 1 ? 'winner' : '';
-    html += `<div class="third-place-box" style="background:${colors.bg}">
-      <div class="third-place-title">Матч за третє місце</div>
-      <div class="bracket-team ${t1Win}"><span style="color:${colors.team}">${tp.t1 || '—'}</span><span class="bracket-score">${tp.s1}</span></div>
-      <div class="bracket-team ${t2Win}"><span style="color:${colors.team}">${tp.t2 || '—'}</span><span class="bracket-score">${tp.s2}</span></div>
-    </div>`;
-  }
-
-  html += `</div>`;
-  container.innerHTML = html;
+    if (isFinalRound && champ && champ !== '— — —') {
+      const cc = document.createElement('div'); cc.className = 'champ-card';
+      cc.innerHTML = `<div class="champ-trophy">${champIcon}</div><div class="champ-lbl">${champLabel}</div><div class="champ-name team-name-text">${champ}</div>`;
+      rd.appendChild(cc);
+    } outer.appendChild(rd);
+  });
 }
 </script>
 </body>
