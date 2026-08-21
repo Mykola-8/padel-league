@@ -38,7 +38,7 @@ body{font-family:'Barlow Condensed',sans-serif;background:transparent;color:var(
 .tbl-row { display: grid; border-bottom: 1px solid rgba(255,255,255,0.04); align-items: center; transition: background 0.2s; }
 .tbl-row:last-child { border-bottom: none; }
 
-/* Ідеальна сітка плей-оф без виходу за рамки */
+/* Сітка плей-оф */
 .bracket-layout { display: flex; flex-direction: column; gap: 12px; width: 100%; height: 100%; justify-content: center; }
 .bracket-grid { display: grid; gap: 16px; width: 100%; align-items: stretch; }
 .bracket-round { display: flex; flex-direction: column; justify-content: space-around; gap: 8px; height: 100%; }
@@ -319,17 +319,39 @@ function renderPlayoffView(state, container, sizes, colors, court, fullState) {
   }
 
   const isLower = (bView === 'lower');
-  const title = isLower ? 'Плей-оф: Нижня сітка' : 'Плей-оф: Верхня сітка';
-  
-  let bracketData = isLower ? (state.bracketDataLower || {}) : (state.bracketData || {});
   const fmt = isLower ? 16 : (parseInt(state.bracketFormat) || 8);
 
+  // ЯКЩО УВІМКНЕНО 1/16 (32 команди) — ПОКАЗУЄМО ТІЛЬКИ СПИСОК УСІХ 32 КОМАНД НА ЕКРАНІ
+  if (!isLower && fmt === 32) {
+    let teamsList = [];
+    const bData32 = state.bracketData || {};
+    // Збираємо команди з першого раунду (1/16)
+    for (let mi = 0; mi < 16; mi++) {
+      const match = bData32[`0-${mi}`];
+      teamsList.push(match ? (match.t1 || `Команда ${mi*2 + 1}`) : `Команда ${mi*2 + 1}`);
+      teamsList.push(match ? (match.t2 || `Команда ${mi*2 + 2}`) : `Команда ${mi*2 + 2}`);
+    }
+
+    let html = `<div class="sec-header">Учасники плей-оф: 1/16 фіналу (32 команди)</div>`;
+    html += `<div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; width:100%;">`;
+    
+    for (let i = 0; i < 32; i++) {
+      html += `<div style="background:${colors.bg}; border:1px solid var(--border); border-radius:6px; padding:8px 12px; display:flex; align-items:center; gap:10px; backdrop-filter:blur(10px); font-size:${sizes.fontSize}px; font-family:${sizes.teamFont}">
+        <span style="font-family:'Bebas Neue',sans-serif; color:var(--accent); font-size:16px; min-width:24px;">${i+1}</span>
+        <span style="font-weight:600; color:${colors.team}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${teamsList[i] || '—'}</span>
+      </div>`;
+    }
+    html += `</div>`;
+    container.innerHTML = html;
+    return;
+  }
+
+  // ДЛЯ ІНШИХ ФОРМАТІВ (1/8, 1/4 тощо) — ПОКАЗУЄМО ЗВИЧАЙНУ СІТКУ ПЛЕЙ-ОФ
+  const title = isLower ? 'Плей-оф: Нижня сітка' : 'Плей-оф: Верхня сітка';
+  let bracketData = isLower ? (state.bracketDataLower || {}) : (state.bracketData || {});
   const roundsCount = Math.log2(fmt);
-  
-  // Назви раундів із акцентом на перехід до центру (1/8)
-  let roundLabels = roundsCount === 5 ? ['1/16 (Старт)', '1/8 (До центру)', '1/4', 'Півфінал', 'Фінал'] :
-                    roundsCount === 4 ? ['1/8 (Старт)', '1/4', 'Півфінал', 'Фінал'] :
-                    roundsCount === 3 ? ['1/4 (Старт)', 'Півфінал', 'Фінал'] :
+  let roundLabels = roundsCount === 4 ? ['1/8', '1/4', 'Півфінал', 'Фінал'] :
+                    roundsCount === 3 ? ['1/4', 'Півфінал', 'Фінал'] :
                     roundsCount === 2 ? ['Півфінал', 'Фінал'] : ['Фінал'];
 
   if (isLower && fullState.groups && fullState.groups.length === 4) {
@@ -343,14 +365,7 @@ function renderPlayoffView(state, container, sizes, colors, court, fullState) {
   for (let ri = 0; ri < roundsCount; ri++) {
     const count = fmt / Math.pow(2, ri + 1);
     html += `<div class="bracket-round">`;
-    
-    // Спеціальний заголовок для центру, щоб усі розуміли перехід
-    let rLbl = roundLabels[ri] || ('Раунд ' + (ri+1));
-    if (roundsCount === 5 && ri === 1) {
-      rLbl = '1/8 (ПЕРЕХІД ДО ЦЕНТРУ)';
-    }
-    
-    html += `<div class="round-title-box">${rLbl}</div>`;
+    html += `<div class="round-title-box">${roundLabels[ri] || ('Раунд ' + (ri+1))}</div>`;
 
     for (let mi = 0; mi < count; mi++) {
       const key = `${ri}-${mi}`;
