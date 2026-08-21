@@ -8,68 +8,73 @@
 <style>
 :root {
   --accent:#00e5ff; --bg:rgba(4,8,15,0.92);
-  --card:rgba(10,22,40,0.88); --border:rgba(0,229,255,0.28);
+  --card:rgba(10,22,40,0.88); --border:rgba(0,229,255,0.22);
   --text:#fff; --muted:#5a7a94; --gold:#ffd700;
+  --green:#00c46a; --red:#ff4455;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Barlow Condensed',sans-serif;background:transparent;color:var(--text);overflow:hidden;width:1920px;height:1080px;position:relative;}
 
 .overlay-wrapper {
   position: absolute; top: 0; left: 0; width: 1920px; height: 1080px;
-  padding: 40px; display: flex; flex-direction: column;
+  padding: 30px 40px; display: flex; flex-direction: column; justify-content: flex-start;
+  transform-origin: top left; transition: transform 0.2s ease;
 }
 
-.bracket-tree {
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-  height: 100%;
-  gap: 30px;
+.tournament-banner {
+  position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
+  background: linear-gradient(90deg, rgba(0,229,255,0.08), rgba(0,229,255,0.2), rgba(0,229,255,0.08));
+  border: 1px solid var(--accent); border-radius: 6px; padding: 6px 32px;
+  font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 3px; color: var(--accent);
+  box-shadow: 0 0 15px rgba(0,229,255,0.15); display: none; z-index: 10; text-transform: uppercase;
 }
 
-.bracket-column {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-around;
-  flex: 1;
-  position: relative;
-}
+.screen-container { width: 100%; height: 100%; display: flex; flex-direction: column; }
+.sec-header { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 2px; color: var(--accent); margin-bottom: 15px; text-transform: uppercase; text-shadow: 0 0 10px rgba(0,229,255,0.3); }
 
-/* Відступи для каскадного ефекту */
-.bracket-column:nth-child(2) { margin-top: 60px; }
-.bracket-column:nth-child(3) { margin-top: 180px; }
+/* Сітка плей-оф */
+.bracket-layout { display: flex; flex-direction: column; gap: 12px; width: 100%; height: 100%; justify-content: center; }
+.bracket-grid { display: grid; gap: 16px; width: 100%; align-items: stretch; }
+.bracket-round { display: flex; flex-direction: column; justify-content: space-around; gap: 8px; height: 100%; }
 
 .round-title-box {
   background: var(--card); border: 1px solid var(--border); border-radius: 6px;
-  padding: 6px 10px; font-family: 'Bebas Neue', sans-serif; font-size: 15px; letter-spacing: 1.5px;
-  color: var(--accent); text-align: center; margin-bottom: 10px;
+  padding: 5px 8px; font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 1px;
+  color: var(--accent); text-align: center; margin-bottom: 2px; text-transform: uppercase;
+  backdrop-filter: blur(8px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
 .bracket-match { 
   background: var(--bg); border: 1px solid var(--border); border-radius: 6px; 
-  padding: 6px 8px; backdrop-filter: blur(10px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.4); display: flex; flex-direction: column; gap: 4px; 
-  margin-bottom: 20px;
+  padding: 6px 8px; backdrop-filter: blur(12px); position: relative; 
+  box-shadow: 0 4px 16px rgba(0,0,0,0.35); display: flex; flex-direction: column; gap: 3px; 
 }
-
 .bracket-team { 
   display: flex; justify-content: space-between; align-items: center; 
-  padding: 3px 6px; font-size: 14px; font-weight: 600; border-radius: 4px; 
-  background: rgba(255,255,255,0.03);
+  padding: 4px 6px; font-size: 13px; font-weight: 600; border-radius: 4px; 
+  background: rgba(255,255,255,0.02); height: 28px; overflow: hidden;
 }
-.bracket-team.winner { color: var(--accent); background: rgba(0,229,255,0.1); border-left: 3px solid var(--accent); }
-.bracket-score { font-family: 'Bebas Neue', sans-serif; font-size: 16px; color: var(--muted); }
+.bracket-team.winner { color: var(--accent); background: rgba(0,229,255,0.08); border-left: 3px solid var(--accent); }
+.bracket-score { font-family: 'Bebas Neue', sans-serif; font-size: 15px; color: var(--muted); min-width: 24px; text-align: right; }
 .bracket-team.winner .bracket-score { color: var(--accent); }
 
-.finals-column { display: flex; flex-direction: column; justify-content: center; gap: 40px; width: 300px; }
-.third-title { color: var(--gold); font-family: 'Bebas Neue', sans-serif; font-size: 16px; text-align: center; }
+/* Блок третього місця */
+.third-place-container { margin-top: 10px; display: flex; flex-direction: column; gap: 4px; width: 340px; }
+.third-place-box {
+  background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+  padding: 8px 12px; backdrop-filter: blur(12px); box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+}
+.third-place-title { font-family: 'Bebas Neue', sans-serif; font-size: 15px; color: var(--gold); letter-spacing: 1px; text-transform: uppercase; }
 
 .hidden-overlay { display: none !important; }
 </style>
 </head>
 <body>
+
+<div class="tournament-banner" id="tournament-banner"></div>
+
 <div class="overlay-wrapper" id="overlay-wrapper">
-  <div id="screen-container"></div>
+  <div class="screen-container" id="screen-container"></div>
 </div>
 
 <script type="module">
@@ -93,25 +98,29 @@ const stateRef = ref(db, 'padel/state');
 
 onValue(stateRef, (snapshot) => {
   const state = snapshot.val();
-  if (state) renderPlayoff(state);
+  if (state) renderPlayoffView(state);
 });
 
-function renderPlayoff(state) {
+function renderPlayoffView(state) {
   const container = document.getElementById('screen-container');
-  const isLower = (state.bracketView === 'lower');
-  const fmt = parseInt(state.bracketFormat) || 8;
+  const bView = state.bracketView || 'upper';
+  const isLower = (bView === 'lower');
+  const fmt = isLower ? 16 : (parseInt(state.bracketFormat) || 8);
   const bracketData = isLower ? (state.bracketDataLower || {}) : (state.bracketData || {});
-  
   const roundsCount = Math.log2(fmt);
-  let labels = roundsCount === 3 ? ['1/8', '1/4', 'ПІВФІНАЛ'] : ['1/4', 'ПІВФІНАЛ'];
+  
+  // ЗАГОЛОВКИ: тут ми прибрали "раунд 4", залишивши потрібну послідовність
+  let roundLabels = roundsCount === 4 ? ['1/8', '1/4', 'ПІВФІНАЛ', 'ФІНАЛ'] :
+                    roundsCount === 3 ? ['1/4', 'ПІВФІНАЛ', 'ФІНАЛ'] :
+                    roundsCount === 2 ? ['ПІВФІНАЛ', 'ФІНАЛ'] : ['ФІНАЛ'];
 
-  let html = `<div class="bracket-tree">`;
+  let html = `<div class="sec-header">${isLower ? 'Нижня сітка' : 'Верхня сітка'}</div>`;
+  html += `<div class="bracket-layout"><div class="bracket-grid" style="grid-template-columns: repeat(${roundsCount}, 1fr);">`;
 
   for (let ri = 0; ri < roundsCount; ri++) {
     const count = fmt / Math.pow(2, ri + 1);
-    html += `<div class="bracket-column">`;
-    html += `<div class="round-title-box">${labels[ri]}</div>`;
-
+    html += `<div class="bracket-round">`;
+    html += `<div class="round-title-box">${roundLabels[ri]}</div>`;
     for (let mi = 0; mi < count; mi++) {
       const m = bracketData[`${ri}-${mi}`] || { t1: '—', t2: '—', s1: '-', s2: '-', winner: -1 };
       html += `
@@ -122,28 +131,19 @@ function renderPlayoff(state) {
     }
     html += `</div>`;
   }
+  html += `</div>`;
 
-  // ФІНАЛ
-  const finalM = bracketData[`${roundsCount}-0`] || { t1: '—', t2: '—', s1: '-', s2: '-', winner: -1 };
-  html += `<div class="finals-column">
-    <div class="round-title-box">ФІНАЛ</div>
-    <div class="bracket-match">
-      <div class="bracket-team ${finalM.winner===0?'winner':''}">${finalM.t1}<span class="bracket-score">${finalM.s1}</span></div>
-      <div class="bracket-team ${finalM.winner===1?'winner':''}">${finalM.t2}<span class="bracket-score">${finalM.s2}</span></div>
-    </div>`;
-
-  if (!isLower) {
-    const tp = state.thirdPlaceMatch || {};
-    html += `<div class="third-block">
-      <div class="third-title">Гра за третє місце</div>
-      <div class="bracket-match">
+  if (!isLower && state.thirdPlaceMatch) {
+    const tp = state.thirdPlaceMatch;
+    html += `<div class="third-place-container">
+      <div class="third-place-title">Гра за третє місце</div>
+      <div class="third-place-box">
         <div class="bracket-team ${tp.winner===0?'winner':''}">${tp.t1||'—'}<span class="bracket-score">${tp.s1||'-'}</span></div>
         <div class="bracket-team ${tp.winner===1?'winner':''}">${tp.t2||'—'}<span class="bracket-score">${tp.s2||'-'}</span></div>
       </div>
     </div>`;
   }
-
-  html += `</div></div>`;
+  html += `</div>`;
   container.innerHTML = html;
 }
 </script>
