@@ -3,28 +3,24 @@
 <head>
 <meta charset="UTF-8">
 <title>Padel Overlay</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@300;400;600;700&display=swap" rel="stylesheet">
+<!-- Підключення шрифтів -->
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow+Condensed:wght@400;700&display=swap" rel="stylesheet">
 <style>
-:root { --accent:#00e5ff; --bg:rgba(4,8,15,0.92); --card:rgba(10,22,40,0.88); --border:rgba(0,229,255,0.22); --text:#fff; --gold:#ffd700; }
-body{font-family:'Barlow Condensed',sans-serif;background:transparent;color:var(--text);width:1920px;height:1080px;overflow:hidden;padding:40px;}
-
-.bracket-container { display: flex; gap: 20px; align-items: start; height: 100%; }
-.column { display: flex; flex-direction: column; gap: 15px; width: 300px; }
-.round-title { background: var(--card); border: 1px solid var(--border); padding: 5px; text-align: center; font-family: 'Bebas Neue'; color: var(--accent); }
-.match { background: var(--bg); border: 1px solid var(--border); padding: 5px; margin-bottom: 10px; }
-.team { display: flex; justify-content: space-between; padding: 3px; font-weight: 600; }
-.winner { color: var(--accent); border-left: 2px solid var(--accent); }
-.score { font-family: 'Bebas Neue'; }
-
-/* Спеціальний контейнер для фіналу та третього місця */
-.final-column { display: flex; flex-direction: column; gap: 20px; width: 300px; }
-.third-place-box { border: 1px solid var(--gold); padding: 5px; background: var(--bg); }
-.third-title { color: var(--gold); font-family: 'Bebas Neue'; text-align: center; margin-bottom: 5px; }
+  :root { --accent:#00e5ff; --bg:rgba(4,8,15,0.92); --text:#fff; }
+  body { font-family: 'Barlow Condensed', sans-serif; background: transparent; color: var(--text); overflow: hidden; width: 1920px; height: 1080px; }
+  
+  /* Контейнер оверлею */
+  .overlay-content { width: 1920px; height: 1080px; padding: 50px; }
+  
+  /* Стилі таблиць */
+  .table-main { width: 100%; background: var(--bg); border: 1px solid var(--accent); padding: 20px; border-radius: 10px; }
+  .title { font-family: 'Bebas Neue'; font-size: 48px; color: var(--accent); margin-bottom: 20px; text-transform: uppercase; }
+  .row { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #333; font-size: 24px; }
 </style>
 </head>
 <body>
 
-<div class="bracket-container" id="bracket"></div>
+<div class="overlay-content" id="overlay-root"></div>
 
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
@@ -35,50 +31,45 @@ const db = getDatabase(initializeApp({databaseURL: "https://overley-f58f8-defaul
 onValue(ref(db, 'padel/state'), (snapshot) => {
   const state = snapshot.val();
   if (!state) return;
-  const isLower = state.bracketView === 'lower';
-  const fmt = isLower ? 16 : (parseInt(state.bracketFormat) || 8);
-  const data = isLower ? (state.bracketDataLower || {}) : (state.bracketData || {});
-  const rounds = Math.log2(fmt);
-  const labels = ['1/8', '1/4', 'ПІВФІНАЛ'];
-
-  let html = '';
-  // Колонки раундів
-  for (let r = 0; r < rounds; r++) {
-    html += `<div class="column"><div class="round-title">${labels[r] || 'Раунд'}</div>`;
-    for (let m = 0; m < fmt / Math.pow(2, r + 1); m++) {
-      const match = data[`${r}-${m}`] || {t1:'—', t2:'—', s1:'-', s2:'-', winner:-1};
-      html += `<div class="match">
-        <div class="team ${match.winner===0?'winner':''}">${match.t1}<span class="score">${match.s1}</span></div>
-        <div class="team ${match.winner===1?'winner':''}">${match.t2}<span class="score">${match.s2}</span></div>
-      </div>`;
-    }
-    html += `</div>`;
-  }
-
-  // Фінал та 3-тє місце
-  const fm = data[`${rounds}-0`] || {t1:'—', t2:'—', s1:'-', s2:'-', winner:-1};
-  const tp = state.thirdPlaceMatch || {};
   
-  html += `<div class="final-column">
-    <div class="column">
-      <div class="round-title">ФІНАЛ</div>
-      <div class="match">
-        <div class="team ${fm.winner===0?'winner':''}">${fm.t1}<span class="score">${fm.s1}</span></div>
-        <div class="team ${fm.winner===1?'winner':''}">${fm.t2}<span class="score">${fm.s2}</span></div>
-      </div>
-    </div>`;
-
-  if (!isLower) {
-    html += `<div class="third-place-box">
-      <div class="third-title">Гра за третє місце</div>
-      <div class="team ${tp.winner===0?'winner':''}">${tp.t1||'—'}<span class="score">${tp.s1||'-'}</span></div>
-      <div class="team ${tp.winner===1?'winner':''}">${tp.t2||'—'}<span class="score">${tp.s2||'-'}</span></div>
-    </div>`;
-  }
+  const root = document.getElementById('overlay-root');
   
-  html += `</div>`;
-  document.getElementById('bracket').innerHTML = html;
+  // Перемикач режимів (view)
+  if (state.view === 'rankings') {
+    renderRankings(state, root);
+  } else if (state.view === 'groups') {
+    renderGroups(state, root);
+  } else if (state.view === 'playoff') {
+    // Тут залишиться ваш код сітки, який ми робили раніше
+    renderPlayoff(state, root);
+  }
 });
+
+function renderRankings(state, root) {
+  let html = `<div class="title">Рейтинг команд</div><div class="table-main">`;
+  (state.rankings || []).forEach((r, i) => {
+    html += `<div class="row"><div>${i+1}. ${r.players}</div><div>${r.pts} очок</div></div>`;
+  });
+  html += `</div>`;
+  root.innerHTML = html;
+}
+
+function renderGroups(state, root) {
+  let html = `<div class="title">Груповий етап</div><div class="table-main">`;
+  (state.groups || []).forEach(g => {
+    html += `<div>Група ${g.letter}</div>`;
+    (g.teams || []).forEach(t => {
+      html += `<div class="row"><div>${t.name}</div><div>${t.pts} очок</div></div>`;
+    });
+  });
+  html += `</div>`;
+  root.innerHTML = html;
+}
+
+function renderPlayoff(state, root) {
+  // Тут вставте той код сітки, який ми щойно налаштували (bracket-tree)
+  root.innerHTML = "ТУТ МАЄ БУТИ ВАША СІТКА";
+}
 </script>
 </body>
 </html>
