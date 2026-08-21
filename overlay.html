@@ -321,24 +321,23 @@ function renderPlayoffView(state, container, sizes, colors, court, fullState) {
   const isLower = (bView === 'lower');
   const fmt = isLower ? 16 : (parseInt(state.bracketFormat) || 8);
 
-  // ЯКЩО УВІМКНЕНО 1/16 (32 команди) — ПОКАЗУЄМО ТІЛЬКИ СПИСОК УСІХ 32 КОМАНД НА ЕКРАНІ
+  // ЯКЩО УВІМКНЕНО 1/16 (32 команди) — ПОКАЗУЄМО ПОПАРНО ХТО З КИМ ГРАЄ (16 матчів по парах)
   if (!isLower && fmt === 32) {
-    let teamsList = [];
     const bData32 = state.bracketData || {};
-    // Збираємо команди з першого раунду (1/16)
-    for (let mi = 0; mi < 16; mi++) {
-      const match = bData32[`0-${mi}`];
-      teamsList.push(match ? (match.t1 || `Команда ${mi*2 + 1}`) : `Команда ${mi*2 + 1}`);
-      teamsList.push(match ? (match.t2 || `Команда ${mi*2 + 2}`) : `Команда ${mi*2 + 2}`);
-    }
-
-    let html = `<div class="sec-header">Учасники плей-оф: 1/16 фіналу (32 команди)</div>`;
-    html += `<div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:10px; width:100%;">`;
+    let html = `<div class="sec-header">Плей-оф: 1/16 фіналу (Матчі по парах — 32 команди)</div>`;
     
-    for (let i = 0; i < 32; i++) {
-      html += `<div style="background:${colors.bg}; border:1px solid var(--border); border-radius:6px; padding:8px 12px; display:flex; align-items:center; gap:10px; backdrop-filter:blur(10px); font-size:${sizes.fontSize}px; font-family:${sizes.teamFont}">
-        <span style="font-family:'Bebas Neue',sans-serif; color:var(--accent); font-size:16px; min-width:24px;">${i+1}</span>
-        <span style="font-weight:600; color:${colors.team}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${teamsList[i] || '—'}</span>
+    // Робимо сітку в 4 колонки, в кожній по 4 матчі (пари)
+    html += `<div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:12px; width:100%;">`;
+    
+    for (let mi = 0; mi < 16; mi++) {
+      const match = bData32[`0-${mi}`] || { t1: `Команда ${mi*2 + 1}`, t2: `Команда ${mi*2 + 2}`, s1: '-', s2: '-', winner: -1 };
+      const t1Win = match.winner === 0 ? 'winner' : '';
+      const t2Win = match.winner === 1 ? 'winner' : '';
+
+      html += `<div class="bracket-match" style="background:${colors.bg}; margin-bottom:4px;">
+        <div style="font-family:'Bebas Neue',sans-serif; font-size:12px; color:var(--accent); margin-bottom:2px; letter-spacing:1px;">Матч 1.</div>
+        <div class="bracket-team ${t1Win}"><span style="color:${colors.team}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${match.t1 || '—'}</span><span class="bracket-score">${match.s1}</span></div>
+        <div class="bracket-team ${t2Win}" style="margin-top:2px;"><span style="color:${colors.team}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${match.t2 || '—'}</span><span class="bracket-score">${match.s2}</span></div>
       </div>`;
     }
     html += `</div>`;
