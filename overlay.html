@@ -32,7 +32,7 @@ body{font-family:'Barlow Condensed',sans-serif;background:transparent;color:var(
 .screen-container { width: 100%; height: 100%; display: flex; flex-direction: column; }
 .sec-header { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 2px; color: var(--accent); margin-bottom: 10px; text-transform: uppercase; text-shadow: 0 0 10px rgba(0,229,255,0.3); }
 
-/* Повноцінна сітка з усіма раундами */
+/* Повноцінна сітка з правильними написами */
 .bracket-tree {
   display: flex;
   justify-content: space-between;
@@ -364,6 +364,7 @@ function renderPlayoffView(state, container, sizes, colors, court, fullState) {
   let bracketData = isLower ? (state.bracketDataLower || {}) : (state.bracketData || {});
   
   const roundsCount = Math.log2(fmt);
+  // Точні назви раундів для кожного формату без згадок про «раунд 4»
   let roundLabels = roundsCount === 3 ? ['1/8', '1/4', 'ПІВФІНАЛ'] : 
                     roundsCount === 2 ? ['1/4', 'ПІВФІНАЛ'] : ['ПІВФІНАЛ'];
 
@@ -375,7 +376,7 @@ function renderPlayoffView(state, container, sizes, colors, court, fullState) {
   html += `<div style="position:relative; width:100%; height:100%; display:flex; flex-direction:column;">`;
   html += `<div class="bracket-tree" style="font-size:${sizes.fontSize}px; font-family:${sizes.teamFont}">`;
 
-  // Рендеримо всі послідовні колонки раундів (1/8 -> 1/4 -> Півфінал)
+  // Рендеримо всі послідовні колонки раундів
   for (let ri = 0; ri < roundsCount; ri++) {
     const count = fmt / Math.pow(2, ri + 1);
     html += `<div class="bracket-column">`;
@@ -396,7 +397,7 @@ function renderPlayoffView(state, container, sizes, colors, court, fullState) {
     html += `</div>`;
   }
 
-  // Права колонка: ФІНАЛ (та гра за третє місце тільки для верхньої сітки)
+  // Права колонка: ФІНАЛ
   const finalKey = `${roundsCount}-0`;
   const finalMatch = bracketData[finalKey] || { t1: '—', t2: '—', s1: '-', s2: '-', winner: -1 };
   const f1Win = finalMatch.winner === 0 ? 'winner' : '';
@@ -411,7 +412,7 @@ function renderPlayoffView(state, container, sizes, colors, court, fullState) {
       </div>
     </div>`;
 
-  // Додаємо блок «Гра за третє місце» тільки якщо це ВЕРХНЯ сітка (!isLower)
+  // Додаємо блок «Гра за третє місце» тільки у верхній сітці
   if (!isLower) {
     const tp = state.thirdPlaceMatch || {};
     const tp1Win = tp.winner === 0 ? 'winner' : '';
