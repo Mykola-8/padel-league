@@ -65,11 +65,12 @@ body{font-family:'Barlow Condensed',sans-serif;background:transparent;color:var(
 .bracket-team.winner .bracket-score { color: var(--accent); }
 
 /* Додатковий блок третього місця */
+.third-place-container { margin-top: 8px; display: flex; flex-direction: column; gap: 4px; }
 .third-place-box {
-  margin-top: 10px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+  background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
   padding: 8px 12px; width: 320px; backdrop-filter: blur(12px); box-shadow: 0 4px 16px rgba(0,0,0,0.35);
 }
-.third-place-title { font-family: 'Bebas Neue', sans-serif; font-size: 15px; color: var(--gold); letter-spacing: 1px; margin-bottom: 4px; text-transform: uppercase; }
+.third-place-title { font-family: 'Bebas Neue', sans-serif; font-size: 15px; color: var(--gold); letter-spacing: 1px; text-transform: uppercase; }
 
 /* Шахова матриця груп */
 .chess-grid-wrap { display: flex; flex-direction: column; gap: 16px; width: 100%; }
@@ -321,12 +322,9 @@ function renderPlayoffView(state, container, sizes, colors, court, fullState) {
   const isLower = (bView === 'lower');
   const fmt = isLower ? 16 : (parseInt(state.bracketFormat) || 8);
 
-  // ЯКЩО УВІМКНЕНО 1/16 (32 команди) — ПОКАЗУЄМО ПОПАРНО ХТО З КИМ ГРАЄ (16 матчів по парах)
   if (!isLower && fmt === 32) {
     const bData32 = state.bracketData || {};
     let html = `<div class="sec-header">Плей-оф: 1/16 фіналу (Матчі по парах — 32 команди)</div>`;
-    
-    // Робимо сітку в 4 колонки, в кожній по 4 матчі (пари)
     html += `<div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:12px; width:100%;">`;
     
     for (let mi = 0; mi < 16; mi++) {
@@ -335,7 +333,7 @@ function renderPlayoffView(state, container, sizes, colors, court, fullState) {
       const t2Win = match.winner === 1 ? 'winner' : '';
 
       html += `<div class="bracket-match" style="background:${colors.bg}; margin-bottom:4px;">
-        <div style="font-family:'Bebas Neue',sans-serif; font-size:12px; color:var(--accent); margin-bottom:2px; letter-spacing:1px;">Матч 1.</div>
+        <div style="font-family:'Bebas Neue',sans-serif; font-size:12px; color:var(--accent); margin-bottom:2px; letter-spacing:1px;">Матч ${mi+1}</div>
         <div class="bracket-team ${t1Win}"><span style="color:${colors.team}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${match.t1 || '—'}</span><span class="bracket-score">${match.s1}</span></div>
         <div class="bracket-team ${t2Win}" style="margin-top:2px;"><span style="color:${colors.team}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${match.t2 || '—'}</span><span class="bracket-score">${match.s2}</span></div>
       </div>`;
@@ -345,7 +343,6 @@ function renderPlayoffView(state, container, sizes, colors, court, fullState) {
     return;
   }
 
-  // ДЛЯ ІНШИХ ФОРМАТІВ (1/8, 1/4 тощо) — ПОКАЗУЄМО ЗВИЧАЙНУ СІТКУ ПЛЕЙ-ОФ
   const title = isLower ? 'Плей-оф: Нижня сітка' : 'Плей-оф: Верхня сітка';
   let bracketData = isLower ? (state.bracketDataLower || {}) : (state.bracketData || {});
   const roundsCount = Math.log2(fmt);
@@ -386,10 +383,12 @@ function renderPlayoffView(state, container, sizes, colors, court, fullState) {
     const tp = state.thirdPlaceMatch;
     const t1Win = tp.winner === 0 ? 'winner' : '';
     const t2Win = tp.winner === 1 ? 'winner' : '';
-    html += `<div class="third-place-box" style="background:${colors.bg}">
-      <div class="third-place-title">Матч за третє місце</div>
-      <div class="bracket-team ${t1Win}"><span style="color:${colors.team}">${tp.t1 || '—'}</span><span class="bracket-score">${tp.s1}</span></div>
-      <div class="bracket-team ${t2Win}"><span style="color:${colors.team}">${tp.t2 || '—'}</span><span class="bracket-score">${tp.s2}</span></div>
+    html += `<div class="third-place-container">
+      <div class="third-place-title">Гра за третє місце</div>
+      <div class="third-place-box" style="background:${colors.bg}">
+        <div class="bracket-team ${t1Win}"><span style="color:${colors.team}">${tp.t1 || '—'}</span><span class="bracket-score">${tp.s1}</span></div>
+        <div class="bracket-team ${t2Win}"><span style="color:${colors.team}">${tp.t2 || '—'}</span><span class="bracket-score">${tp.s2}</span></div>
+      </div>
     </div>`;
   }
 
