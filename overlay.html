@@ -32,12 +32,6 @@ body{font-family:'Barlow Condensed',sans-serif;background:transparent;color:var(
 .screen-container { width: 100%; height: 100%; display: flex; flex-direction: column; }
 .sec-header { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 2px; color: var(--accent); margin-bottom: 15px; text-transform: uppercase; text-shadow: 0 0 10px rgba(0,229,255,0.3); }
 
-/* Таблиці загальні */
-.table-box { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; backdrop-filter: blur(12px); width: 100%; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
-.tbl-head { display: grid; background: var(--card); border-bottom: 1px solid var(--border); font-size: 14px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
-.tbl-row { display: grid; border-bottom: 1px solid rgba(255,255,255,0.04); align-items: center; transition: background 0.2s; }
-.tbl-row:last-child { border-bottom: none; }
-
 /* Сітка плей-оф */
 .bracket-layout { display: flex; flex-direction: column; gap: 12px; width: 100%; height: 100%; justify-content: center; }
 .bracket-grid { display: grid; gap: 16px; width: 100%; align-items: stretch; }
@@ -65,20 +59,12 @@ body{font-family:'Barlow Condensed',sans-serif;background:transparent;color:var(
 .bracket-team.winner .bracket-score { color: var(--accent); }
 
 /* Додатковий блок третього місця */
-.third-place-container { margin-top: 8px; display: flex; flex-direction: column; gap: 4px; }
+.third-place-container { margin-top: 10px; display: flex; flex-direction: column; gap: 4px; width: 340px; }
 .third-place-box {
   background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
-  padding: 8px 12px; width: 320px; backdrop-filter: blur(12px); box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+  padding: 8px 12px; backdrop-filter: blur(12px); box-shadow: 0 4px 16px rgba(0,0,0,0.35);
 }
 .third-place-title { font-family: 'Bebas Neue', sans-serif; font-size: 15px; color: var(--gold); letter-spacing: 1px; text-transform: uppercase; }
-
-/* Шахова матриця груп */
-.chess-grid-wrap { display: flex; flex-direction: column; gap: 16px; width: 100%; }
-.chess-table { width: 100%; border-collapse: collapse; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
-.chess-table th, .chess-table td { border: 1px solid var(--border); padding: 10px; text-align: center; font-size: 15px; }
-.chess-table th { background: var(--card); color: var(--accent); font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 1px; }
-.chess-table td.team-name-cell { text-align: left; font-weight: bold; padding-left: 15px; }
-.chess-table td.x-cell { background: rgba(0,0,0,0.3); color: rgba(255,255,255,0.15); }
 
 .hidden-overlay { display: none !important; }
 </style>
@@ -379,10 +365,11 @@ function renderPlayoffView(state, container, sizes, colors, court, fullState) {
   }
   html += `</div>`;
 
-  if (!isLower && state.thirdPlaceMatch && (state.thirdPlaceMatch.t1 || state.thirdPlaceMatch.t2)) {
-    const tp = state.thirdPlaceMatch;
+  if (!isLower) {
+    const tp = state.thirdPlaceMatch || {};
     const t1Win = tp.winner === 0 ? 'winner' : '';
     const t2Win = tp.winner === 1 ? 'winner' : '';
+    
     html += `<div class="third-place-container">
       <div class="third-place-title">Гра за третє місце</div>
       <div class="third-place-box" style="background:${colors.bg}">
