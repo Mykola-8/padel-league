@@ -64,7 +64,7 @@ body{font-family:'Barlow Condensed',sans-serif;background:transparent;color:var(
 .bracket-score { font-family: 'Bebas Neue', sans-serif; font-size: 17px; color: var(--muted); min-width: 28px; text-align: right; }
 .bracket-team.winner .bracket-score { color: var(--accent); }
 
-/* Додатковий блок третього місця під фіналом */
+/* Блок третього місця під фіналом */
 .third-place-box {
   background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
   padding: 8px 10px; backdrop-filter: blur(12px); box-shadow: 0 4px 16px rgba(0,0,0,0.35);
@@ -342,7 +342,6 @@ function renderPlayoffView(state, container, sizes, colors, court, fullState) {
     const count = fmt / Math.pow(2, ri + 1);
     html += `<div class="bracket-round">`;
     
-    // Перевіряємо чи це остання колонка (Фінал), щоб під нею розмістити матч за 3-тє місце у верхній сітці
     const isFinalRound = (ri === roundsCount - 1);
     html += `<div class="round-title-box">${roundLabels[ri] || ('Раунд ' + (ri+1))}</div>`;
 
@@ -359,7 +358,6 @@ function renderPlayoffView(state, container, sizes, colors, court, fullState) {
       </div>`;
     }
 
-    // Якщо це колонка фіналу і це верхня сітка — додаємо матч за третє місце безпосередньо під фіналом у цій же колонці
     if (isFinalRound && !isLower && state.thirdPlaceMatch && (state.thirdPlaceMatch.t1 || state.thirdPlaceMatch.t2)) {
       const tp = state.thirdPlaceMatch;
       const tp1Win = tp.winner === 0 ? 'winner' : '';
