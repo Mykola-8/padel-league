@@ -32,14 +32,14 @@ body{font-family:'Barlow Condensed',sans-serif;background:transparent;color:var(
 .screen-container { width: 100%; height: 100%; display: flex; flex-direction: column; }
 .sec-header { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 2px; color: var(--accent); margin-bottom: 10px; text-transform: uppercase; text-shadow: 0 0 10px rgba(0,229,255,0.3); }
 
-/* Чиста послідовна сітка без ліній */
+/* Класична сітка з півфіналом без ліній */
 .bracket-tree {
   display: flex;
   justify-content: space-between;
   align-items: stretch;
   width: 100%;
   flex-grow: 1;
-  gap: 25px;
+  gap: 20px;
   position: relative;
 }
 
@@ -53,33 +53,33 @@ body{font-family:'Barlow Condensed',sans-serif;background:transparent;color:var(
 
 .round-title-box {
   background: var(--card); border: 1px solid var(--border); border-radius: 6px;
-  padding: 6px 10px; font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 1.5px;
-  color: var(--accent); text-align: center; margin-bottom: 8px; text-transform: uppercase;
+  padding: 5px 8px; font-family: 'Bebas Neue', sans-serif; font-size: 15px; letter-spacing: 1.5px;
+  color: var(--accent); text-align: center; margin-bottom: 6px; text-transform: uppercase;
   backdrop-filter: blur(8px); box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
 .bracket-match { 
   background: var(--bg); border: 1px solid var(--border); border-radius: 6px; 
-  padding: 6px 8px; backdrop-filter: blur(12px); position: relative; 
-  box-shadow: 0 4px 16px rgba(0,0,0,0.35); display: flex; flex-direction: column; gap: 3px; 
+  padding: 5px 7px; backdrop-filter: blur(12px); position: relative; 
+  box-shadow: 0 4px 16px rgba(0,0,0,0.35); display: flex; flex-direction: column; gap: 2px; 
   width: 100%;
 }
 
 .bracket-team { 
   display: flex; justify-content: space-between; align-items: center; 
-  padding: 4px 6px; font-size: 13px; font-weight: 600; border-radius: 4px; 
-  background: rgba(255,255,255,0.02); height: 28px; overflow: hidden;
+  padding: 3px 6px; font-size: 13px; font-weight: 600; border-radius: 4px; 
+  background: rgba(255,255,255,0.02); height: 26px; overflow: hidden;
 }
 .bracket-team.winner { color: var(--accent); background: rgba(0,229,255,0.08); border-left: 3px solid var(--accent); }
-.bracket-score { font-family: 'Bebas Neue', sans-serif; font-size: 15px; color: var(--muted); min-width: 22px; text-align: right; }
+.bracket-score { font-family: 'Bebas Neue', sans-serif; font-size: 14px; color: var(--muted); min-width: 20px; text-align: right; }
 .bracket-team.winner .bracket-score { color: var(--accent); }
 
-/* Права колонка для фіналу та третього місця з правильними відступами */
+/* Права колонка для фіналу та третього місця */
 .finals-column {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 35px;
+  gap: 30px;
   flex: 1;
   height: 100%;
 }
@@ -92,7 +92,7 @@ body{font-family:'Barlow Condensed',sans-serif;background:transparent;color:var(
 
 .third-title {
   background: var(--card); border: 1px solid var(--gold); border-radius: 6px;
-  padding: 6px 10px; font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 1.5px;
+  padding: 5px 8px; font-family: 'Bebas Neue', sans-serif; font-size: 15px; letter-spacing: 1.5px;
   color: var(--gold); text-align: center; text-transform: uppercase;
   backdrop-filter: blur(8px); box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
@@ -363,16 +363,15 @@ function renderPlayoffView(state, container, sizes, colors, court, fullState) {
   const title = isLower ? 'Плей-оф: Нижня сітка' : 'Плей-оф: Верхня сітка';
   let bracketData = isLower ? (state.bracketDataLower || {}) : (state.bracketData || {});
   
-  // Обмежуємо кількість раундів до 2 (1/8 та 1/4 або 1/4 та півфінал), прибираючи зайві
-  const roundsCount = Math.min(Math.log2(fmt), 2);
-  let roundLabels = roundsCount === 2 ? ['1/8', '1/4'] : ['1/4'];
-  if (fmt === 8) roundLabels = ['1/4', 'ПІВФІНАЛ'];
+  // Встановлюємо 3 раунди: 1/4 (або 1/8), Півфінал
+  const roundsCount = 2; // Колонка 0 (1/4 або 1/8) та Колонка 1 (Півфінал)
+  let roundLabels = fmt === 8 ? ['1/4', 'ПІВФІНАЛ'] : ['1/8', '1/4'];
 
   let html = `<div class="sec-header">${title}</div>`;
   html += `<div style="position:relative; width:100%; height:100%; display:flex; flex-direction:column;">`;
   html += `<div class="bracket-tree" style="font-size:${sizes.fontSize}px; font-family:${sizes.teamFont}">`;
 
-  // Рендеримо основні колонки раундів
+  // Рендеримо колонки раундів (наприклад, 1/4 та Півфінал)
   for (let ri = 0; ri < roundsCount; ri++) {
     const count = fmt / Math.pow(2, ri + 1);
     html += `<div class="bracket-column">`;
@@ -394,7 +393,7 @@ function renderPlayoffView(state, container, sizes, colors, court, fullState) {
   }
 
   // Права колонка: ФІНАЛ та ГРА ЗА ТРЕТЄ МІСЦЕ
-  const finalKey = `${roundsCount}-${0}`;
+  const finalKey = `2-0`; // Індекс фіналу в структурі даних
   const finalMatch = bracketData[finalKey] || { t1: '—', t2: '—', s1: '-', s2: '-', winner: -1 };
   const f1Win = finalMatch.winner === 0 ? 'winner' : '';
   const f2Win = finalMatch.winner === 1 ? 'winner' : '';
