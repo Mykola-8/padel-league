@@ -10,37 +10,21 @@
   --accent:#00e5ff; --bg:rgba(4,8,15,0.92);
   --card:rgba(10,22,40,0.88); --border:rgba(0,229,255,0.28);
   --text:#fff; --muted:#5a7a94; --gold:#ffd700;
-  --green:#00c46a; --red:#ff4455;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Barlow Condensed',sans-serif;background:transparent;color:var(--text);overflow:hidden;width:1920px;height:1080px;position:relative;}
 
 .overlay-wrapper {
   position: absolute; top: 0; left: 0; width: 1920px; height: 1080px;
-  padding: 30px 40px; display: flex; flex-direction: column; justify-content: flex-start;
-  transform-origin: top left; transition: transform 0.2s ease;
+  padding: 40px; display: flex; flex-direction: column;
 }
 
-.tournament-banner {
-  position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
-  background: linear-gradient(90deg, rgba(0,229,255,0.08), rgba(0,229,255,0.2), rgba(0,229,255,0.08));
-  border: 1px solid var(--accent); border-radius: 6px; padding: 6px 32px;
-  font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 3px; color: var(--accent);
-  box-shadow: 0 0 15px rgba(0,229,255,0.15); display: none; z-index: 10; text-transform: uppercase;
-}
-
-.screen-container { width: 100%; height: 100%; display: flex; flex-direction: column; }
-.sec-header { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 2px; color: var(--accent); margin-bottom: 10px; text-transform: uppercase; text-shadow: 0 0 10px rgba(0,229,255,0.3); }
-
-/* Сувора послідовна сітка */
 .bracket-tree {
   display: flex;
   justify-content: space-between;
-  align-items: stretch;
   width: 100%;
-  flex-grow: 1;
-  gap: 15px;
-  position: relative;
+  height: 100%;
+  gap: 30px;
 }
 
 .bracket-column {
@@ -48,64 +32,44 @@ body{font-family:'Barlow Condensed',sans-serif;background:transparent;color:var(
   flex-direction: column;
   justify-content: space-around;
   flex: 1;
-  height: 100%;
+  position: relative;
 }
+
+/* Відступи для каскадного ефекту */
+.bracket-column:nth-child(2) { margin-top: 60px; }
+.bracket-column:nth-child(3) { margin-top: 180px; }
 
 .round-title-box {
   background: var(--card); border: 1px solid var(--border); border-radius: 6px;
-  padding: 5px 8px; font-family: 'Bebas Neue', sans-serif; font-size: 14px; letter-spacing: 1.5px;
-  color: var(--accent); text-align: center; margin-bottom: 6px; text-transform: uppercase;
-  backdrop-filter: blur(8px); box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  padding: 6px 10px; font-family: 'Bebas Neue', sans-serif; font-size: 15px; letter-spacing: 1.5px;
+  color: var(--accent); text-align: center; margin-bottom: 10px;
 }
 
 .bracket-match { 
   background: var(--bg); border: 1px solid var(--border); border-radius: 6px; 
-  padding: 5px 7px; backdrop-filter: blur(12px); position: relative; 
-  box-shadow: 0 4px 16px rgba(0,0,0,0.35); display: flex; flex-direction: column; gap: 2px; 
-  width: 100%;
+  padding: 6px 8px; backdrop-filter: blur(10px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.4); display: flex; flex-direction: column; gap: 4px; 
+  margin-bottom: 20px;
 }
 
 .bracket-team { 
   display: flex; justify-content: space-between; align-items: center; 
-  padding: 3px 6px; font-size: 13px; font-weight: 600; border-radius: 4px; 
-  background: rgba(255,255,255,0.02); height: 26px; overflow: hidden;
+  padding: 3px 6px; font-size: 14px; font-weight: 600; border-radius: 4px; 
+  background: rgba(255,255,255,0.03);
 }
-.bracket-team.winner { color: var(--accent); background: rgba(0,229,255,0.08); border-left: 3px solid var(--accent); }
-.bracket-score { font-family: 'Bebas Neue', sans-serif; font-size: 14px; color: var(--muted); min-width: 20px; text-align: right; }
+.bracket-team.winner { color: var(--accent); background: rgba(0,229,255,0.1); border-left: 3px solid var(--accent); }
+.bracket-score { font-family: 'Bebas Neue', sans-serif; font-size: 16px; color: var(--muted); }
 .bracket-team.winner .bracket-score { color: var(--accent); }
 
-/* Права колонка для фіналу та третього місця */
-.finals-column {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 25px;
-  flex: 1;
-  height: 100%;
-}
-
-.final-block, .third-block {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.third-title {
-  background: var(--card); border: 1px solid var(--gold); border-radius: 6px;
-  padding: 5px 8px; font-family: 'Bebas Neue', sans-serif; font-size: 14px; letter-spacing: 1.5px;
-  color: var(--gold); text-align: center; text-transform: uppercase;
-  backdrop-filter: blur(8px); box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-}
+.finals-column { display: flex; flex-direction: column; justify-content: center; gap: 40px; width: 300px; }
+.third-title { color: var(--gold); font-family: 'Bebas Neue', sans-serif; font-size: 16px; text-align: center; }
 
 .hidden-overlay { display: none !important; }
 </style>
 </head>
 <body>
-
-<div class="tournament-banner" id="tournament-banner"></div>
-
 <div class="overlay-wrapper" id="overlay-wrapper">
-  <div class="screen-container" id="screen-container"></div>
+  <div id="screen-container"></div>
 </div>
 
 <script type="module">
@@ -127,311 +91,59 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const stateRef = ref(db, 'padel/state');
 
-const urlParams = new URLSearchParams(window.location.search);
-const courtParam = urlParams.get('court');
-
 onValue(stateRef, (snapshot) => {
   const state = snapshot.val();
-  if (state) {
-    try {
-      renderOverlay(state, courtParam);
-    } catch (err) {
-      console.error("Render error:", err);
-    }
-  }
+  if (state) renderPlayoff(state);
 });
 
-function renderOverlay(state, court) {
-  const wrapper = document.getElementById('overlay-wrapper');
-  const banner = document.getElementById('tournament-banner');
+function renderPlayoff(state) {
   const container = document.getElementById('screen-container');
-
-  let isVis = true;
-  if (court) {
-    isVis = (state.courtVisibility && state.courtVisibility[court] !== undefined) ? state.courtVisibility[court] : true;
-  } else {
-    isVis = state.isVisible !== false;
-  }
-
-  if (!isVis) {
-    wrapper.classList.add('hidden-overlay');
-    banner.style.display = 'none';
-    return;
-  }
-  wrapper.classList.remove('hidden-overlay');
-
-  if (state.tourVisible && state.tourText) {
-    banner.style.display = 'block';
-    banner.textContent = state.tourText;
-  } else {
-    banner.style.display = 'none';
-  }
-
-  let view = 'rankings';
-  if (court) {
-    view = (state.courtViews && state.courtViews[court]) ? state.courtViews[court] : 'rankings';
-  } else {
-    view = state.view || 'rankings';
-  }
-
-  const sizes = (state.sizes && state.sizes[view]) ? state.sizes[view] : { scale: 1, tblWidth: 95, tblPadY: 9, fontSize: 13, teamFont: "'Barlow Condensed', sans-serif" };
-  
-  wrapper.style.transform = `scale(${sizes.scale || 1})`;
-  container.style.width = `${sizes.tblWidth || 95}%`;
-  container.style.margin = '0 auto';
-
-  const colors = state.colors || {};
-  const screenColor = colors[view] || { team: '#fff', bg: '#050c1c', head: '#081830' };
-
-  if (view === 'rankings') {
-    renderRankingsView(state, container, sizes, screenColor);
-  } else if (view === 'groups') {
-    renderGroupsView(state, container, sizes, screenColor, court);
-  } else if (view === 'schedule') {
-    renderScheduleView(state, container, sizes, screenColor);
-  } else if (view === 'playoff') {
-    renderPlayoffView(state, container, sizes, screenColor, court, state);
-  }
-}
-
-function renderRankingsView(state, container, sizes, colors) {
-  const title = state.rankTitle || 'РЕЙТИНГ КОМАНД';
-  const rankings = state.rankings || [];
-  
-  let html = `<div class="sec-header">${title}</div>`;
-  html += `<div class="table-box" style="background:${colors.bg}; font-size:${sizes.fontSize}px; font-family:${sizes.teamFont}">`;
-  html += `<div class="tbl-head" style="grid-template-columns: 60px 1fr 100px 100px; background:${colors.head}; padding:${sizes.tblPadY}px 20px;">
-    <div style="text-align:center">#</div><div>Команда / Гравці</div><div style="text-align:center">Група</div><div style="text-align:right">Очки</div>
-  </div>`;
-
-  rankings.forEach((r, i) => {
-    html += `<div class="tbl-row" style="grid-template-columns: 60px 1fr 100px 100px; padding:${sizes.tblPadY}px 20px; color:${colors.team}">
-      <div style="text-align:center; font-weight:bold; color:var(--accent);">${r.seed || (i+1)}</div>
-      <div style="font-weight:600;">${r.players || '—'}</div>
-      <div style="text-align:center; font-weight:bold;">${r.group || '—'}</div>
-      <div style="text-align:right; font-weight:bold; color:var(--accent);">${r.pts || 0}</div>
-    </div>`;
-  });
-  html += `</div>`;
-  container.innerHTML = html;
-}
-
-function renderGroupsView(state, container, sizes, colors, court) {
-  let visGroup = 'all';
-  if (court) {
-    visGroup = (state.courtVisibleGroup && state.courtVisibleGroup[court] !== undefined) ? state.courtVisibleGroup[court] : String(parseInt(court) - 1);
-  } else {
-    visGroup = state.visibleGroup || 'all';
-  }
-
-  const groups = state.groups || [];
-  const layout = state.groupLayout || 'classic';
-  const namesOnly = state.groupChessNamesOnly || false;
-
-  let html = `<div class="sec-header">Груповий етап</div>`;
-
-  groups.forEach((g, gi) => {
-    if (visGroup !== 'all' && String(gi) !== String(visGroup)) return;
-
-    if (layout === 'chess') {
-      html += `<div style="font-family:'Bebas Neue',sans-serif; font-size:22px; color:var(--accent); margin-bottom:8px;">Група ${g.letter}</div>`;
-      html += `<div class="chess-grid-wrap" style="font-size:${sizes.fontSize}px; font-family:${sizes.teamFont}">`;
-      html += `<table class="chess-table" style="background:${colors.bg}"><tr><th>Група ${g.letter}</th>`;
-      
-      (g.teams || []).forEach((t, tj) => {
-        const colName = namesOnly ? (t.name || `К${tj+1}`) : String.fromCharCode(65 + tj);
-        html += `<th>${colName}</th>`;
-      });
-      if (!namesOnly) html += `<th>І</th><th>В</th><th>П</th><th>Очки</th>`;
-      html += `</tr>`;
-
-      (g.teams || []).forEach((t, ti) => {
-        const rowName = namesOnly ? (t.name || `К${ti+1}`) : (t.name || `Команда ${ti+1}`);
-        html += `<tr><td class="team-name-cell" style="color:${colors.team}; font-weight:bold;">${rowName}</td>`;
-        
-        (g.teams || []).forEach((tjTeam, tj) => {
-          if (ti === tj) {
-            html += `<td class="x-cell">X</td>`;
-          } else {
-            const sc = (t.scores && t.scores[tj]) ? t.scores[tj] : '';
-            html += `<td style="color:${colors.team}">${sc || '-'}</td>`;
-          }
-        });
-
-        if (!namesOnly) {
-          html += `<td style="color:${colors.team}">${t.p || 0}</td>`;
-          html += `<td style="color:${colors.team}">${t.w || 0}</td>`;
-          html += `<td style="color:${colors.team}">${t.l || 0}</td>`;
-          html += `<td style="font-weight:bold; color:var(--accent);">${t.pts || 0}</td>`;
-        }
-        html += `</tr>`;
-      });
-      html += `</table></div><br>`;
-    } else {
-      html += `<div style="font-family:'Bebas Neue',sans-serif; font-size:22px; color:var(--accent); margin-bottom:8px;">Група ${g.letter}</div>`;
-      html += `<div class="table-box" style="background:${colors.bg}; margin-bottom:15px; font-size:${sizes.fontSize}px; font-family:${sizes.teamFont}">`;
-      html += `<div class="tbl-head" style="grid-template-columns: 50px 1fr 70px 90px 90px 110px 80px; background:${colors.head}; padding:${sizes.tblPadY}px 15px;">
-        <div style="text-align:center">#</div><div>Команда</div><div style="text-align:center">Ігри</div><div style="text-align:center">Виграші</div><div style="text-align:center">Програш</div><div style="text-align:center">Різн (МГ)</div><div style="text-align:right">Очки</div>
-      </div>`;
-
-      (g.teams || []).forEach((t, ti) => {
-        html += `<div class="tbl-row" style="grid-template-columns: 50px 1fr 70px 90px 90px 110px 80px; padding:${sizes.tblPadY}px 15px; color:${colors.team}">
-          <div style="text-align:center; font-weight:bold; color:var(--accent);">${ti + 1}</div>
-          <div style="font-weight:600;">${t.name || '—'}</div>
-          <div style="text-align:center;">${t.p || 0}</div>
-          <div style="text-align:center; color:var(--green);">${t.w || 0}</div>
-          <div style="text-align:center; color:var(--red);">${t.l || 0}</div>
-          <div style="text-align:center;">${t.gd || '0:0'}</div>
-          <div style="text-align:right; font-weight:bold; color:var(--accent);">${t.pts || 0}</div>
-        </div>`;
-      });
-      html += `</div>`;
-    }
-  });
-
-  container.innerHTML = html;
-}
-
-function renderScheduleView(state, container, sizes, colors) {
-  const headers = state.schedHeaders || ['Час', 'Корт 1'];
-  const rows = state.schedRows || [];
-
-  let html = `<div class="sec-header">Розклад ігор</div>`;
-  html += `<div class="table-box" style="background:${colors.bg}; font-size:${sizes.fontSize}px; font-family:${sizes.teamFont}">`;
-  
-  const colTemplate = `80px repeat(${headers.length - 1}, 1fr)`;
-  html += `<div class="tbl-head" style="grid-template-columns: ${colTemplate}; background:${colors.head}; padding:${sizes.tblPadY}px 15px;">`;
-  headers.forEach((h, i) => {
-    html += `<div style="${i === 0 ? 'text-align:center' : 'text-align:center; font-weight:bold; color:var(--accent);'}">${h}</div>`;
-  });
-  html += `</div>`;
-
-  rows.forEach(r => {
-    if (r.isBreak) {
-      html += `<div class="tbl-row" style="grid-template-columns: 80px 1fr; padding:${sizes.tblPadY}px 15px; background:rgba(255,215,0,0.04);">
-        <div style="text-align:center; font-weight:bold; color:var(--gold);">${r.time}</div>
-        <div style="text-align:center; font-weight:bold; color:var(--gold); letter-spacing:2px;">${(r.cells && r.cells[0]) || 'ПЕРЕРВА'}</div>
-      </div>`;
-    } else {
-      let cellsHtml = '';
-      (r.cells || []).forEach(c => {
-        cellsHtml += `<div style="text-align:center; font-weight:600; color:${colors.team};">${c || '—'}</div>`;
-      });
-      html += `<div class="tbl-row" style="grid-template-columns: ${colTemplate}; padding:${sizes.tblPadY}px 15px;">
-        <div style="text-align:center; font-weight:bold; color:var(--accent);">${r.time}</div>
-        ${cellsHtml}
-      </div>`;
-    }
-  });
-
-  html += `</div>`;
-  container.innerHTML = html;
-}
-
-function renderPlayoffView(state, container, sizes, colors, court, fullState) {
-  let bView = 'upper';
-  if (court) {
-    bView = (state.courtBracketViews && state.courtBracketViews[court]) ? state.courtBracketViews[court] : 'upper';
-  } else {
-    bView = state.bracketView || 'upper';
-  }
-
-  const isLower = (bView === 'lower');
-  const fmt = isLower ? 16 : (parseInt(state.bracketFormat) || 8);
-
-  if (!isLower && fmt === 32) {
-    const bData32 = state.bracketData || {};
-    let html = `<div class="sec-header">Плей-оф: 1/16 фіналу (Матчі по парах — 32 команди)</div>`;
-    html += `<div style="display:grid; grid-template-columns: repeat(4, 1fr); gap:12px; width:100%;">`;
-    
-    for (let mi = 0; mi < 16; mi++) {
-      const match = bData32[`0-${mi}`] || { t1: `Команда ${mi*2 + 1}`, t2: `Команда ${mi*2 + 2}`, s1: '-', s2: '-', winner: -1 };
-      const t1Win = match.winner === 0 ? 'winner' : '';
-      const t2Win = match.winner === 1 ? 'winner' : '';
-
-      html += `<div class="bracket-match" style="background:${colors.bg}; margin-bottom:4px;">
-        <div style="font-family:'Bebas Neue',sans-serif; font-size:12px; color:var(--accent); margin-bottom:2px; letter-spacing:1px;">Матч ${mi+1}</div>
-        <div class="bracket-team ${t1Win}"><span style="color:${colors.team}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${match.t1 || '—'}</span><span class="bracket-score">${match.s1}</span></div>
-        <div class="bracket-team ${t2Win}" style="margin-top:2px;"><span style="color:${colors.team}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${match.t2 || '—'}</span><span class="bracket-score">${match.s2}</span></div>
-      </div>`;
-    }
-    html += `</div>`;
-    container.innerHTML = html;
-    return;
-  }
-
-  const title = isLower ? 'Плей-оф: Нижня сітка' : 'Плей-оф: Верхня сітка';
-  let bracketData = isLower ? (state.bracketDataLower || {}) : (state.bracketData || {});
+  const isLower = (state.bracketView === 'lower');
+  const fmt = parseInt(state.bracketFormat) || 8;
+  const bracketData = isLower ? (state.bracketDataLower || {}) : (state.bracketData || {});
   
   const roundsCount = Math.log2(fmt);
-  
-  // Суворі назви для колонок турнірної сітки: 1/8 -> 1/4 -> ПІВФІНАЛ
-  let roundLabels = ['1/8', '1/4', 'ПІВФІНАЛ'];
-  if (roundsCount === 2) {
-    roundLabels = ['1/4', 'ПІВФІНАЛ'];
-  } else if (roundsCount === 1) {
-    roundLabels = ['ПІВФІНАЛ'];
-  }
+  let labels = roundsCount === 3 ? ['1/8', '1/4', 'ПІВФІНАЛ'] : ['1/4', 'ПІВФІНАЛ'];
 
-  if (isLower && fullState.groups && fullState.groups.length === 4) {
-    roundLabels = ['1/8 (4-5 місця)', '1/4 (з 3 місцями)', 'ПІВФІНАЛ'];
-  }
-
-  let html = `<div class="sec-header">${title}</div>`;
-  html += `<div style="position:relative; width:100%; height:100%; display:flex; flex-direction:column;">`;
-  html += `<div class="bracket-tree" style="font-size:${sizes.fontSize}px; font-family:${sizes.teamFont}">`;
+  let html = `<div class="bracket-tree">`;
 
   for (let ri = 0; ri < roundsCount; ri++) {
     const count = fmt / Math.pow(2, ri + 1);
     html += `<div class="bracket-column">`;
-    html += `<div class="round-title-box">${roundLabels[ri] || ('Раунд ' + (ri+1))}</div>`;
+    html += `<div class="round-title-box">${labels[ri]}</div>`;
 
     for (let mi = 0; mi < count; mi++) {
-      const key = `${ri}-${mi}`;
-      const m = bracketData[key] || { t1: '—', t2: '—', s1: '-', s2: '-', winner: -1 };
-
-      const t1Win = m.winner === 0 ? 'winner' : '';
-      const t2Win = m.winner === 1 ? 'winner' : '';
-
-      html += `<div class="bracket-match" style="background:${colors.bg}">
-        <div class="bracket-team ${t1Win}"><span style="color:${colors.team}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${m.t1 || '—'}</span><span class="bracket-score">${m.s1}</span></div>
-        <div class="bracket-team ${t2Win}"><span style="color:${colors.team}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${m.t2 || '—'}</span><span class="bracket-score">${m.s2}</span></div>
-      </div>`;
+      const m = bracketData[`${ri}-${mi}`] || { t1: '—', t2: '—', s1: '-', s2: '-', winner: -1 };
+      html += `
+        <div class="bracket-match">
+          <div class="bracket-team ${m.winner===0?'winner':''}">${m.t1}<span class="bracket-score">${m.s1}</span></div>
+          <div class="bracket-team ${m.winner===1?'winner':''}">${m.t2}<span class="bracket-score">${m.s2}</span></div>
+        </div>`;
     }
     html += `</div>`;
   }
 
-  // Права колонка: ФІНАЛ
-  const finalKey = `${roundsCount}-0`;
-  const finalMatch = bracketData[finalKey] || { t1: '—', t2: '—', s1: '-', s2: '-', winner: -1 };
-  const f1Win = finalMatch.winner === 0 ? 'winner' : '';
-  const f2Win = finalMatch.winner === 1 ? 'winner' : '';
-
+  // ФІНАЛ
+  const finalM = bracketData[`${roundsCount}-0`] || { t1: '—', t2: '—', s1: '-', s2: '-', winner: -1 };
   html += `<div class="finals-column">
-    <div class="final-block">
-      <div class="round-title-box">ФІНАЛ</div>
-      <div class="bracket-match" style="background:${colors.bg}">
-        <div class="bracket-team ${f1Win}"><span style="color:${colors.team}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${finalMatch.t1 || '—'}</span><span class="bracket-score">${finalMatch.s1}</span></div>
-        <div class="bracket-team ${f2Win}"><span style="color:${colors.team}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${finalMatch.t2 || '—'}</span><span class="bracket-score">${finalMatch.s2}</span></div>
-      </div>
+    <div class="round-title-box">ФІНАЛ</div>
+    <div class="bracket-match">
+      <div class="bracket-team ${finalM.winner===0?'winner':''}">${finalM.t1}<span class="bracket-score">${finalM.s1}</span></div>
+      <div class="bracket-team ${finalM.winner===1?'winner':''}">${finalM.t2}<span class="bracket-score">${finalM.s2}</span></div>
     </div>`;
 
-  // Додаємо блок «Гра за третє місце» тільки для верхньої сітки
   if (!isLower) {
     const tp = state.thirdPlaceMatch || {};
-    const tp1Win = tp.winner === 0 ? 'winner' : '';
-    const tp2Win = tp.winner === 1 ? 'winner' : '';
-
     html += `<div class="third-block">
       <div class="third-title">Гра за третє місце</div>
-      <div class="bracket-match" style="background:${colors.bg}">
-        <div class="bracket-team ${tp1Win}"><span style="color:${colors.team}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${tp.t1 || '—'}</span><span class="bracket-score">${tp.s1}</span></div>
-        <div class="bracket-team ${tp2Win}"><span style="color:${colors.team}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${tp.t2 || '—'}</span><span class="bracket-score">${tp.s2}</span></div>
+      <div class="bracket-match">
+        <div class="bracket-team ${tp.winner===0?'winner':''}">${tp.t1||'—'}<span class="bracket-score">${tp.s1||'-'}</span></div>
+        <div class="bracket-team ${tp.winner===1?'winner':''}">${tp.t2||'—'}<span class="bracket-score">${tp.s2||'-'}</span></div>
       </div>
     </div>`;
   }
 
-  html += `</div></div></div>`;
+  html += `</div></div>`;
   container.innerHTML = html;
 }
 </script>
