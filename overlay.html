@@ -10,7 +10,7 @@
   --accent:#00e5ff; --bg:rgba(4,8,15,0.92);
   --card:rgba(10,22,40,0.88); --border:rgba(0,229,255,0.28);
   --text:#fff; --muted:#5a7a94; --gold:#ffd700;
-  --green:#00c46a; --red:#ff4455; --line:rgba(0,229,255,0.45);
+  --green:#00c46a; --red:#ff4455;
 }
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Barlow Condensed',sans-serif;background:transparent;color:var(--text);overflow:hidden;width:1920px;height:1080px;position:relative;}
@@ -32,14 +32,14 @@ body{font-family:'Barlow Condensed',sans-serif;background:transparent;color:var(
 .screen-container { width: 100%; height: 100%; display: flex; flex-direction: column; }
 .sec-header { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 2px; color: var(--accent); margin-bottom: 10px; text-transform: uppercase; text-shadow: 0 0 10px rgba(0,229,255,0.3); }
 
-/* Деревоподібна сітка з лініями */
+/* Чиста послідовна сітка без ліній */
 .bracket-tree {
   display: flex;
   justify-content: space-between;
   align-items: stretch;
   width: 100%;
   flex-grow: 1;
-  gap: 20px;
+  gap: 25px;
   position: relative;
 }
 
@@ -48,43 +48,40 @@ body{font-family:'Barlow Condensed',sans-serif;background:transparent;color:var(
   flex-direction: column;
   justify-content: space-around;
   flex: 1;
-  position: relative;
   height: 100%;
-  z-index: 2;
 }
 
 .round-title-box {
   background: var(--card); border: 1px solid var(--border); border-radius: 6px;
-  padding: 5px 8px; font-family: 'Bebas Neue', sans-serif; font-size: 15px; letter-spacing: 1.5px;
-  color: var(--accent); text-align: center; margin-bottom: 6px; text-transform: uppercase;
+  padding: 6px 10px; font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 1.5px;
+  color: var(--accent); text-align: center; margin-bottom: 8px; text-transform: uppercase;
   backdrop-filter: blur(8px); box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
 .bracket-match { 
   background: var(--bg); border: 1px solid var(--border); border-radius: 6px; 
-  padding: 5px 7px; backdrop-filter: blur(12px); position: relative; 
-  box-shadow: 0 4px 16px rgba(0,0,0,0.35); display: flex; flex-direction: column; gap: 2px; 
+  padding: 6px 8px; backdrop-filter: blur(12px); position: relative; 
+  box-shadow: 0 4px 16px rgba(0,0,0,0.35); display: flex; flex-direction: column; gap: 3px; 
   width: 100%;
 }
 
 .bracket-team { 
   display: flex; justify-content: space-between; align-items: center; 
-  padding: 3px 6px; font-size: 13px; font-weight: 600; border-radius: 4px; 
-  background: rgba(255,255,255,0.02); height: 26px; overflow: hidden;
+  padding: 4px 6px; font-size: 13px; font-weight: 600; border-radius: 4px; 
+  background: rgba(255,255,255,0.02); height: 28px; overflow: hidden;
 }
 .bracket-team.winner { color: var(--accent); background: rgba(0,229,255,0.08); border-left: 3px solid var(--accent); }
-.bracket-score { font-family: 'Bebas Neue', sans-serif; font-size: 14px; color: var(--muted); min-width: 20px; text-align: right; }
+.bracket-score { font-family: 'Bebas Neue', sans-serif; font-size: 15px; color: var(--muted); min-width: 22px; text-align: right; }
 .bracket-team.winner .bracket-score { color: var(--accent); }
 
-/* Права колонка для фіналу та третього місця */
+/* Права колонка для фіналу та третього місця з правильними відступами */
 .finals-column {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 30px;
+  gap: 35px;
   flex: 1;
   height: 100%;
-  z-index: 2;
 }
 
 .final-block, .third-block {
@@ -95,20 +92,9 @@ body{font-family:'Barlow Condensed',sans-serif;background:transparent;color:var(
 
 .third-title {
   background: var(--card); border: 1px solid var(--gold); border-radius: 6px;
-  padding: 5px 8px; font-family: 'Bebas Neue', sans-serif; font-size: 15px; letter-spacing: 1.5px;
+  padding: 6px 10px; font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 1.5px;
   color: var(--gold); text-align: center; text-transform: uppercase;
   backdrop-filter: blur(8px); box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-}
-
-/* SVG для чітких з’єднувальних ліній між колонок */
-.bracket-svg-lines {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 1;
 }
 
 .hidden-overlay { display: none !important; }
@@ -376,15 +362,17 @@ function renderPlayoffView(state, container, sizes, colors, court, fullState) {
 
   const title = isLower ? 'Плей-оф: Нижня сітка' : 'Плей-оф: Верхня сітка';
   let bracketData = isLower ? (state.bracketDataLower || {}) : (state.bracketData || {});
-  const roundsCount = Math.log2(fmt);
-  let roundLabels = roundsCount === 4 ? ['1/8', '1/4', 'ПІВФІНАЛ'] :
-                    roundsCount === 3 ? ['1/4', 'ПІВФІНАЛ'] : ['ПІВФІНАЛ'];
+  
+  // Обмежуємо кількість раундів до 2 (1/8 та 1/4 або 1/4 та півфінал), прибираючи зайві
+  const roundsCount = Math.min(Math.log2(fmt), 2);
+  let roundLabels = roundsCount === 2 ? ['1/8', '1/4'] : ['1/4'];
+  if (fmt === 8) roundLabels = ['1/4', 'ПІВФІНАЛ'];
 
   let html = `<div class="sec-header">${title}</div>`;
   html += `<div style="position:relative; width:100%; height:100%; display:flex; flex-direction:column;">`;
-  html += `<div class="bracket-tree" id="bracketTreeContainer" style="font-size:${sizes.fontSize}px; font-family:${sizes.teamFont}">`;
+  html += `<div class="bracket-tree" style="font-size:${sizes.fontSize}px; font-family:${sizes.teamFont}">`;
 
-  // Рендеримо основні раунди до фіналу
+  // Рендеримо основні колонки раундів
   for (let ri = 0; ri < roundsCount; ri++) {
     const count = fmt / Math.pow(2, ri + 1);
     html += `<div class="bracket-column">`;
@@ -397,7 +385,7 @@ function renderPlayoffView(state, container, sizes, colors, court, fullState) {
       const t1Win = m.winner === 0 ? 'winner' : '';
       const t2Win = m.winner === 1 ? 'winner' : '';
 
-      html += `<div class="bracket-match" id="match-${ri}-${mi}" style="background:${colors.bg}">
+      html += `<div class="bracket-match" style="background:${colors.bg}">
         <div class="bracket-team ${t1Win}"><span style="color:${colors.team}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${m.t1 || '—'}</span><span class="bracket-score">${m.s1}</span></div>
         <div class="bracket-team ${t2Win}"><span style="color:${colors.team}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${m.t2 || '—'}</span><span class="bracket-score">${m.s2}</span></div>
       </div>`;
@@ -418,7 +406,7 @@ function renderPlayoffView(state, container, sizes, colors, court, fullState) {
   html += `<div class="finals-column">
     <div class="final-block">
       <div class="round-title-box">ФІНАЛ</div>
-      <div class="bracket-match" id="match-final" style="background:${colors.bg}">
+      <div class="bracket-match" style="background:${colors.bg}">
         <div class="bracket-team ${f1Win}"><span style="color:${colors.team}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${finalMatch.t1 || '—'}</span><span class="bracket-score">${finalMatch.s1}</span></div>
         <div class="bracket-team ${f2Win}"><span style="color:${colors.team}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${finalMatch.t2 || '—'}</span><span class="bracket-score">${finalMatch.s2}</span></div>
       </div>
@@ -435,92 +423,6 @@ function renderPlayoffView(state, container, sizes, colors, court, fullState) {
 
   html += `</div></div>`;
   container.innerHTML = html;
-
-  // Динамічне малювання з’єднувальних ліній між матчами сусідніх колон
-  setTimeout(() => {
-    drawConnectorLines(roundsCount);
-  }, 50);
-}
-
-function drawConnectorLines(roundsCount) {
-  const container = document.getElementById('bracketTreeContainer');
-  if (!container) return;
-
-  const oldSvg = container.querySelector('svg');
-  if (oldSvg) oldSvg.remove();
-
-  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  svg.setAttribute('class', 'bracket-svg-lines');
-  svg.setAttribute('width', container.offsetWidth);
-  svg.setAttribute('height', container.offsetHeight);
-
-  const containerRect = container.getBoundingClientRect();
-
-  for (let ri = 0; ri < roundsCount - 1; ri++) {
-    const count = Math.floor(8 / Math.pow(2, ri));
-    for (let mi = 0; mi < count; mi += 2) {
-      const m1 = document.getElementById(`match-${ri}-${mi}`);
-      const m2 = document.getElementById(`match-${ri}-${mi+1}`);
-      const nextM = document.getElementById(`match-${ri+1}-${Math.floor(mi/2)}`);
-
-      if (m1 && m2 && nextM) {
-        const r1 = m1.getBoundingClientRect();
-        const r2 = m2.getBoundingClientRect();
-        const rNext = nextM.getBoundingClientRect();
-
-        const x1 = r1.right - containerRect.left;
-        const y1 = r1.top + r1.height / 2 - containerRect.top;
-        const x2 = r2.right - containerRect.left;
-        const y2 = r2.top + r2.height / 2 - containerRect.top;
-
-        const xNext = rNext.left - containerRect.left;
-        const yNext = rNext.top + rNext.height / 2 - containerRect.top;
-
-        const midX = x1 + (xNext - x1) / 2;
-
-        createPath(svg, `M ${x1} ${y1} H ${midX} V ${y2} H ${x1}`);
-        createPath(svg, `M ${midX} ${(y1 + y2) / 2} H ${xNext}`);
-      }
-    }
-  }
-
-  // Лінія до фіналу від півфіналів
-  const semiCount = Math.floor(8 / Math.pow(2, roundsCount - 1));
-  if (semiCount >= 2) {
-    const s1 = document.getElementById(`match-${roundsCount-1}-0`);
-    const s2 = document.getElementById(`match-${roundsCount-1}-1`);
-    const finalM = document.getElementById(`match-final`);
-
-    if (s1 && s2 && finalM) {
-      const r1 = s1.getBoundingClientRect();
-      const r2 = s2.getBoundingClientRect();
-      const rFin = finalM.getBoundingClientRect();
-
-      const x1 = r1.right - containerRect.left;
-      const y1 = r1.top + r1.height / 2 - containerRect.top;
-      const x2 = r2.right - containerRect.left;
-      const y2 = r2.top + r2.height / 2 - containerRect.top;
-
-      const xFin = rFin.left - containerRect.left;
-      const yFin = rFin.top + rFin.height / 2 - containerRect.top;
-
-      const midX = x1 + (xFin - x1) / 2;
-
-      createPath(svg, `M ${x1} ${y1} H ${midX} V ${y2} H ${x1}`);
-      createPath(svg, `M ${midX} ${(y1 + y2) / 2} H ${xFin}`);
-    }
-  }
-
-  container.appendChild(svg);
-}
-
-function createPath(svg, d) {
-  const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-  path.setAttribute('d', d);
-  path.setAttribute('stroke', 'rgba(0,229,255,0.45)');
-  path.setAttribute('stroke-width', '2');
-  path.setAttribute('fill', 'none');
-  svg.appendChild(path);
 }
 </script>
 </body>
