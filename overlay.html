@@ -32,14 +32,14 @@ body{font-family:'Barlow Condensed',sans-serif;background:transparent;color:var(
 .screen-container { width: 100%; height: 100%; display: flex; flex-direction: column; }
 .sec-header { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 2px; color: var(--accent); margin-bottom: 10px; text-transform: uppercase; text-shadow: 0 0 10px rgba(0,229,255,0.3); }
 
-/* Повноцінна сітка з трьома раундами + фінал */
+/* Повноцінна сітка з усіма раундами */
 .bracket-tree {
   display: flex;
   justify-content: space-between;
   align-items: stretch;
   width: 100%;
   flex-grow: 1;
-  gap: 20px;
+  gap: 15px;
   position: relative;
 }
 
@@ -53,7 +53,7 @@ body{font-family:'Barlow Condensed',sans-serif;background:transparent;color:var(
 
 .round-title-box {
   background: var(--card); border: 1px solid var(--border); border-radius: 6px;
-  padding: 5px 8px; font-family: 'Bebas Neue', sans-serif; font-size: 15px; letter-spacing: 1.5px;
+  padding: 5px 8px; font-family: 'Bebas Neue', sans-serif; font-size: 14px; letter-spacing: 1.5px;
   color: var(--accent); text-align: center; margin-bottom: 6px; text-transform: uppercase;
   backdrop-filter: blur(8px); box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
@@ -79,7 +79,7 @@ body{font-family:'Barlow Condensed',sans-serif;background:transparent;color:var(
   display: flex;
   flex-direction: column;
   justify-content: center;
-  gap: 30px;
+  gap: 25px;
   flex: 1;
   height: 100%;
 }
@@ -92,7 +92,7 @@ body{font-family:'Barlow Condensed',sans-serif;background:transparent;color:var(
 
 .third-title {
   background: var(--card); border: 1px solid var(--gold); border-radius: 6px;
-  padding: 5px 8px; font-family: 'Bebas Neue', sans-serif; font-size: 15px; letter-spacing: 1.5px;
+  padding: 5px 8px; font-family: 'Bebas Neue', sans-serif; font-size: 14px; letter-spacing: 1.5px;
   color: var(--gold); text-align: center; text-transform: uppercase;
   backdrop-filter: blur(8px); box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
@@ -363,15 +363,19 @@ function renderPlayoffView(state, container, sizes, colors, court, fullState) {
   const title = isLower ? 'Плей-оф: Нижня сітка' : 'Плей-оф: Верхня сітка';
   let bracketData = isLower ? (state.bracketDataLower || {}) : (state.bracketData || {});
   
-  // Визначаємо раунди: для 8 команд це 1/4 (індекс 0) та Півфінал (індекс 1)
-  const roundsCount = Math.min(Math.log2(fmt), 2);
-  let roundLabels = fmt === 8 ? ['1/4', 'ПІВФІНАЛ'] : ['1/8', '1/4'];
+  const roundsCount = Math.log2(fmt);
+  let roundLabels = roundsCount === 3 ? ['1/8', '1/4', 'ПІВФІНАЛ'] : 
+                    roundsCount === 2 ? ['1/4', 'ПІВФІНАЛ'] : ['ПІВФІНАЛ'];
+
+  if (isLower && fullState.groups && fullState.groups.length === 4) {
+    roundLabels = ['1/8 (4-5 місця)', '1/4 (з 3 місцями)', 'ПІВФІНАЛ'];
+  }
 
   let html = `<div class="sec-header">${title}</div>`;
   html += `<div style="position:relative; width:100%; height:100%; display:flex; flex-direction:column;">`;
   html += `<div class="bracket-tree" style="font-size:${sizes.fontSize}px; font-family:${sizes.teamFont}">`;
 
-  // Рендеримо колонки раундів (1/4 та Півфінал)
+  // Рендеримо всі послідовні колонки раундів (1/8 -> 1/4 -> Півфінал)
   for (let ri = 0; ri < roundsCount; ri++) {
     const count = fmt / Math.pow(2, ri + 1);
     html += `<div class="bracket-column">`;
@@ -392,15 +396,11 @@ function renderPlayoffView(state, container, sizes, colors, court, fullState) {
     html += `</div>`;
   }
 
-  // Права колонка: ФІНАЛ та ГРА ЗА ТРЕТЄ МІСЦЕ
+  // Права колонка: ФІНАЛ (та гра за третє місце тільки для верхньої сітки)
   const finalKey = `${roundsCount}-0`;
   const finalMatch = bracketData[finalKey] || { t1: '—', t2: '—', s1: '-', s2: '-', winner: -1 };
   const f1Win = finalMatch.winner === 0 ? 'winner' : '';
   const f2Win = finalMatch.winner === 1 ? 'winner' : '';
-
-  const tp = state.thirdPlaceMatch || {};
-  const tp1Win = tp.winner === 0 ? 'winner' : '';
-  const tp2Win = tp.winner === 1 ? 'winner' : '';
 
   html += `<div class="finals-column">
     <div class="final-block">
@@ -409,18 +409,24 @@ function renderPlayoffView(state, container, sizes, colors, court, fullState) {
         <div class="bracket-team ${f1Win}"><span style="color:${colors.team}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${finalMatch.t1 || '—'}</span><span class="bracket-score">${finalMatch.s1}</span></div>
         <div class="bracket-team ${f2Win}"><span style="color:${colors.team}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${finalMatch.t2 || '—'}</span><span class="bracket-score">${finalMatch.s2}</span></div>
       </div>
-    </div>
+    </div>`;
 
-    <div class="third-block">
+  // Додаємо блок «Гра за третє місце» тільки якщо це ВЕРХНЯ сітка (!isLower)
+  if (!isLower) {
+    const tp = state.thirdPlaceMatch || {};
+    const tp1Win = tp.winner === 0 ? 'winner' : '';
+    const tp2Win = tp.winner === 1 ? 'winner' : '';
+
+    html += `<div class="third-block">
       <div class="third-title">Гра за третє місце</div>
       <div class="bracket-match" style="background:${colors.bg}">
         <div class="bracket-team ${tp1Win}"><span style="color:${colors.team}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${tp.t1 || '—'}</span><span class="bracket-score">${tp.s1}</span></div>
         <div class="bracket-team ${tp2Win}"><span style="color:${colors.team}; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${tp.t2 || '—'}</span><span class="bracket-score">${tp.s2}</span></div>
       </div>
-    </div>
-  </div>`;
+    </div>`;
+  }
 
-  html += `</div></div>`;
+  html += `</div></div></div>`;
   container.innerHTML = html;
 }
 </script>
