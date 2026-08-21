@@ -17,20 +17,20 @@ body{font-family:'Barlow Condensed',sans-serif;background:transparent;color:var(
 
 .overlay-wrapper {
   position: absolute; top: 0; left: 0; width: 1920px; height: 1080px;
-  padding: 40px; display: flex; flex-direction: column; justify-content: flex-start;
+  padding: 30px 40px; display: flex; flex-direction: column; justify-content: flex-start;
   transform-origin: top left; transition: transform 0.2s ease;
 }
 
 .tournament-banner {
-  position: absolute; top: 30px; left: 50%; transform: translateX(-50%);
+  position: absolute; top: 20px; left: 50%; transform: translateX(-50%);
   background: linear-gradient(90deg, rgba(0,229,255,0.08), rgba(0,229,255,0.2), rgba(0,229,255,0.08));
-  border: 1px solid var(--accent); border-radius: 6px; padding: 8px 36px;
-  font-family: 'Bebas Neue', sans-serif; font-size: 26px; letter-spacing: 3px; color: var(--accent);
+  border: 1px solid var(--accent); border-radius: 6px; padding: 6px 32px;
+  font-family: 'Bebas Neue', sans-serif; font-size: 24px; letter-spacing: 3px; color: var(--accent);
   box-shadow: 0 0 15px rgba(0,229,255,0.15); display: none; z-index: 10; text-transform: uppercase;
 }
 
 .screen-container { width: 100%; height: 100%; display: flex; flex-direction: column; }
-.sec-header { font-family: 'Bebas Neue', sans-serif; font-size: 34px; letter-spacing: 2px; color: var(--accent); margin-bottom: 20px; text-transform: uppercase; text-shadow: 0 0 10px rgba(0,229,255,0.3); }
+.sec-header { font-family: 'Bebas Neue', sans-serif; font-size: 32px; letter-spacing: 2px; color: var(--accent); margin-bottom: 15px; text-transform: uppercase; text-shadow: 0 0 10px rgba(0,229,255,0.3); }
 
 /* Таблиці загальні */
 .table-box { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; overflow: hidden; backdrop-filter: blur(12px); width: 100%; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
@@ -38,38 +38,38 @@ body{font-family:'Barlow Condensed',sans-serif;background:transparent;color:var(
 .tbl-row { display: grid; border-bottom: 1px solid rgba(255,255,255,0.04); align-items: center; transition: background 0.2s; }
 .tbl-row:last-child { border-bottom: none; }
 
-/* Офіційна турнірна сітка плей-оф */
-.bracket-layout { display: flex; flex-direction: column; gap: 20px; width: 100%; height: 100%; }
-.bracket-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; width: 100%; align-items: center; }
-.bracket-round { display: flex; flex-direction: column; justify-content: space-around; gap: 14px; height: 100%; }
+/* Ідеальна сітка плей-оф без виходу за рамки */
+.bracket-layout { display: flex; flex-direction: column; gap: 12px; width: 100%; height: 100%; justify-content: center; }
+.bracket-grid { display: grid; gap: 16px; width: 100%; align-items: stretch; }
+.bracket-round { display: flex; flex-direction: column; justify-content: space-around; gap: 8px; height: 100%; }
 
 .round-title-box {
   background: var(--card); border: 1px solid var(--border); border-radius: 6px;
-  padding: 6px 12px; font-family: 'Bebas Neue', sans-serif; font-size: 18px; letter-spacing: 1.5px;
-  color: var(--accent); text-align: center; margin-bottom: 4px; text-transform: uppercase;
-  backdrop-filter: blur(8px); box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  padding: 5px 8px; font-family: 'Bebas Neue', sans-serif; font-size: 16px; letter-spacing: 1px;
+  color: var(--accent); text-align: center; margin-bottom: 2px; text-transform: uppercase;
+  backdrop-filter: blur(8px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
 .bracket-match { 
-  background: var(--bg); border: 1px solid var(--border); border-radius: 8px; 
-  padding: 8px 10px; backdrop-filter: blur(12px); position: relative; 
-  box-shadow: 0 4px 16px rgba(0,0,0,0.35); display: flex; flex-direction: column; gap: 4px; 
+  background: var(--bg); border: 1px solid var(--border); border-radius: 6px; 
+  padding: 6px 8px; backdrop-filter: blur(12px); position: relative; 
+  box-shadow: 0 4px 16px rgba(0,0,0,0.35); display: flex; flex-direction: column; gap: 3px; 
 }
 .bracket-team { 
   display: flex; justify-content: space-between; align-items: center; 
-  padding: 6px 8px; font-size: 15px; font-weight: 600; border-radius: 4px; 
-  background: rgba(255,255,255,0.02); height: 32px; overflow: hidden;
+  padding: 4px 6px; font-size: 13px; font-weight: 600; border-radius: 4px; 
+  background: rgba(255,255,255,0.02); height: 28px; overflow: hidden;
 }
 .bracket-team.winner { color: var(--accent); background: rgba(0,229,255,0.08); border-left: 3px solid var(--accent); }
-.bracket-score { font-family: 'Bebas Neue', sans-serif; font-size: 17px; color: var(--muted); min-width: 28px; text-align: right; }
+.bracket-score { font-family: 'Bebas Neue', sans-serif; font-size: 15px; color: var(--muted); min-width: 24px; text-align: right; }
 .bracket-team.winner .bracket-score { color: var(--accent); }
 
 /* Додатковий блок третього місця */
 .third-place-box {
-  margin-top: 15px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
-  padding: 10px 14px; width: 340px; backdrop-filter: blur(12px); box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+  margin-top: 10px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+  padding: 8px 12px; width: 320px; backdrop-filter: blur(12px); box-shadow: 0 4px 16px rgba(0,0,0,0.35);
 }
-.third-place-title { font-family: 'Bebas Neue', sans-serif; font-size: 16px; color: var(--gold); letter-spacing: 1px; margin-bottom: 6px; text-transform: uppercase; }
+.third-place-title { font-family: 'Bebas Neue', sans-serif; font-size: 15px; color: var(--gold); letter-spacing: 1px; margin-bottom: 4px; text-transform: uppercase; }
 
 /* Шахова матриця груп */
 .chess-grid-wrap { display: flex; flex-direction: column; gap: 16px; width: 100%; }
@@ -156,7 +156,7 @@ function renderOverlay(state, court) {
     view = state.view || 'rankings';
   }
 
-  const sizes = (state.sizes && state.sizes[view]) ? state.sizes[view] : { scale: 1, tblWidth: 95, tblPadY: 9, fontSize: 15, teamFont: "'Barlow Condensed', sans-serif" };
+  const sizes = (state.sizes && state.sizes[view]) ? state.sizes[view] : { scale: 1, tblWidth: 95, tblPadY: 9, fontSize: 13, teamFont: "'Barlow Condensed', sans-serif" };
   
   wrapper.style.transform = `scale(${sizes.scale || 1})`;
   container.style.width = `${sizes.tblWidth || 95}%`;
@@ -216,7 +216,7 @@ function renderGroupsView(state, container, sizes, colors, court) {
     if (visGroup !== 'all' && String(gi) !== String(visGroup)) return;
 
     if (layout === 'chess') {
-      html += `<div style="font-family:'Bebas Neue',sans-serif; font-size:24px; color:var(--accent); margin-bottom:10px;">Група ${g.letter}</div>`;
+      html += `<div style="font-family:'Bebas Neue',sans-serif; font-size:22px; color:var(--accent); margin-bottom:8px;">Група ${g.letter}</div>`;
       html += `<div class="chess-grid-wrap" style="font-size:${sizes.fontSize}px; font-family:${sizes.teamFont}">`;
       html += `<table class="chess-table" style="background:${colors.bg}"><tr><th>Група ${g.letter}</th>`;
       
@@ -250,8 +250,8 @@ function renderGroupsView(state, container, sizes, colors, court) {
       });
       html += `</table></div><br>`;
     } else {
-      html += `<div style="font-family:'Bebas Neue',sans-serif; font-size:24px; color:var(--accent); margin-bottom:10px;">Група ${g.letter}</div>`;
-      html += `<div class="table-box" style="background:${colors.bg}; margin-bottom:20px; font-size:${sizes.fontSize}px; font-family:${sizes.teamFont}">`;
+      html += `<div style="font-family:'Bebas Neue',sans-serif; font-size:22px; color:var(--accent); margin-bottom:8px;">Група ${g.letter}</div>`;
+      html += `<div class="table-box" style="background:${colors.bg}; margin-bottom:15px; font-size:${sizes.fontSize}px; font-family:${sizes.teamFont}">`;
       html += `<div class="tbl-head" style="grid-template-columns: 50px 1fr 70px 90px 90px 110px 80px; background:${colors.head}; padding:${sizes.tblPadY}px 15px;">
         <div style="text-align:center">#</div><div>Команда</div><div style="text-align:center">Ігри</div><div style="text-align:center">Виграші</div><div style="text-align:center">Програш</div><div style="text-align:center">Різн (МГ)</div><div style="text-align:right">Очки</div>
       </div>`;
@@ -325,13 +325,15 @@ function renderPlayoffView(state, container, sizes, colors, court, fullState) {
   const fmt = isLower ? 16 : (parseInt(state.bracketFormat) || 8);
 
   const roundsCount = Math.log2(fmt);
-  let roundLabels = roundsCount === 5 ? ['1/16', '1/8', '1/4', 'Півфінал', 'Фінал'] :
-                    roundsCount === 4 ? ['1/8', '1/4', 'Півфінал', 'Фінал'] :
-                    roundsCount === 3 ? ['1/4', 'Півфінал', 'Фінал'] :
+  
+  // Назви раундів із акцентом на перехід до центру (1/8)
+  let roundLabels = roundsCount === 5 ? ['1/16 (Старт)', '1/8 (До центру)', '1/4', 'Півфінал', 'Фінал'] :
+                    roundsCount === 4 ? ['1/8 (Старт)', '1/4', 'Півфінал', 'Фінал'] :
+                    roundsCount === 3 ? ['1/4 (Старт)', 'Півфінал', 'Фінал'] :
                     roundsCount === 2 ? ['Півфінал', 'Фінал'] : ['Фінал'];
 
   if (isLower && fullState.groups && fullState.groups.length === 4) {
-    roundLabels = ['1/8 (4 та 5 місця)', '1/4 (з 3 місцями)', 'Півфінал', 'Фінал нижньої сітки'];
+    roundLabels = ['1/8 (4-5 місця)', '1/4 (з 3 місцями)', 'Півфінал', 'Фінал нижньої сітки'];
   }
 
   let html = `<div class="sec-header">${title}</div>`;
@@ -341,7 +343,14 @@ function renderPlayoffView(state, container, sizes, colors, court, fullState) {
   for (let ri = 0; ri < roundsCount; ri++) {
     const count = fmt / Math.pow(2, ri + 1);
     html += `<div class="bracket-round">`;
-    html += `<div class="round-title-box">${roundLabels[ri] || ('Раунд ' + (ri+1))}</div>`;
+    
+    // Спеціальний заголовок для центру, щоб усі розуміли перехід
+    let rLbl = roundLabels[ri] || ('Раунд ' + (ri+1));
+    if (roundsCount === 5 && ri === 1) {
+      rLbl = '1/8 (ПЕРЕХІД ДО ЦЕНТРУ)';
+    }
+    
+    html += `<div class="round-title-box">${rLbl}</div>`;
 
     for (let mi = 0; mi < count; mi++) {
       const key = `${ri}-${mi}`;
