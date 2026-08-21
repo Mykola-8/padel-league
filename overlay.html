@@ -58,13 +58,14 @@ body{font-family:'Barlow Condensed',sans-serif;background:transparent;color:var(
 .bracket-score { font-family: 'Bebas Neue', sans-serif; font-size: 15px; color: var(--muted); min-width: 24px; text-align: right; }
 .bracket-team.winner .bracket-score { color: var(--accent); }
 
-/* Додатковий блок третього місця */
-.third-place-container { margin-top: 10px; display: flex; flex-direction: column; gap: 4px; width: 340px; }
-.third-place-box {
-  background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
-  padding: 8px 12px; backdrop-filter: blur(12px); box-shadow: 0 4px 16px rgba(0,0,0,0.35);
+/* Блок третього місця посередині */
+.third-place-column { display: flex; flex-direction: column; justify-content: center; gap: 8px; height: 100%; }
+.third-place-title { 
+  background: var(--card); border: 1px solid var(--gold); border-radius: 6px;
+  padding: 5px 8px; font-family: 'Bebas Neue', sans-serif; font-size: 15px; letter-spacing: 1px;
+  color: var(--gold); text-align: center; margin-bottom: 2px; text-transform: uppercase;
+  backdrop-filter: blur(8px); box-shadow: 0 4px 12px rgba(0,0,0,0.3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; 
 }
-.third-place-title { font-family: 'Bebas Neue', sans-serif; font-size: 15px; color: var(--gold); letter-spacing: 1px; text-transform: uppercase; }
 
 .hidden-overlay { display: none !important; }
 </style>
@@ -342,41 +343,79 @@ function renderPlayoffView(state, container, sizes, colors, court, fullState) {
 
   let html = `<div class="sec-header">${title}</div>`;
   html += `<div class="bracket-layout">`;
-  html += `<div class="bracket-grid" style="grid-template-columns: repeat(${roundsCount}, 1fr); font-size:${sizes.fontSize}px; font-family:${sizes.teamFont}">`;
+  
+  // Якщо це верхня сітка і раундів більше або дорівнює 3 (наприклад, 1/4 або 1/8 з півфіналами), 
+  // вставляємо блок за 3 місце між півфіналом та фіналом.
+  if (!isLower && roundsCount >= 2) {
+    let gridColsTemplate = '';
+    for(let r=0; r<roundsCount; r++) {
+      if (r === roundsCount - 1) {
+        gridColsTemplate += ' 1.1fr 1fr'; // колонка для 3-го місця і колонка фіналу
+      } else {
+        gridColsTemplate += ' 1fr';
+      }
+    }
+    html += `<div class="bracket-grid" style="grid-template-columns:${gridColsTemplate}; font-size:${sizes.fontSize}px; font-family:${sizes.teamFont}">`;
 
-  for (let ri = 0; ri < roundsCount; ri++) {
-    const count = fmt / Math.pow(2, ri + 1);
-    html += `<div class="bracket-round">`;
-    html += `<div class="round-title-box">${roundLabels[ri] || ('Раунд ' + (ri+1))}</div>`;
+    for (let ri = 0; ri < roundsCount; ri++) {
+      const count = fmt / Math.pow(2, ri + 1);
+      
+      // Якщо це передостанній раунд (півфінал), після нього виводимо колонку «Гра за третє місце»
+      if (ri === roundsCount - 1) {
+        const tp = state.thirdPlaceMatch || {};
+        const t1Win = tp.winner === 0 ? 'winner' : '';
+        const t2Win = tp.winner === 1 ? 'winner' : '';
 
-    for (let mi = 0; mi < count; mi++) {
-      const key = `${ri}-${mi}`;
-      const m = bracketData[key] || { t1: '—', t2: '—', s1: '-', s2: '-', winner: -1 };
+        html += `<div class="third-place-column">
+          <div class="third-place-title">Гра за третє місце</div>
+          <div class="bracket-match" style="background:${colors.bg}">
+            <div class="bracket-team ${t1Win}"><span style="color:${colors.team}">${tp.t1 || '—'}</span><span class="bracket-score">${tp.s1}</span></div>
+            <div class="bracket-team ${t2Win}"><span style="color:${colors.team}">${tp.t2 || '—'}</span><span class="bracket-score">${tp.s2}</span></div>
+          </div>
+        </div>`;
+      }
 
-      const t1Win = m.winner === 0 ? 'winner' : '';
-      const t2Win = m.winner === 1 ? 'winner' : '';
+      html += `<div class="bracket-round">`;
+      html += `<div class="round-title-box">${roundLabels[ri] || ('Раунд ' + (ri+1))}</div>`;
 
-      html += `<div class="bracket-match" style="background:${colors.bg}">
-        <div class="bracket-team ${t1Win}"><span style="color:${colors.team}">${m.t1 || '—'}</span><span class="bracket-score">${m.s1}</span></div>
-        <div class="bracket-team ${t2Win}"><span style="color:${colors.team}">${m.t2 || '—'}</span><span class="bracket-score">${m.s2}</span></div>
-      </div>`;
+      for (let mi = 0; mi < count; mi++) {
+        const key = `${ri}-${mi}`;
+        const m = bracketData[key] || { t1: '—', t2: '—', s1: '-', s2: '-', winner: -1 };
+
+        const t1Win = m.winner === 0 ? 'winner' : '';
+        const t2Win = m.winner === 1 ? 'winner' : '';
+
+        html += `<div class="bracket-match" style="background:${colors.bg}">
+          <div class="bracket-team ${t1Win}"><span style="color:${colors.team}">${m.t1 || '—'}</span><span class="bracket-score">${m.s1}</span></div>
+          <div class="bracket-team ${t2Win}"><span style="color:${colors.team}">${m.t2 || '—'}</span><span class="bracket-score">${m.s2}</span></div>
+        </div>`;
+      }
+      html += `</div>`;
     }
     html += `</div>`;
-  }
-  html += `</div>`;
+  } else {
+    // Стандартний вивід для нижньої сітки або інших форматів
+    html += `<div class="bracket-grid" style="grid-template-columns: repeat(${roundsCount}, 1fr); font-size:${sizes.fontSize}px; font-family:${sizes.teamFont}">`;
+    for (let ri = 0; ri < roundsCount; ri++) {
+      const count = fmt / Math.pow(2, ri + 1);
+      html += `<div class="bracket-round">`;
+      html += `<div class="round-title-box">${roundLabels[ri] || ('Раунд ' + (ri+1))}</div>`;
 
-  if (!isLower) {
-    const tp = state.thirdPlaceMatch || {};
-    const t1Win = tp.winner === 0 ? 'winner' : '';
-    const t2Win = tp.winner === 1 ? 'winner' : '';
-    
-    html += `<div class="third-place-container">
-      <div class="third-place-title">Гра за третє місце</div>
-      <div class="third-place-box" style="background:${colors.bg}">
-        <div class="bracket-team ${t1Win}"><span style="color:${colors.team}">${tp.t1 || '—'}</span><span class="bracket-score">${tp.s1}</span></div>
-        <div class="bracket-team ${t2Win}"><span style="color:${colors.team}">${tp.t2 || '—'}</span><span class="bracket-score">${tp.s2}</span></div>
-      </div>
-    </div>`;
+      for (let mi = 0; mi < count; mi++) {
+        const key = `${ri}-${mi}`;
+        const m = bracketData[key] || { t1: '—', t2: '—', s1: '-', s2: '-', winner: -1 };
+
+        const t1Win = m.winner === 0 ? 'winner' : '';
+        const t2Win = m.winner === 1 ? 'winner' : '';
+
+        html += `<div class="bracket-match" style="background:${colors.bg}">
+          <div class="bracket-team ${t1Win}"><span style="color:${colors.team}">${m.t1 || '—'}</span><span class="bracket-score">${m.s1}</span></div>
+          <div class="bracket-team ${t2Win}"><span style="color:${colors.team}">${m.t2 || '—'}</span><span class="bracket-score">${m.s2}</span></div>
+        </div>`;
+      }
+      html += `</div>`;
+    }
+    html += `</div>`;
   }
 
   html += `</div>`;
