@@ -53,21 +53,27 @@ body{font-family:'Barlow Condensed',sans-serif;background:transparent;color:var(
 .bracket-match { 
   border-radius: 8px; 
   padding: 8px 10px; backdrop-filter: blur(12px); position: relative; 
-  box-shadow: 0 4px 16px rgba(0,0,0,0.35); display: flex; flex-direction: column; gap: 4px; 
+  box-shadow: 0 4px 16px rgba(0,0,0,0.35); display: flex; flex-direction: column; gap: 6px; 
 }
 .bracket-team { 
   display: flex; justify-content: space-between; align-items: center; 
-  padding: 6px 8px; font-weight: 600; border-radius: 4px; 
-  background: rgba(255,255,255,0.02); height: 32px; overflow: hidden;
+  padding: 6px 10px; font-weight: 600; border-radius: 4px; 
+  background: rgba(255,255,255,0.02); height: 36px; overflow: hidden; gap: 10px;
+}
+.bracket-team span:first-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
 }
 .bracket-team.winner { background: rgba(0,229,255,0.08); border-left: 3px solid var(--accent); }
-.bracket-score { font-family: 'Bebas Neue', sans-serif; min-width: 28px; text-align: right; }
+.bracket-score { font-family: 'Bebas Neue', sans-serif; min-width: 45px; text-align: right; letter-spacing: 1px; flex-shrink: 0; }
 
 /* Блок третього місця під фіналом */
 .third-place-box {
   border-radius: 8px;
   padding: 8px 10px; backdrop-filter: blur(12px); box-shadow: 0 4px 16px rgba(0,0,0,0.35);
-  display: flex; flex-direction: column; gap: 4px; margin-top: 10px;
+  display: flex; flex-direction: column; gap: 6px; margin-top: 10px;
 }
 .third-place-title {
   border-radius: 6px;
@@ -173,7 +179,6 @@ function renderOverlay(state, court) {
   const colors = state.colors || {};
   const screenColor = colors[view] || { team: '#fff', bg: '#050c1c', head: '#081830' };
 
-  // Динамічне застосування акцентного кольору
   if (state.accent) {
     document.documentElement.style.setProperty('--accent', state.accent);
   }
@@ -369,8 +374,8 @@ function renderPlayoffView(state, container, sizes, colors, resolvedBg, resolved
       const t2Win = m.winner === 1 ? 'winner' : '';
 
       html += `<div class="bracket-match" style="background:${resolvedBg}; border-color:var(--accent);">
-        <div class="bracket-team ${t1Win}" style="color:${colors.team || '#fff'}"><span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${m.t1 || '—'}</span><span class="bracket-score">${m.s1}</span></div>
-        <div class="bracket-team ${t2Win}" style="color:${colors.team || '#fff'}"><span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${m.t2 || '—'}</span><span class="bracket-score">${m.s2}</span></div>
+        <div class="bracket-team ${t1Win}" style="color:${colors.team || '#fff'}"><span>${m.t1 || '—'}</span><span class="bracket-score">${m.s1}</span></div>
+        <div class="bracket-team ${t2Win}" style="color:${colors.team || '#fff'}"><span>${m.t2 || '—'}</span><span class="bracket-score">${m.s2}</span></div>
       </div>`;
     }
 
@@ -382,8 +387,8 @@ function renderPlayoffView(state, container, sizes, colors, resolvedBg, resolved
         <div style="margin-top: 15px;">
           <div class="third-place-title" style="background:${resolvedHead}; border-color:var(--gold); color:var(--gold);">Матч за третє місце</div>
           <div class="third-place-box" style="background:${resolvedBg}; border-color:var(--accent);">
-            <div class="bracket-team ${tp1Win}" style="color:${colors.team || '#fff'}"><span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${tp.t1 || '—'}</span><span class="bracket-score">${tp.s1}</span></div>
-            <div class="bracket-team ${tp2Win}" style="color:${colors.team || '#fff'}"><span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${tp.t2 || '—'}</span><span class="bracket-score">${tp.s2}</span></div>
+            <div class="bracket-team ${tp1Win}" style="color:${colors.team || '#fff'}"><span>${tp.t1 || '—'}</span><span class="bracket-score">${tp.s1}</span></div>
+            <div class="bracket-team ${tp2Win}" style="color:${colors.team || '#fff'}"><span>${tp.t2 || '—'}</span><span class="bracket-score">${tp.s2}</span></div>
           </div>
         </div>`;
     }
