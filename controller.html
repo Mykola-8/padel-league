@@ -738,7 +738,6 @@ window.saveEditedTeam = function(i) {
     }
     window.globalTeamsList[i] = newVal;
     
-    // Оновлюємо в рейтингу та групах, якщо назва змінилася
     if (state.rankings) {
       state.rankings.forEach(r => { if (r.players === oldVal) r.players = newVal; });
     }
@@ -773,9 +772,9 @@ window.addBulkTeams = function() {
 };
  
 function generateTeamSelect(selectedValue, id, dataAttrs = "", onChangeHandler = "") {
-  let options = `<option value="">-- Оберіть команду --</option>`;
+  let options = `<option value="">No Match</option>`;
   const teams = window.globalTeamsList || [];
-  if (selectedValue && !teams.includes(selectedValue)) {
+  if (selectedValue && selectedValue !== "No Match" && !teams.includes(selectedValue)) {
     options += `<option value="${selectedValue}" selected>${selectedValue}</option>`;
   }
   teams.forEach(team => {
@@ -910,13 +909,13 @@ function renderGroupEditor() {
     matrixRows += `<div style="display:grid; grid-template-columns: 140px repeat(${tc}, 1fr); gap:6px; margin-bottom:6px; align-items:center;"><div></div>`;
     for(let tj=0; tj<tc; tj++) {
       const teamObj = grp.teams[tj] || {};
-      const colTeamName = (teamObj.name && teamObj.name.trim() !== '') ? teamObj.name : `Команда ${String.fromCharCode(65 + tj)}`;
+      const colTeamName = (teamObj.name && teamObj.name.trim() !== '' && teamObj.name !== 'No Match') ? teamObj.name : `Команда ${String.fromCharCode(65 + tj)}`;
       matrixRows += `<div style="text-align:center; font-size:11px; font-weight:bold; color:var(--accent); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${colTeamName}">${colTeamName}</div>`;
     }
     matrixRows += `</div>`;
     
     (grp.teams||[]).forEach((team,ti)=>{
-      const rowTeamName = (team.name && team.name.trim() !== '') ? team.name : `Команда ${String.fromCharCode(65 + ti)}`;
+      const rowTeamName = (team.name && team.name.trim() !== '' && team.name !== 'No Match') ? team.name : `Команда ${String.fromCharCode(65 + ti)}`;
       matrixRows += `<div style="display:grid; grid-template-columns: 140px repeat(${tc}, 1fr); gap:6px; margin-bottom:6px; align-items:center;">`;
       matrixRows += `<div style="font-size:12px; font-weight:bold; color:var(--text); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="${rowTeamName}">${rowTeamName}</div>`;
       for(let tj=0; tj<tc; tj++) {
@@ -1084,7 +1083,7 @@ function autoSyncPlayoff() {
   const fmt = parseInt(document.getElementById('p-format').value) || 8;
   const sortedGroups = getSortedGroupsForPlayoff();
   const getT = (gIdx, pos) => {
-    if (!sortedGroups[gIdx] || !sortedGroups[gIdx].top[pos] || !sortedGroups[gIdx].top[pos].name) return `Група ${'ABCDEFGHIJ'[gIdx]||''} ${pos+1}`;
+    if (!sortedGroups[gIdx] || !sortedGroups[gIdx].top[pos] || !sortedGroups[gIdx].top[pos].name || sortedGroups[gIdx].top[pos].name === 'No Match') return `Група ${'ABCDEFGHIJ'[gIdx]||''} ${pos+1}`;
     return sortedGroups[gIdx].top[pos].name;
   };
   const bData = state.bracketData || {};
@@ -1128,7 +1127,7 @@ window.seedPlayoffFromGroups = function() { if (!confirm('Ця дія перез
 function autoSyncPlayoffLower() {
   const sortedGroups = getSortedGroupsForPlayoff();
   const getT = (gIdx, pos) => {
-    if (!sortedGroups[gIdx] || !sortedGroups[gIdx].top[pos] || !sortedGroups[gIdx].top[pos].name) return `Група ${'ABCDEFGHIJ'[gIdx]||''} ${pos+1}`;
+    if (!sortedGroups[gIdx] || !sortedGroups[gIdx].top[pos] || !sortedGroups[gIdx].top[pos].name || sortedGroups[gIdx].top[pos].name === 'No Match') return `Група ${'ABCDEFGHIJ'[gIdx]||''} ${pos+1}`;
     return sortedGroups[gIdx].top[pos].name;
   };
 
