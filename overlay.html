@@ -38,6 +38,14 @@ body{font-family:'Barlow Condensed',sans-serif;background:transparent;color:var(
 .tbl-row { display: grid; border-bottom: 1px solid rgba(255,255,255,0.04); align-items: center; transition: background 0.2s; }
 .tbl-row:last-child { border-bottom: none; }
 
+/* Дві колонки рейтингу поруч (Режим 1) */
+.rankings-dual-layout {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  width: 100%;
+}
+
 /* Сітка для груп (коли показати всі) */
 .groups-grid-layout {
   display: grid;
@@ -141,6 +149,9 @@ const stateRef = ref(db, 'padel/state');
 const urlParams = new URLSearchParams(window.location.search);
 const courtParam = urlParams.get('court');
 
+let rankingAnimInterval = null;
+let currentRankingPage = 0;
+
 onValue(stateRef, (snapshot) => {
   const state = snapshot.val();
   if (state) renderOverlay(state, courtParam);
@@ -169,6 +180,7 @@ function renderOverlay(state, court) {
   if (!isVis) {
     wrapper.classList.add('hidden-overlay');
     banner.style.display = 'none';
+    if (rankingAnimInterval) { clearInterval(rankingAnimInterval); rankingAnimInterval = null; }
     return;
   }
   wrapper.classList.remove('hidden-overlay');
@@ -185,6 +197,12 @@ function renderOverlay(state, court) {
     view = (state.courtViews && state.courtViews[court]) ? state.courtViews[court] : 'rankings';
   } else {
     view = state.view || 'rankings';
+  }
+
+  // Очищаємо таймер анімації рейтингу, якщо переключили екран
+  if (view !== 'rankings' && rankingAnimInterval) {
+    clearInterval(rankingAnimInterval);
+    rankingAnimInterval = null;
   }
 
   const sizes = (state.sizes && state.sizes[view]) ? state.sizes[view] : { scale: 1, tblWidth: 95, tblPadY: 9, fontSize: 15, teamFont: "'Barlow Condensed', sans-serif" };
@@ -207,10 +225,13 @@ function renderOverlay(state, court) {
   if (view === 'rankings') {
     renderRankingsView(state, container, sizes, screenColor, resolvedBg, resolvedHead);
   } else if (view === 'groups') {
+    if (rankingAnimInterval) { clearInterval(rankingAnimInterval); rankingAnimInterval = null; }
     renderGroupsView(state, container, sizes, screenColor, resolvedBg, resolvedHead, court);
   } else if (view === 'schedule') {
+    if (rankingAnimInterval) { clearInterval(rankingAnimInterval); rankingAnimInterval = null; }
     renderScheduleView(state, container, sizes, screenColor, resolvedBg, resolvedHead);
   } else if (view === 'playoff') {
+    if (rankingAnimInterval) { clearInterval(rankingAnimInterval); rankingAnimInterval = null; }
     renderPlayoffView(state, container, sizes, screenColor, resolvedBg, resolvedHead, court, state);
   }
 }
@@ -218,21 +239,100 @@ function renderOverlay(state, court) {
 function renderRankingsView(state, container, sizes, colors, resolvedBg, resolvedHead) {
   const title = state.rankTitle || 'РЕЙТИНГ КОМАНД';
   const rankings = state.rankings || [];
-  
-  let html = `<div class="sec-header">${title}</div>`;
-  html += `<div class="table-box" style="background:${resolvedBg}; border-color:var(--accent); font-size:${sizes.fontSize}px; font-family:${sizes.teamFont}">`;
-  html += `<div class="tbl-head" style="grid-template-columns: 60px 1fr 100px; background:${resolvedHead}; border-color:var(--accent); padding:${sizes.tblPadY}px 20px;">
-    <div style="text-align:center">#</div><div>Команда / Гравці</div><div style="text-align:right">Очки</div>
-  </div>`;
+  const mode = state.rankingMode || (rankings.length > 10 ? 1 : 1); // Режим 1: двоє табла поруч, Режим 2: анімація кожні 15 сек
 
-  rankings.forEach((r, i) => {
-    html += `<div class="tbl-row" style="grid-template-columns: 60px 1fr 100px; padding:${sizes.tblPadY}px 20px; color:${colors.team || '#fff'}">
-      <div style="text-align:center; font-weight:bold; color:var(--accent);">${r.seed || (i+1)}</div>
-      <div style="font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${r.players || '—'}</div>
-      <div style="text-align:right; font-weight:bold; color:var(--accent);">${r.pts || 0}</div>
+  let html = `<div class="sec-header">${title}</div>`;
+
+  if (rankings.length > 10 && mode === 2) {
+    // Режим 2: Анімація по черзі кожні 15 секунд (сторінки по 10)
+    const pageSize = 10;
+    const totalPages = Math.ceil(rankings.length / pageSize);
+    
+    if (!rankingAnimInterval) {
+      rankingAnimInterval = setInterval(() => {
+        currentRankingPage = (currentRankingPage + 1) % totalPages;
+        renderRankingsView(state, container, sizes, colors, resolvedBg, resolvedHead);
+      }, 15000);
+    }
+
+    const startIdx = currentRankingPage * pageSize;
+    const pageItems = rankings.slice(startIdx, startIdx + pageSize);
+
+    html += `<div class="table-box" style="background:${resolvedBg}; border-color:var(--accent); font-size:${sizes.fontSize}px; font-family:${sizes.teamFont}">`;
+    html += `<div class="tbl-head" style="grid-template-columns: 60px 1fr 100px; background:${resolvedHead}; border-color:var(--accent); padding:${sizes.tblPadY}px 20px;">
+      <div style="text-align:center">#</div><div>Команда / Гравці</div><div style="text-align:right">Очки</div>
     </div>`;
-  });
-  html += `</div>`;
+
+    pageItems.forEach((r, i) => {
+      const realIndex = startIdx + i + 1;
+      html += `<div class="tbl-row" style="grid-template-columns: 60px 1fr 100px; padding:${sizes.tblPadY}px 20px; color:${colors.team || '#fff'}">
+        <div style="text-align:center; font-weight:bold; color:var(--accent);">${r.seed || realIndex}</div>
+        <div style="font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${r.players || '—'}</div>
+        <div style="text-align:right; font-weight:bold; color:var(--accent);">${r.pts || 0}</div>
+      </div>`;
+    });
+    html += `</div>`;
+
+  } else if (rankings.length > 10 && mode === 1) {
+    // Режим 1: Два табла поруч без анімації (ділимо на дві колонки)
+    if (rankingAnimInterval) { clearInterval(rankingAnimInterval); rankingAnimInterval = null; }
+    
+    const mid = Math.ceil(rankings.length / 2);
+    const col1 = rankings.slice(0, mid);
+    const col2 = rankings.slice(mid);
+
+    html += `<div class="rankings-dual-layout" style="font-size:${sizes.fontSize}px; font-family:${sizes.teamFont}">`;
+    
+    // Колонка 1
+    html += `<div class="table-box" style="background:${resolvedBg}; border-color:var(--accent);">`;
+    html += `<div class="tbl-head" style="grid-template-columns: 50px 1fr 80px; background:${resolvedHead}; border-color:var(--accent); padding:${sizes.tblPadY}px 15px;">
+      <div style="text-align:center">#</div><div>Команда</div><div style="text-align:right">Очки</div>
+    </div>`;
+    col1.forEach((r, i) => {
+      html += `<div class="tbl-row" style="grid-template-columns: 50px 1fr 80px; padding:${sizes.tblPadY}px 15px; color:${colors.team || '#fff'}">
+        <div style="text-align:center; font-weight:bold; color:var(--accent);">${r.seed || (i+1)}</div>
+        <div style="font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${r.players || '—'}</div>
+        <div style="text-align:right; font-weight:bold; color:var(--accent);">${r.pts || 0}</div>
+      </div>`;
+    });
+    html += `</div>`;
+
+    // Колонка 2
+    html += `<div class="table-box" style="background:${resolvedBg}; border-color:var(--accent);">`;
+    html += `<div class="tbl-head" style="grid-template-columns: 50px 1fr 80px; background:${resolvedHead}; border-color:var(--accent); padding:${sizes.tblPadY}px 15px;">
+      <div style="text-align:center">#</div><div>Команда</div><div style="text-align:right">Очки</div>
+    </div>`;
+    col2.forEach((r, i) => {
+      const realIndex = mid + i + 1;
+      html += `<div class="tbl-row" style="grid-template-columns: 50px 1fr 80px; padding:${sizes.tblPadY}px 15px; color:${colors.team || '#fff'}">
+        <div style="text-align:center; font-weight:bold; color:var(--accent);">${r.seed || realIndex}</div>
+        <div style="font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${r.players || '—'}</div>
+        <div style="text-align:right; font-weight:bold; color:var(--accent);">${r.pts || 0}</div>
+      </div>`;
+    });
+    html += `</div>`;
+
+    html += `</div>`;
+
+  } else {
+    // Стандартний вивід (до 10 команд)
+    if (rankingAnimInterval) { clearInterval(rankingAnimInterval); rankingAnimInterval = null; }
+
+    html += `<div class="table-box" style="background:${resolvedBg}; border-color:var(--accent); font-size:${sizes.fontSize}px; font-family:${sizes.teamFont}">`;
+    html += `<div class="tbl-head" style="grid-template-columns: 60px 1fr 100px; background:${resolvedHead}; border-color:var(--accent); padding:${sizes.tblPadY}px 20px;">
+      <div style="text-align:center">#</div><div>Команда / Гравці</div><div style="text-align:right">Очки</div>
+    </div>`;
+
+    rankings.forEach((r, i) => {
+      html += `<div class="tbl-row" style="grid-template-columns: 60px 1fr 100px; padding:${sizes.tblPadY}px 20px; color:${colors.team || '#fff'}">
+        <div style="text-align:center; font-weight:bold; color:var(--accent);">${r.seed || (i+1)}</div>
+        <div style="font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${r.players || '—'}</div>
+        <div style="text-align:right; font-weight:bold; color:var(--accent);">${r.pts || 0}</div>
+      </div>`;
+    });
+    html += `</div>`;
+  }
+
   container.innerHTML = html;
 }
 
