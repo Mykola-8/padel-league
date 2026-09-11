@@ -58,6 +58,8 @@ select.dyn-select option { background: var(--bg); color: #fff; }
 .r-row input, .r-row select{font-size:13px;}
 .del-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;transition:color .15s;}
 .del-btn:hover{color:var(--red);}
+.edit-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:15px;transition:color .15s;}
+.edit-btn:hover{color:var(--accent);}
  
 .sched-row{display:grid;gap:5px;align-items:center;margin-bottom:6px;grid-template-columns:70px 1fr 1fr 1fr 1fr 32px;}
 .sched-row.is-break{grid-template-columns:70px 1fr 32px;}
@@ -694,7 +696,61 @@ window.changeSizeTarget = function(target) {
 };
  
 window.globalTeamsList = [];
-function renderGlobalTeams() { const wrap = document.getElementById('global-teams-list'); wrap.innerHTML = ''; window.globalTeamsList.forEach((team, i) => { const row = document.createElement('div'); row.style = 'display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:rgba(255,255,255,.05); border-radius:6px; font-size:14px;'; row.innerHTML = `<span>${team}</span><button class="del-btn" onclick="delGlobalTeam(${i})">✕</button>`; wrap.appendChild(row); }); renderRankEditor(); renderGroupEditor(); renderBracketEditor(); renderBracketEditorLower(); }
+function renderGlobalTeams() { 
+  const wrap = document.getElementById('global-teams-list'); 
+  wrap.innerHTML = ''; 
+  window.globalTeamsList.forEach((team, i) => { 
+    const row = document.createElement('div'); 
+    row.style = 'display:flex; justify-content:space-between; align-items:center; padding:8px 12px; background:rgba(255,255,255,.05); border-radius:6px; font-size:14px; gap:8px;'; 
+    row.innerHTML = `
+      <span id="team-text-${i}" style="flex:1;">${team}</span>
+      <input type="text" id="team-input-${i}" value="${team}" style="display:none; flex:1; padding:4px 8px; background:rgba(255,255,255,.06); color:var(--text); border:1px solid var(--border); border-radius:4px; font-family:'Barlow Condensed',sans-serif; font-size:14px;" onkeydown="if(event.key==='Enter') saveEditedTeam(${i})">
+      <div style="display:flex; gap:6px;">
+        <button class="edit-btn" id="edit-btn-${i}" onclick="startEditTeam(${i})" title="Редагувати">✏️</button>
+        <button class="btn btn-primary btn-sm" id="save-btn-${i}" style="display:none; padding:4px 8px; font-size:11px;" onclick="saveEditedTeam(${i})">💾</button>
+        <button class="del-btn" onclick="delGlobalTeam(${i})" title="Видалити">✕</button>
+      </div>`; 
+    wrap.appendChild(row); 
+  }); 
+  renderRankEditor(); renderGroupEditor(); renderBracketEditor(); renderBracketEditorLower(); 
+}
+
+window.startEditTeam = function(i) {
+  document.getElementById(`team-text-${i}`).style.display = 'none';
+  const inp = document.getElementById(`team-input-${i}`);
+  inp.style.display = 'block';
+  inp.focus();
+  inp.setSelectionRange(inp.value.length, inp.value.length);
+  document.getElementById(`edit-btn-${i}`).style.display = 'none';
+  document.getElementById(`save-btn-${i}`).style.display = 'inline-flex';
+};
+
+window.saveEditedTeam = function(i) {
+  const inp = document.getElementById(`team-input-${i}`);
+  const newVal = inp.value.trim();
+  if (!newVal) { alert('Назва команди не може бути порожньою!'); return; }
+  
+  const oldVal = window.globalTeamsList[i];
+  if (newVal !== oldVal) {
+    if (window.globalTeamsList.includes(newVal)) {
+      alert('Команда з такою назвою вже існує!');
+      return;
+    }
+    window.globalTeamsList[i] = newVal;
+    
+    // Оновлюємо в рейтингу та групах, якщо назва змінилася
+    if (state.rankings) {
+      state.rankings.forEach(r => { if (r.players === oldVal) r.players = newVal; });
+    }
+    if (state.groups) {
+      state.groups.forEach(g => {
+        g.teams.forEach(t => { if (t.name === oldVal) t.name = newVal; });
+      });
+    }
+  }
+  renderGlobalTeams();
+  autoSave();
+};
  
 window.addGlobalTeam = function() { 
   const inp = document.getElementById('new-team-inp'); const val = inp.value.trim(); 
