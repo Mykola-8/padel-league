@@ -199,7 +199,6 @@ function renderOverlay(state, court) {
     view = state.view || 'rankings';
   }
 
-  // Очищаємо таймер анімації рейтингу, якщо переключили екран
   if (view !== 'rankings' && rankingAnimInterval) {
     clearInterval(rankingAnimInterval);
     rankingAnimInterval = null;
@@ -239,12 +238,11 @@ function renderOverlay(state, court) {
 function renderRankingsView(state, container, sizes, colors, resolvedBg, resolvedHead) {
   const title = state.rankTitle || 'РЕЙТИНГ КОМАНД';
   const rankings = state.rankings || [];
-  const mode = state.rankingMode || (rankings.length > 10 ? 1 : 1); // Режим 1: двоє табла поруч, Режим 2: анімація кожні 15 сек
+  const mode = state.rankingMode || 1;
 
   let html = `<div class="sec-header">${title}</div>`;
 
   if (rankings.length > 10 && mode === 2) {
-    // Режим 2: Анімація по черзі кожні 15 секунд (сторінки по 10)
     const pageSize = 10;
     const totalPages = Math.ceil(rankings.length / pageSize);
     
@@ -265,16 +263,16 @@ function renderRankingsView(state, container, sizes, colors, resolvedBg, resolve
 
     pageItems.forEach((r, i) => {
       const realIndex = startIdx + i + 1;
+      const teamName = (r.players && r.players.trim() !== '' && r.players !== 'No Match') ? r.players : 'No Match';
       html += `<div class="tbl-row" style="grid-template-columns: 60px 1fr 100px; padding:${sizes.tblPadY}px 20px; color:${colors.team || '#fff'}">
         <div style="text-align:center; font-weight:bold; color:var(--accent);">${r.seed || realIndex}</div>
-        <div style="font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${r.players || '—'}</div>
+        <div style="font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${teamName}</div>
         <div style="text-align:right; font-weight:bold; color:var(--accent);">${r.pts || 0}</div>
       </div>`;
     });
     html += `</div>`;
 
   } else if (rankings.length > 10 && mode === 1) {
-    // Режим 1: Два табла поруч без анімації (ділимо на дві колонки)
     if (rankingAnimInterval) { clearInterval(rankingAnimInterval); rankingAnimInterval = null; }
     
     const mid = Math.ceil(rankings.length / 2);
@@ -283,39 +281,37 @@ function renderRankingsView(state, container, sizes, colors, resolvedBg, resolve
 
     html += `<div class="rankings-dual-layout" style="font-size:${sizes.fontSize}px; font-family:${sizes.teamFont}">`;
     
-    // Колонка 1
     html += `<div class="table-box" style="background:${resolvedBg}; border-color:var(--accent);">`;
     html += `<div class="tbl-head" style="grid-template-columns: 50px 1fr 80px; background:${resolvedHead}; border-color:var(--accent); padding:${sizes.tblPadY}px 15px;">
       <div style="text-align:center">#</div><div>Команда</div><div style="text-align:right">Очки</div>
     </div>`;
     col1.forEach((r, i) => {
+      const teamName = (r.players && r.players.trim() !== '' && r.players !== 'No Match') ? r.players : 'No Match';
       html += `<div class="tbl-row" style="grid-template-columns: 50px 1fr 80px; padding:${sizes.tblPadY}px 15px; color:${colors.team || '#fff'}">
         <div style="text-align:center; font-weight:bold; color:var(--accent);">${r.seed || (i+1)}</div>
-        <div style="font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${r.players || '—'}</div>
+        <div style="font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${teamName}</div>
         <div style="text-align:right; font-weight:bold; color:var(--accent);">${r.pts || 0}</div>
       </div>`;
     });
     html += `</div>`;
 
-    // Колонка 2
     html += `<div class="table-box" style="background:${resolvedBg}; border-color:var(--accent);">`;
     html += `<div class="tbl-head" style="grid-template-columns: 50px 1fr 80px; background:${resolvedHead}; border-color:var(--accent); padding:${sizes.tblPadY}px 15px;">
       <div style="text-align:center">#</div><div>Команда</div><div style="text-align:right">Очки</div>
     </div>`;
     col2.forEach((r, i) => {
       const realIndex = mid + i + 1;
+      const teamName = (r.players && r.players.trim() !== '' && r.players !== 'No Match') ? r.players : 'No Match';
       html += `<div class="tbl-row" style="grid-template-columns: 50px 1fr 80px; padding:${sizes.tblPadY}px 15px; color:${colors.team || '#fff'}">
         <div style="text-align:center; font-weight:bold; color:var(--accent);">${r.seed || realIndex}</div>
-        <div style="font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${r.players || '—'}</div>
+        <div style="font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${teamName}</div>
         <div style="text-align:right; font-weight:bold; color:var(--accent);">${r.pts || 0}</div>
       </div>`;
     });
     html += `</div>`;
-
     html += `</div>`;
 
   } else {
-    // Стандартний вивід (до 10 команд)
     if (rankingAnimInterval) { clearInterval(rankingAnimInterval); rankingAnimInterval = null; }
 
     html += `<div class="table-box" style="background:${resolvedBg}; border-color:var(--accent); font-size:${sizes.fontSize}px; font-family:${sizes.teamFont}">`;
@@ -324,9 +320,10 @@ function renderRankingsView(state, container, sizes, colors, resolvedBg, resolve
     </div>`;
 
     rankings.forEach((r, i) => {
+      const teamName = (r.players && r.players.trim() !== '' && r.players !== 'No Match') ? r.players : 'No Match';
       html += `<div class="tbl-row" style="grid-template-columns: 60px 1fr 100px; padding:${sizes.tblPadY}px 20px; color:${colors.team || '#fff'}">
         <div style="text-align:center; font-weight:bold; color:var(--accent);">${r.seed || (i+1)}</div>
-        <div style="font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${r.players || '—'}</div>
+        <div style="font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${teamName}</div>
         <div style="text-align:right; font-weight:bold; color:var(--accent);">${r.pts || 0}</div>
       </div>`;
     });
@@ -370,14 +367,16 @@ function renderGroupsView(state, container, sizes, colors, resolvedBg, resolvedH
       html += `<table class="chess-table" style="background:${resolvedBg}; border-color:var(--accent);"><tr><th style="background:${resolvedHead}; border-color:var(--accent); color:var(--accent);">Група ${g.letter}</th>`;
       
       g.teams.forEach((t, tj) => {
-        const colName = namesOnly ? (t.name || `К${tj+1}`) : String.fromCharCode(65 + tj);
+        const rawName = (t.name && t.name.trim() !== '' && t.name !== 'No Match') ? t.name : 'No Match';
+        const colName = namesOnly ? rawName : String.fromCharCode(65 + tj);
         html += `<th style="background:${resolvedHead}; border-color:var(--accent); color:var(--accent);">${colName}</th>`;
       });
       if (!namesOnly) html += `<th style="background:${resolvedHead}; border-color:var(--accent); color:var(--accent);">І</th><th style="background:${resolvedHead}; border-color:var(--accent); color:var(--accent);">В</th><th style="background:${resolvedHead}; border-color:var(--accent); color:var(--accent);">П</th><th style="background:${resolvedHead}; border-color:var(--accent); color:var(--accent);">Очки</th>`;
       html += `</tr>`;
 
       g.teams.forEach((t, ti) => {
-        const rowName = namesOnly ? (t.name || `К${ti+1}`) : (t.name || `Команда ${ti+1}`);
+        const rawName = (t.name && t.name.trim() !== '' && t.name !== 'No Match') ? t.name : 'No Match';
+        const rowName = namesOnly ? rawName : rawName;
         html += `<tr><td class="team-name-cell" style="color:${colors.team || '#fff'}; border-color:var(--accent); font-weight:bold;">${rowName}</td>`;
         
         g.teams.forEach((tjTeam, tj) => {
@@ -406,9 +405,10 @@ function renderGroupsView(state, container, sizes, colors, resolvedBg, resolvedH
       </div>`;
 
       g.teams.forEach((t, ti) => {
+        const teamName = (t.name && t.name.trim() !== '' && t.name !== 'No Match') ? t.name : 'No Match';
         html += `<div class="tbl-row" style="grid-template-columns: 40px 1fr 50px 60px 60px 80px 60px; border-color:var(--accent); padding:${sizes.tblPadY}px 10px; color:${colors.team || '#fff'}">
           <div style="text-align:center; font-weight:bold; color:var(--accent);">${ti + 1}</div>
-          <div style="font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${t.name || '—'}</div>
+          <div style="font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${teamName}</div>
           <div style="text-align:center;">${t.p || 0}</div>
           <div style="text-align:center; color:var(--green);">${t.w || 0}</div>
           <div style="text-align:center; color:var(--red);">${t.l || 0}</div>
@@ -498,27 +498,32 @@ function renderPlayoffView(state, container, sizes, colors, resolvedBg, resolved
 
     for (let mi = 0; mi < count; mi++) {
       const key = `${ri}-${mi}`;
-      const m = bracketData[key] || { t1: '—', t2: '—', s1: '-', s2: '-', winner: -1 };
+      const m = bracketData[key] || { t1: 'No Match', t2: 'No Match', s1: '-', s2: '-', winner: -1 };
+
+      const t1 = (m.t1 && m.t1.trim() !== '' && m.t1 !== 'No Match') ? m.t1 : 'No Match';
+      const t2 = (m.t2 && m.t2.trim() !== '' && m.t2 !== 'No Match') ? m.t2 : 'No Match';
 
       const t1Win = m.winner === 0 ? 'winner' : '';
       const t2Win = m.winner === 1 ? 'winner' : '';
 
       html += `<div class="bracket-match" style="background:${resolvedBg}; border-color:var(--accent);">
-        <div class="bracket-team ${t1Win}" style="color:${colors.team || '#fff'}"><span>${m.t1 || '—'}</span><span class="bracket-score">${m.s1}</span></div>
-        <div class="bracket-team ${t2Win}" style="color:${colors.team || '#fff'}"><span>${m.t2 || '—'}</span><span class="bracket-score">${m.s2}</span></div>
+        <div class="bracket-team ${t1Win}" style="color:${colors.team || '#fff'}"><span>${t1}</span><span class="bracket-score">${m.s1}</span></div>
+        <div class="bracket-team ${t2Win}" style="color:${colors.team || '#fff'}"><span>${t2}</span><span class="bracket-score">${m.s2}</span></div>
       </div>`;
     }
 
     if (isFinalRound && !isLower && state.thirdPlaceMatch && (state.thirdPlaceMatch.t1 || state.thirdPlaceMatch.t2)) {
       const tp = state.thirdPlaceMatch;
+      const tp1 = (tp.t1 && tp.t1.trim() !== '' && tp.t1 !== 'No Match') ? tp.t1 : 'No Match';
+      const tp2 = (tp.t2 && tp.t2.trim() !== '' && tp.t2 !== 'No Match') ? tp.t2 : 'No Match';
       const tp1Win = tp.winner === 0 ? 'winner' : '';
       const tp2Win = tp.winner === 1 ? 'winner' : '';
       html += `
         <div style="margin-top: 15px; width: 100%;">
           <div class="third-place-title" style="background:${resolvedHead}; border-color:var(--gold); color:var(--gold);">Матч за третє місце</div>
           <div class="third-place-box" style="background:${resolvedBg}; border-color:var(--accent);">
-            <div class="bracket-team ${tp1Win}" style="color:${colors.team || '#fff'}"><span>${tp.t1 || '—'}</span><span class="bracket-score">${tp.s1}</span></div>
-            <div class="bracket-team ${tp2Win}" style="color:${colors.team || '#fff'}"><span>${tp.t2 || '—'}</span><span class="bracket-score">${tp.s2}</span></div>
+            <div class="bracket-team ${tp1Win}" style="color:${colors.team || '#fff'}"><span>${tp1}</span><span class="bracket-score">${tp.s1}</span></div>
+            <div class="bracket-team ${tp2Win}" style="color:${colors.team || '#fff'}"><span>${tp2}</span><span class="bracket-score">${tp.s2}</span></div>
           </div>
         </div>`;
     }
