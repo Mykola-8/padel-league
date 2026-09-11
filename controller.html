@@ -54,7 +54,7 @@ select.dyn-select option { background: var(--bg); color: #fff; }
  
 .color-picker-sm { width:100%; height:32px; padding:2px; cursor:pointer; background:transparent; border:1px solid var(--border); border-radius:4px; }
  
-.r-row{display:grid;grid-template-columns:40px 1fr 50px 70px 32px;gap:6px;align-items:center;margin-bottom:6px;}
+.r-row{display:grid;grid-template-columns:40px 1fr 70px 32px;gap:6px;align-items:center;margin-bottom:6px;}
 .r-row input, .r-row select{font-size:13px;}
 .del-btn{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;transition:color .15s;}
 .del-btn:hover{color:var(--red);}
@@ -273,12 +273,12 @@ input:checked + .slider:before { transform: translateX(22px); background-color: 
   <div class="card">
     <div class="card-title">Якщо команд більше 10 — режим показу рейтингу</div>
     <div class="field"><select id="rank-split-mode-select" onchange="autoSave()">
-      <option value="side">Два табло поруч (без анімації)</option>
-      <option value="animate">Анімація: по черзі кожні 15 сек</option>
+      <option value="1">1. Два табло поруч (без анімації)</option>
+      <option value="2">2. Анімація: по черзі кожні 15 сек</option>
     </select></div>
-    <div style="font-size:11px; color:var(--muted);">Якщо в рейтингу більше 10 команд, вони автоматично розділяються на два табла, а колонка «Група» приховується. Тут можна обрати — показувати обидва табло одночасно поруч, або перемикати їх по черзі кожні 15 секунд.</div>
+    <div style="font-size:11px; color:var(--muted);">Якщо в рейтингу більше 10 команд, ви можете обрати — показувати обидва табло одночасно поруч, або перемикати їх по черзі кожні 15 секунд[cite: 3].</div>
   </div>
-  <div class="card"><div class="card-title">Команди — SEED · Гравці · Група · Рейтинг</div><div id="rank-rows"></div><button class="btn btn-primary btn-sm" onclick="addRankRow()">+ Додати команду</button></div>
+  <div class="card"><div class="card-title">Команди — SEED · Гравці · Очки</div><div id="rank-rows"></div><button class="btn btn-primary btn-sm" onclick="addRankRow()">+ Додати команду</button></div>
 </div>
  
 <div class="page" id="page-groups">
@@ -296,7 +296,7 @@ input:checked + .slider:before { transform: translateX(22px); background-color: 
     </div>
     <div class="field" style="margin-top:10px;">
       <label><input type="checkbox" id="g-chess-names-only" onchange="autoSave()"> Показати тільки назви команд (огляд груп без цифр)</label>
-      <div style="font-size:11px; color:var(--muted); margin-top:4px;">В шаховій таблиці замість цифр 1, 2, 3 у заголовках та рядках виводитимуться повні назви команд. На оверлеї будуть показані виключно назви команд у вигляді огляду груп без цифр і очків.</div>
+      <div style="font-size:11px; color:var(--muted); margin-top:4px;">В шаховій таблиці замість цифр 1, 2, 3 у заголовках та рядках виводитимуться повні назви команд. На оверлеї будуть показані виключно назви команд у вигляді огляду груп без цифр і очків[cite: 3].</div>
     </div>
   </div>
   <div id="group-editor"></div>
@@ -313,7 +313,7 @@ input:checked + .slider:before { transform: translateX(22px); background-color: 
   <div class="card">
     <div class="card-title">Авто-заповнення першого раунду (Верхня сітка)</div>
     <button class="btn btn-primary" onclick="seedPlayoffFromGroups()" style="width:100%;">🏆 Сформувати верхню сітку з результатів Груп</button>
-    <div style="font-size:11px; color:var(--muted); margin-top:8px; text-align:center;">Для 4 груп: A1 проти C2, B1 проти D2 тощо. Автоматично зчитує місця після зіграних ігор.</div>
+    <div style="font-size:11px; color:var(--muted); margin-top:8px; text-align:center;">Для 4 груп: A1 проти C2, B1 проти D2 тощо. Автоматично зчитує місця після зіграних ігор[cite: 3].</div>
   </div>
   <div class="card">
     <div class="card-title">Формат турніру</div>
@@ -337,7 +337,7 @@ input:checked + .slider:before { transform: translateX(22px); background-color: 
   <div class="card">
     <div class="card-title">Авто-заповнення першого раунду (Нижня сітка)</div>
     <button class="btn btn-outline" onclick="seedPlayoffLowerFromGroups()" style="width:100%;">🥈 Сформувати нижню сітку з груп (3-ті, 4-ті, 5-ті місця)</button>
-    <div style="font-size:11px; color:var(--muted); margin-top:8px; text-align:center;">Формує 1/8 для нижньої сітки (4-ті та 5-ті місця), а 3-ті місця отримують автоматичний прохід у 1/4 (Quarter Final Bye).</div>
+    <div style="font-size:11px; color:var(--muted); margin-top:8px; text-align:center;">Формує 1/8 для нижньої сітки (4-ті та 5-ті місця), а 3-ті місця отримують автоматичний прохід у 1/4 (Quarter Final Bye)[cite: 3].</div>
   </div>
   <div id="bracket-editor-lower"></div>
   <div class="card"><div class="card-title">🥈 Переможець нижньої сітки</div><div class="field"><input type="text" id="champion-inp-lower" value="— — —"></div></div>
@@ -507,7 +507,7 @@ function defaultState() {
     },
     accent: '#00e5ff', bgOpacity: 0.88,
     colors: { rankings: { team: '#ffffff', bg: '#050c1c', head: '#081830' }, groups: { team: '#ffffff', bg: '#050c1c', head: '#081830' }, schedule: { team: '#ffffff', bg: '#050c1c', head: '#000000' }, playoff: { team: '#ffffff', bg: '#161a22', head: '#000000' } },
-    rankTitle: 'ГРАВЦІ (ЧОЛОВІКИ) 🇺🇦', rankSplitMode: 'side',
+    rankTitle: 'ГРАВЦІ (ЧОЛОВІКИ) 🇺🇦', rankSplitMode: 1,
     rankings: [],
     groupLayout: 'classic', groupChessNamesOnly: false, groupCount:4, teamCount:5, groups: emptyGroups(4,5), visibleGroup: 'all',
     schedHeaders:['Час','Корт 1','Корт 2','Корт 3','Корт 4'], schedRows:[{time:'09:00',cells:['','','',''],isBreak:false}],
@@ -534,7 +534,7 @@ function collectState() {
   };
  
   state.rankTitle  = document.getElementById('rank-title-inp').value;
-  state.rankSplitMode = document.getElementById('rank-split-mode-select')?.value || 'side';
+  state.rankSplitMode = parseInt(document.getElementById('rank-split-mode-select')?.value || '1');
   state.rankings   = collectRankings();
   state.schedHeaders = collectSchedHeaders();
   state.schedRows  = collectSchedRows();
@@ -700,7 +700,7 @@ window.addGlobalTeam = function() {
   const inp = document.getElementById('new-team-inp'); const val = inp.value.trim(); 
   if (val) { 
     if (!window.globalTeamsList) window.globalTeamsList = []; 
-    if (!window.globalTeamsList.includes(val)) { window.globalTeamsList.push(val); state.rankings = collectRankings(); const n = state.rankings.length + 1; state.rankings.push({seed: n, players: val, group: 'ABCDEFGHIJ'[(n-1)%10], pts: 0}); }
+    if (!window.globalTeamsList.includes(val)) { window.globalTeamsList.push(val); state.rankings = collectRankings(); const n = state.rankings.length + 1; state.rankings.push({seed: n, players: val, pts: 0}); }
     inp.value = ''; renderGlobalTeams(); autoSave(); 
   } 
 };
@@ -711,7 +711,7 @@ window.addBulkTeams = function() {
   if (!window.globalTeamsList) window.globalTeamsList = [];
   state.rankings = collectRankings(); let currentSeed = state.rankings.length;
   lines.forEach(line => { const val = line.trim();
-    if (val && !window.globalTeamsList.includes(val)) { window.globalTeamsList.push(val); currentSeed++; state.rankings.push({seed: currentSeed, players: val, group: 'ABCDEFGHIJ'[(currentSeed-1)%10], pts: 0}); added = true; }
+    if (val && !window.globalTeamsList.includes(val)) { window.globalTeamsList.push(val); currentSeed++; state.rankings.push({seed: currentSeed, players: val, pts: 0}); added = true; }
   });
   if (added) { inp.value = ''; renderGlobalTeams(); autoSave(); }
 };
@@ -728,9 +728,22 @@ function generateTeamSelect(selectedValue, id, dataAttrs = "", onChangeHandler =
   return `<select class="dyn-select" ${id ? `id="${id}"` : ''} ${dataAttrs} ${onChangeHandler ? `onchange="${onChangeHandler}"` : ''}>${options}</select>`;
 }
  
-function renderRankEditor() { const wrap = document.getElementById('rank-rows'); wrap.innerHTML = ''; (state.rankings || []).forEach((r,i) => { const row = document.createElement('div'); row.className = 'r-row'; row.innerHTML = `<input type="number" value="${r.seed||(i+1)}" data-ri="${i}" data-f="seed" style="text-align:center">${generateTeamSelect(r.players, null, `data-ri="${i}" data-f="players"`)}<input type="text" value="${r.group||''}" data-ri="${i}" data-f="group" style="text-align:center"><input type="number" value="${r.pts||0}" data-ri="${i}" data-f="pts" style="text-align:right"><button class="del-btn" onclick="delRankRow(${i})">✕</button>`; wrap.appendChild(row); }); }
-function collectRankings() { return Array.from(document.querySelectorAll('.r-row')).map(row => ({ seed:parseInt(row.querySelector('[data-f="seed"]').value)||0, players:row.querySelector('[data-f="players"]').value, group:row.querySelector('[data-f="group"]').value, pts:parseInt(row.querySelector('[data-f="pts"]').value)||0 })); }
-window.addRankRow = function() { state.rankings = collectRankings(); const n = state.rankings.length+1; state.rankings.push({seed:n,players:'',group:'ABCDEFGHIJ'[(n-1)%10],pts:0}); renderRankEditor(); autoSave(); };
+function renderRankEditor() { 
+  const wrap = document.getElementById('rank-rows'); wrap.innerHTML = ''; 
+  (state.rankings || []).forEach((r,i) => { 
+    const row = document.createElement('div'); row.className = 'r-row'; 
+    row.innerHTML = `<input type="number" value="${r.seed||(i+1)}" data-ri="${i}" data-f="seed" style="text-align:center">${generateTeamSelect(r.players, null, `data-ri="${i}" data-f="players"`)}<input type="number" value="${r.pts||0}" data-ri="${i}" data-f="pts" style="text-align:right"><button class="del-btn" onclick="delRankRow(${i})">✕</button>`; 
+    wrap.appendChild(row); 
+  }); 
+}
+function collectRankings() { 
+  return Array.from(document.querySelectorAll('.r-row')).map(row => ({ 
+    seed: parseInt(row.querySelector('[data-f="seed"]').value)||0, 
+    players: row.querySelector('[data-f="players"]').value, 
+    pts: parseInt(row.querySelector('[data-f="pts"]').value)||0 
+  })); 
+}
+window.addRankRow = function() { state.rankings = collectRankings(); const n = state.rankings.length+1; state.rankings.push({seed:n,players:'',pts:0}); renderRankEditor(); autoSave(); };
 window.delRankRow = function(i) { state.rankings = collectRankings(); state.rankings.splice(i,1); renderRankEditor(); autoSave(); };
  
 function renderSchedEditor() {
@@ -961,7 +974,7 @@ function recalcGroupStats(gi) {
     const diff = gf - ga;
     const diffStr = diff > 0 ? '+' + diff : String(diff);
     const gdVal = p > 0 ? gf + ':' + ga + ' (' + diffStr + ')' : '0:0 (0)';
-    const nameEl = document.querySelector(`.team-stat-row[data-gi="${gi}"][data-ti="${ti}"] [data-f="name"]`);
+    const nameEl = document.querySelector(`.team-stat-row[data-gi="${gi}"][data-ti="${s?.ti||ti}"] [data-f="name"]`);
     stats[ti] = { ti, p, w, l, gf, ga, pts, gdVal, diff, name: nameEl ? nameEl.value : '' };
   }
   for (const s of stats) {
@@ -1318,7 +1331,7 @@ function initUI() {
   syncRange('s-opacity','rv-opacity');
   
   document.getElementById('rank-title-inp').value = state.rankTitle||'';
-  document.getElementById('rank-split-mode-select').value = state.rankSplitMode || 'side';
+  document.getElementById('rank-split-mode-select').value = state.rankSplitMode || 1;
   document.getElementById('g-count').value = state.groupCount||4;
   document.getElementById('g-teams').value = state.teamCount||5;
   document.getElementById('g-layout').value = state.groupLayout||'classic';
