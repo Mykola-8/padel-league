@@ -221,15 +221,14 @@ function renderRankingsView(state, container, sizes, colors, resolvedBg, resolve
   
   let html = `<div class="sec-header">${title}</div>`;
   html += `<div class="table-box" style="background:${resolvedBg}; border-color:var(--accent); font-size:${sizes.fontSize}px; font-family:${sizes.teamFont}">`;
-  html += `<div class="tbl-head" style="grid-template-columns: 60px 1fr 100px 100px; background:${resolvedHead}; border-color:var(--accent); padding:${sizes.tblPadY}px 20px;">
-    <div style="text-align:center">#</div><div>Команда / Гравці</div><div style="text-align:center">Група</div><div style="text-align:right">Очки</div>
+  html += `<div class="tbl-head" style="grid-template-columns: 60px 1fr 100px; background:${resolvedHead}; border-color:var(--accent); padding:${sizes.tblPadY}px 20px;">
+    <div style="text-align:center">#</div><div>Команда / Гравці</div><div style="text-align:right">Очки</div>
   </div>`;
 
   rankings.forEach((r, i) => {
-    html += `<div class="tbl-row" style="grid-template-columns: 60px 1fr 100px 100px; padding:${sizes.tblPadY}px 20px; color:${colors.team || '#fff'}">
+    html += `<div class="tbl-row" style="grid-template-columns: 60px 1fr 100px; padding:${sizes.tblPadY}px 20px; color:${colors.team || '#fff'}">
       <div style="text-align:center; font-weight:bold; color:var(--accent);">${r.seed || (i+1)}</div>
-      <div style="font-weight:600;">${r.players || '—'}</div>
-      <div style="text-align:center; font-weight:bold;">${r.group || '—'}</div>
+      <div style="font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${r.players || '—'}</div>
       <div style="text-align:right; font-weight:bold; color:var(--accent);">${r.pts || 0}</div>
     </div>`;
   });
@@ -251,7 +250,6 @@ function renderGroupsView(state, container, sizes, colors, resolvedBg, resolvedH
 
   let html = `<div class="sec-header">Груповий етап</div>`;
 
-  // Визначаємо кількість активних груп для виводу сітки
   const activeGroups = groups.filter((g, gi) => visGroup === 'all' || String(gi) === String(visGroup));
   let gridColsClass = 'cols-1';
   if (visGroup === 'all') {
