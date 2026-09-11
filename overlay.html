@@ -38,6 +38,24 @@ body{font-family:'Barlow Condensed',sans-serif;background:transparent;color:var(
 .tbl-row { display: grid; border-bottom: 1px solid rgba(255,255,255,0.04); align-items: center; transition: background 0.2s; }
 .tbl-row:last-child { border-bottom: none; }
 
+/* Сітка для груп (коли показати всі) */
+.groups-grid-layout {
+  display: grid;
+  gap: 20px;
+  width: 100%;
+  justify-content: center;
+  align-content: center;
+}
+.groups-grid-layout.cols-2 { grid-template-columns: repeat(2, 1fr); }
+.groups-grid-layout.cols-3 { grid-template-columns: repeat(3, 1fr); }
+.groups-grid-layout.cols-1 { grid-template-columns: 1fr; max-width: 900px; }
+
+.group-card-item {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
 /* Офіційна турнірна сітка плей-оф */
 .bracket-layout { display: flex; flex-direction: column; gap: 20px; width: 100%; align-items: center; }
 .bracket-grid { display: grid; gap: 24px; width: 100%; align-items: center; justify-content: center; }
@@ -203,7 +221,7 @@ function renderRankingsView(state, container, sizes, colors, resolvedBg, resolve
   
   let html = `<div class="sec-header">${title}</div>`;
   html += `<div class="table-box" style="background:${resolvedBg}; border-color:var(--accent); font-size:${sizes.fontSize}px; font-family:${sizes.teamFont}">`;
-  html += `<div class="tbl-head" style="grid-template-columns: 60px 1fr 100px 100px; background:${resolvedHead}; border-color:var(--accent); padding:${sizes.tblPadY}px 20px; color:${colors.headText || 'var(--muted)'};">
+  html += `<div class="tbl-head" style="grid-template-columns: 60px 1fr 100px 100px; background:${resolvedHead}; border-color:var(--accent); padding:${sizes.tblPadY}px 20px;">
     <div style="text-align:center">#</div><div>Команда / Гравці</div><div style="text-align:center">Група</div><div style="text-align:right">Очки</div>
   </div>`;
 
@@ -233,11 +251,23 @@ function renderGroupsView(state, container, sizes, colors, resolvedBg, resolvedH
 
   let html = `<div class="sec-header">Груповий етап</div>`;
 
+  // Визначаємо кількість активних груп для виводу сітки
+  const activeGroups = groups.filter((g, gi) => visGroup === 'all' || String(gi) === String(visGroup));
+  let gridColsClass = 'cols-1';
+  if (visGroup === 'all') {
+    if (activeGroups.length === 4) gridColsClass = 'cols-2';
+    else if (activeGroups.length === 6 || activeGroups.length >= 6) gridColsClass = 'cols-3';
+    else if (activeGroups.length === 2) gridColsClass = 'cols-2';
+  }
+
+  html += `<div class="groups-grid-layout ${gridColsClass}">`;
+
   groups.forEach((g, gi) => {
     if (visGroup !== 'all' && String(gi) !== String(visGroup)) return;
 
+    html += `<div class="group-card-item">`;
     if (layout === 'chess') {
-      html += `<div style="font-family:'Bebas Neue',sans-serif; font-size:24px; color:var(--accent); margin-bottom:10px; text-align:center; width:100%;">Група ${g.letter}</div>`;
+      html += `<div style="font-family:'Bebas Neue',sans-serif; font-size:24px; color:var(--accent); margin-bottom:8px; text-align:center; width:100%;">Група ${g.letter}</div>`;
       html += `<div class="chess-grid-wrap" style="font-size:${sizes.fontSize}px; font-family:${sizes.teamFont}">`;
       html += `<table class="chess-table" style="background:${resolvedBg}; border-color:var(--accent);"><tr><th style="background:${resolvedHead}; border-color:var(--accent); color:var(--accent);">Група ${g.letter}</th>`;
       
@@ -269,18 +299,18 @@ function renderGroupsView(state, container, sizes, colors, resolvedBg, resolvedH
         }
         html += `</tr>`;
       });
-      html += `</table></div><br>`;
+      html += `</table></div>`;
     } else {
-      html += `<div style="font-family:'Bebas Neue',sans-serif; font-size:24px; color:var(--accent); margin-bottom:10px; text-align:center; width:100%;">Група ${g.letter}</div>`;
-      html += `<div class="table-box" style="background:${resolvedBg}; border-color:var(--accent); margin-bottom:20px; font-size:${sizes.fontSize}px; font-family:${sizes.teamFont}">`;
-      html += `<div class="tbl-head" style="grid-template-columns: 50px 1fr 70px 90px 90px 110px 80px; background:${resolvedHead}; border-color:var(--accent); padding:${sizes.tblPadY}px 15px;">
-        <div style="text-align:center">#</div><div>Команда</div><div style="text-align:center">Ігри</div><div style="text-align:center">Виграші</div><div style="text-align:center">Програш</div><div style="text-align:center">Різн (МГ)</div><div style="text-align:right">Очки</div>
+      html += `<div style="font-family:'Bebas Neue',sans-serif; font-size:24px; color:var(--accent); margin-bottom:8px; text-align:center; width:100%;">Група ${g.letter}</div>`;
+      html += `<div class="table-box" style="background:${resolvedBg}; border-color:var(--accent); font-size:${sizes.fontSize}px; font-family:${sizes.teamFont}">`;
+      html += `<div class="tbl-head" style="grid-template-columns: 40px 1fr 50px 60px 60px 80px 60px; background:${resolvedHead}; border-color:var(--accent); padding:${sizes.tblPadY}px 10px;">
+        <div style="text-align:center">#</div><div>Команда</div><div style="text-align:center">І</div><div style="text-align:center">В</div><div style="text-align:center">П</div><div style="text-align:center">Різн</div><div style="text-align:right">Очки</div>
       </div>`;
 
       g.teams.forEach((t, ti) => {
-        html += `<div class="tbl-row" style="grid-template-columns: 50px 1fr 70px 90px 90px 110px 80px; border-color:var(--accent); padding:${sizes.tblPadY}px 15px; color:${colors.team || '#fff'}">
+        html += `<div class="tbl-row" style="grid-template-columns: 40px 1fr 50px 60px 60px 80px 60px; border-color:var(--accent); padding:${sizes.tblPadY}px 10px; color:${colors.team || '#fff'}">
           <div style="text-align:center; font-weight:bold; color:var(--accent);">${ti + 1}</div>
-          <div style="font-weight:600;">${t.name || '—'}</div>
+          <div style="font-weight:600; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${t.name || '—'}</div>
           <div style="text-align:center;">${t.p || 0}</div>
           <div style="text-align:center; color:var(--green);">${t.w || 0}</div>
           <div style="text-align:center; color:var(--red);">${t.l || 0}</div>
@@ -290,8 +320,10 @@ function renderGroupsView(state, container, sizes, colors, resolvedBg, resolvedH
       });
       html += `</div>`;
     }
+    html += `</div>`;
   });
 
+  html += `</div>`;
   container.innerHTML = html;
 }
 
